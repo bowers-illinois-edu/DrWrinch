@@ -1,0 +1,60 @@
+# DrWrinch
+
+Fully specified Bayes factors for process tracing.
+
+This package implements the methods of Lopez, Bowers, and Gajardo Cooper
+(2026), “Fully specified Bayes factors for process tracing.” Two
+generative models for evidence in favor of a working theory against a
+single rival — a binomial model for open-ended evidence and a
+hypergeometric urn model for bounded archives — each yield a
+conservative Bayes factor. Sensitivity analyses vary coding error and
+observation bias.
+
+The package is named after [Dorothy Maud
+Wrinch](https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch) (1894–1976),
+the mathematician whose joint papers with Harold Jeffreys (1919, 1921,
+1923) developed the framework that became Jeffreys’s theory of Bayes
+factors. A companion package,
+[DrBristol](https://github.com/bowers-illinois-edu/DrBristol),
+implements p-value methods for the same class of problems.
+
+## Installation
+
+``` r
+
+remotes::install_github("bowers-illinois-edu/DrWrinch")
+```
+
+## Status
+
+Under active development alongside the paper. The single-rival case is
+the current focus. Multiple-rival extensions are being developed in a
+companion paper and may live in a separate package.
+
+# Package index
+
+## Bayes factors
+
+Compute Bayes factors under the binomial and hypergeometric urn models.
+
+- [`bf_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_binomial.md)
+  : Bayes factor under the binomial model
+- [`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md)
+  : Bayes factor under the hypergeometric urn model
+
+## Sensitivity analysis
+
+Locate the smallest perturbations of observation bias and prior that
+flip the conclusion.
+
+- [`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md)
+  : Sensitivity analysis for the binomial Bayes factor
+- [`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md)
+  : Sensitivity analysis for the urn Bayes factor
+
+# Articles
+
+### All vignettes
+
+- [Getting started with
+  DrWrinch](https://bowers-illinois-edu.github.io/DrWrinch/articles/getting-started.md):
