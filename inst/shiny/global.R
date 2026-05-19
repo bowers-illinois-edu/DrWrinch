@@ -2,6 +2,16 @@
 # the runtime dependencies and source the app's helper functions
 # here so ui.R and server.R inherit a fully-prepared environment.
 
+# DrWrinch is not on CRAN, so on shinyapps.io the package will not
+# be in the installed manifest automatically. We install it from
+# GitHub on first cold-start; subsequent renders use the cached
+# install (~30s one-time hit). In local development,
+# devtools::load_all() has already loaded DrWrinch, so this branch
+# is a no-op.
+if (!requireNamespace("DrWrinch", quietly = TRUE)) {
+  remotes::install_github("bowers-illinois-edu/DrWrinch")
+}
+
 library(shiny)
 library(bslib)
 library(plotly)

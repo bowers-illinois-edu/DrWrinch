@@ -125,13 +125,19 @@ interpret_omega_star <- function(om, threshold = 20) {
 # Returns nothing on success. On failure, shiny::validate() short-
 # circuits the calling reactive with the friendly message.
 validate_counts <- function(y_W, y_R) {
+  # Whole-number check uses (x == round(x)) so that numericInput's
+  # double-valued integers (e.g., 7, not 7L) still pass. This catches
+  # the 7.5-typed-into-the-box case the server's as.integer() would
+  # otherwise silently truncate.
   shiny::validate(
     shiny::need(
-      is.numeric(y_W) && length(y_W) == 1L && !is.na(y_W) && y_W >= 0,
+      is.numeric(y_W) && length(y_W) == 1L && !is.na(y_W) &&
+        y_W >= 0 && y_W == round(y_W),
       "Enter a non-negative whole number for y_W (working-theory count)."
     ),
     shiny::need(
-      is.numeric(y_R) && length(y_R) == 1L && !is.na(y_R) && y_R >= 0,
+      is.numeric(y_R) && length(y_R) == 1L && !is.na(y_R) &&
+        y_R >= 0 && y_R == round(y_R),
       "Enter a non-negative whole number for y_R (rival-theory count)."
     ),
     shiny::need(

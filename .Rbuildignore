@@ -9,3 +9,5 @@
 ^HANDOFF\.md$
 ^PLAN_SHINY\.md$
 ^\.claude$
+^deploy\.R$
+^inst/shiny/rsconnect$

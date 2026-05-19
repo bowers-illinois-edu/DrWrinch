@@ -12,3 +12,7 @@ reference:
   contents:
   - sens_binomial
   - sens_urn
+- title: Interactive app
+  desc: Launch a Shiny app that exposes the four core functions through a browser UI.
+  contents:
+  - run_app

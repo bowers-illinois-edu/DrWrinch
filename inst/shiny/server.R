@@ -160,27 +160,40 @@ function(input, output, session) {
         tags$li(
           tags$strong("Binomial:"),
           " open-ended evidence collection -- ongoing interviews, ",
-          "an expanding archive, a growing set of cases."
+          "an expanding archive, a growing set of cases. Implemented ",
+          "in bf_binomial()."
         ),
         tags$li(
           tags$strong("Urn (hypergeometric):"),
           " bounded archive -- a closed historical record, a fixed ",
-          "set of documents. Returns 'undefined' when the rival- ",
-          "favorable urn construction cannot supply the observed ",
-          "sample size (y_R > y_W + 1)."
+          "set of documents. Implemented in bf_urn(). Returns ",
+          "'undefined' when the rival-favorable urn construction ",
+          "cannot supply the observed sample size (y_R > y_W + 1)."
         )
       ),
       tags$p(
-        "We recommend reading both tabs together. The paper (Lopez, ",
-        "Bowers, and Gajardo Cooper 2026) argues that when the design ",
-        "is ambiguous between open-ended and bounded evidence, ",
-        "computing both Bayes factors is the conservative move: the ",
-        "urn is more favorable to the working theory by construction, ",
-        "and the binomial generalizes more easily to other settings."
+        "We recommend reading both tabs together. The paper argues ",
+        "that when the design is ambiguous between open-ended and ",
+        "bounded evidence, computing both Bayes factors is the ",
+        "conservative move: the urn is more favorable to the working ",
+        "theory by construction, and the binomial generalizes more ",
+        "easily to other settings."
       ),
+
+      tags$h4("Running example"),
+      tags$p(
+        "The default inputs (y_W = 7, y_R = 3, threshold = 20) ",
+        "reproduce the running example from the paper. The urn ",
+        "returns BF = 39 -- above threshold 20, K&R 'strong' -- ",
+        "while the binomial returns BF ~ 7.83, below threshold and ",
+        "in the K&R 'positive' bin. The Sensitivity tab shows that ",
+        "the urn's verdict survives a roughly 30% pro-working-theory ",
+        "observation bias before flipping."
+      ),
+
       tags$h4("Verdict scale"),
       tags$p(
-        "Verdicts use the Kass & Raftery (1995) scale:"
+        "Verdicts use the Kass & Raftery (1995, JASA) scale:"
       ),
       tags$ul(
         tags$li("BF in (1, 3]: not worth more than a bare mention"),
@@ -192,6 +205,34 @@ function(input, output, session) {
         "For BF < 1, the same bins apply to 1/BF and the direction ",
         "flips from 'favors working theory' to 'favors rival'. BF = 1 ",
         "is exact equipoise; the direction reads 'neither'."
+      ),
+
+      tags$h4("Sensitivity"),
+      tags$p(
+        "omega_star (observation-bias tipping point): the smallest ",
+        "value of omega > 1 at which the Bayes factor first drops ",
+        "below the chosen threshold. Larger omega_star means the ",
+        "conclusion is more robust to pro-working-theory observation ",
+        "bias."
+      ),
+      tags$p(
+        "M_star (prior-sweep tipping point, binomial only): the ",
+        "smallest integer M such that a Beta(1, M+1) rival-tilted ",
+        "prior drops the Bayes factor below threshold. Larger ",
+        "M_star means the conclusion survives stronger rival-tilted ",
+        "priors."
+      ),
+
+      tags$h4("Sources"),
+      tags$p(
+        "Lopez, Bowers, and Gajardo Cooper (2026), ",
+        tags$em("Fully specified Bayes factors for process tracing"),
+        ". Source code and documentation: ",
+        tags$a(
+          href = "https://github.com/bowers-illinois-edu/DrWrinch",
+          "github.com/bowers-illinois-edu/DrWrinch"
+        ),
+        "."
       )
     )
   })

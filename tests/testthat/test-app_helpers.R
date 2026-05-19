@@ -188,3 +188,45 @@ test_that("bf_M_curve at M=0 reproduces bf_binomial under a uniform prior", {
   )
   expect_equal(df$bf[1], expected)
 })
+
+
+# ---- validate_counts ---------------------------------------------------
+#
+# validate_counts uses shiny::validate(need(...)), which raises a
+# condition rather than returning a value. We catch the condition and
+# inspect its message; calling the function in isolation (outside a
+# reactive) is fine for that.
+
+test_that("validate_counts accepts integer-valued doubles", {
+  testthat::skip_if_not_installed("shiny")
+  # shiny::numericInput returns doubles like 7 (not 7L). The
+  # validator must accept these; otherwise every initial render
+  # would fail.
+  out <- tryCatch(validate_counts(7, 3), condition = function(e) e)
+  expect_null(out)
+})
+
+test_that("validate_counts rejects non-integer values with 'whole number' prose", {
+  testthat::skip_if_not_installed("shiny")
+  # Without this check, as.integer(input$y_W) in the server would
+  # silently truncate 7.5 to 7. Process tracers count documents and
+  # witnesses; a non-integer is a typo we should surface.
+  err <- tryCatch(validate_counts(7.5, 3), condition = function(e) e)
+  expect_true(inherits(err, "condition"))
+  expect_match(conditionMessage(err), "whole number", ignore.case = TRUE)
+})
+
+test_that("validate_counts rejects negative values", {
+  testthat::skip_if_not_installed("shiny")
+  err <- tryCatch(validate_counts(-1, 3), condition = function(e) e)
+  expect_true(inherits(err, "condition"))
+  expect_match(conditionMessage(err), "non-negative|whole number",
+               ignore.case = TRUE)
+})
+
+test_that("validate_counts rejects (0, 0) since there is no evidence", {
+  testthat::skip_if_not_installed("shiny")
+  err <- tryCatch(validate_counts(0, 0), condition = function(e) e)
+  expect_true(inherits(err, "condition"))
+  expect_match(conditionMessage(err), "both be zero", ignore.case = TRUE)
+})

@@ -1,3 +1,25 @@
+# DrWrinch 0.0.1.9000
+
+* Added `run_app()` -- an interactive Shiny app exposing the four
+  core functions through a browser UI. Inputs (y_W, y_R, threshold)
+  sit in a sidebar with theta_cut, prior_a, and prior_b tucked into
+  an Advanced accordion. The main panel has three tabs: Result
+  (Binomial / Urn sub-tabs with formatted Bayes factors, Kass &
+  Raftery verdicts, and direction labels), Sensitivity (tipping-
+  point prose plus plotly curves of BF vs. omega and BF vs. M), and
+  About (running example, verdict scale, and sources).
+* Added `shiny (>= 1.7.0)`, `bslib (>= 0.6.0)`, and `plotly (>=
+  4.10.0)` to `Suggests`. The Shiny stack is runtime-only; the four
+  core Bayes factor functions remain usable without it. `run_app()`
+  guards each dependency with `requireNamespace()` and reports a
+  clear install hint on miss.
+* Dropped the unused `DrBristol` cross-reference from `Suggests`
+  (it was never `library()`-ed in any R, test, or vignette code and
+  was blocking the GitHub Actions workflows).
+* Repository published at
+  https://github.com/bowers-illinois-edu/DrWrinch; pkgdown site at
+  https://bowers-illinois-edu.github.io/DrWrinch/.
+
 # DrWrinch 0.0.0.9002
 
 * CRAN-readiness additions: `Depends: R (>= 4.0.0)`, `cph` role on all
