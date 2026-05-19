@@ -42,7 +42,8 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     shiny (>= 1.7.0),
-    bslib (>= 0.6.0)
+    bslib (>= 0.6.0),
+    plotly (>= 4.10.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0

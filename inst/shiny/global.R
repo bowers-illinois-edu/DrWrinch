@@ -4,10 +4,13 @@
 
 library(shiny)
 library(bslib)
+library(plotly)
 library(DrWrinch)
 
-# Helpers live under inst/shiny/R/ rather than the package's R/ so
-# they stay out of the package namespace. Shiny 1.5+ auto-sources
-# files in R/ under the app directory; sourcing explicitly here is
-# belt-and-braces and makes the dependency obvious to a reader.
+# Helpers and plot functions live under inst/shiny/R/ rather than
+# the package's R/ so they stay out of the package namespace. Shiny
+# 1.5+ auto-sources files in R/ under the app directory; sourcing
+# explicitly here is belt-and-braces and makes the dependencies
+# obvious to a reader.
 source("R/helpers.R", local = TRUE)
+source("R/plots.R", local = TRUE)

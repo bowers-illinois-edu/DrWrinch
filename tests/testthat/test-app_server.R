@@ -13,6 +13,7 @@
 
 testthat::skip_if_not_installed("shiny")
 testthat::skip_if_not_installed("bslib")
+testthat::skip_if_not_installed("plotly")
 
 app_dir <- system.file("shiny", package = "DrWrinch")
 if (!nzchar(app_dir) || !dir.exists(app_dir)) {
@@ -96,6 +97,90 @@ test_that("the urn card prose for (7, 3) names the 'strong' K&R bin", {
       "strong",
       ignore.case = TRUE,
       all = FALSE
+    )
+  })
+})
+
+
+# ---- Phase 2: Sensitivity tab -----------------------------------------
+#
+# The sensitivity tab reports tipping points -- omega_star (observation
+# bias) and M_star (rival-favoring pseudo-observations) -- for both
+# models, plus the plotly curves over omega and M. The plot rendering
+# itself is left to manual review / Layer 3 snapshots; these tests
+# pin the substantive numeric and prose claims the sensitivity panel
+# is supposed to surface.
+
+test_that("sens_u(7, 3, threshold=20) reactive returns omega_star ~ 1.30", {
+  shiny::testServer(app = app_dir, expr = {
+    session$setInputs(
+      y_W = 7, y_R = 3, threshold = 20,
+      theta_cut = 0.5, prior_a = 1, prior_b = 1
+    )
+    res <- sens_u()
+    expect_equal(round(res$omega_star, 2), 1.30)
+    expect_equal(res$bf, 39)
+  })
+})
+
+test_that("sens_b(7, 3, threshold=20) reports baseline failure", {
+  shiny::testServer(app = app_dir, expr = {
+    session$setInputs(
+      y_W = 7, y_R = 3, threshold = 20,
+      theta_cut = 0.5, prior_a = 1, prior_b = 1
+    )
+    res <- sens_b()
+    expect_equal(res$omega_star, 0)
+    expect_equal(res$M_star, 0L)
+  })
+})
+
+test_that("sens_b(7, 3, threshold=5) yields a real omega_star > 1", {
+  shiny::testServer(app = app_dir, expr = {
+    session$setInputs(
+      y_W = 7, y_R = 3, threshold = 5,
+      theta_cut = 0.5, prior_a = 1, prior_b = 1
+    )
+    res <- sens_b()
+    expect_gt(res$omega_star, 1)
+    expect_false(is.na(res$omega_star))
+  })
+})
+
+test_that("sens_b(10, 0, threshold=20)$M_star is a positive integer", {
+  shiny::testServer(app = app_dir, expr = {
+    session$setInputs(
+      y_W = 10, y_R = 0, threshold = 20,
+      theta_cut = 0.5, prior_a = 1, prior_b = 1
+    )
+    res <- sens_b()
+    expect_gt(res$M_star, 0L)
+    expect_false(is.na(res$M_star))
+  })
+})
+
+test_that("tipping_text for (7, 3, 20) carries the urn's ~30% prose", {
+  shiny::testServer(app = app_dir, expr = {
+    session$setInputs(
+      y_W = 7, y_R = 3, threshold = 20,
+      theta_cut = 0.5, prior_a = 1, prior_b = 1
+    )
+    txt <- as.character(output$tipping_text)
+    expect_match(txt, "30", fixed = TRUE, all = FALSE)
+    expect_match(txt, "%", fixed = TRUE, all = FALSE)
+  })
+})
+
+test_that("tipping_text for (7, 3, 20) signals binomial baseline failure", {
+  shiny::testServer(app = app_dir, expr = {
+    session$setInputs(
+      y_W = 7, y_R = 3, threshold = 20,
+      theta_cut = 0.5, prior_a = 1, prior_b = 1
+    )
+    expect_match(
+      as.character(output$tipping_text),
+      "baseline|below threshold",
+      ignore.case = TRUE, all = FALSE
     )
   })
 })

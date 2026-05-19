@@ -37,6 +37,27 @@ function(input, output, session) {
     DrWrinch::bf_urn(co$y_W, co$y_R)
   })
 
+  # Sensitivity reactives. We call the package's sens_* functions
+  # directly so the numeric tipping points the app shows match the
+  # paper's (and the vignette's) computation exactly. No re-derivation
+  # inside the server.
+  sens_b <- reactive({
+    co <- counts_ok()
+    DrWrinch::sens_binomial(
+      co$y_W, co$y_R,
+      threshold = input$threshold,
+      theta_cut = input$theta_cut
+    )
+  })
+
+  sens_u <- reactive({
+    co <- counts_ok()
+    DrWrinch::sens_urn(
+      co$y_W, co$y_R,
+      threshold = input$threshold
+    )
+  })
+
   output$result_binom <- renderUI({
     fmt <- format_bf(bf_binom())
     tagList(
@@ -70,6 +91,61 @@ function(input, output, session) {
         tags$p(tags$strong("Direction:"), " ", fmt$direction)
       )
     }
+  })
+
+  # Sensitivity-tab prose. interpret_omega_star() and interpret_M_star()
+  # produce the per-branch sentences; this output composes them into
+  # the two sections the panel shows.
+  output$tipping_text <- renderUI({
+    sb <- sens_b()
+    su <- sens_u()
+    th <- input$threshold
+
+    binom_om_prose <- interpret_omega_star(sb$omega_star, threshold = th)
+    urn_om_prose <- if (is.na(su$bf)) {
+      paste0(
+        "The urn model is undefined at these counts; no observation-",
+        "bias sensitivity is reported. Use the binomial entry above ",
+        "or revisit the counts."
+      )
+    } else {
+      interpret_omega_star(su$omega_star, threshold = th)
+    }
+    M_prose <- interpret_M_star(sb$M_star, threshold = th)
+
+    tagList(
+      tags$h4("Observation-bias sensitivity"),
+      tags$p(tags$strong("Binomial model:"), " ", binom_om_prose),
+      tags$p(tags$strong("Urn model:"), " ", urn_om_prose),
+      tags$h4("Prior sensitivity (binomial only)"),
+      tags$p(M_prose)
+    )
+  })
+
+  output$plot_omega <- plotly::renderPlotly({
+    co <- counts_ok()
+    sb <- sens_b()
+    su <- sens_u()
+    plot_bf_vs_omega(
+      y_W = co$y_W, y_R = co$y_R,
+      threshold = input$threshold,
+      theta_cut = input$theta_cut,
+      omega_star_b = sb$omega_star,
+      omega_star_u = su$omega_star,
+      urn_defined = !is.na(su$bf)
+    )
+  })
+
+  output$plot_M <- plotly::renderPlotly({
+    co <- counts_ok()
+    sb <- sens_b()
+    plot_bf_vs_M(
+      y_W = co$y_W, y_R = co$y_R,
+      threshold = input$threshold,
+      theta_cut = input$theta_cut,
+      M_max = 50L,
+      M_star = sb$M_star
+    )
   })
 
   output$about_panel <- renderUI({

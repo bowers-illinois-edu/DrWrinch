@@ -140,3 +140,103 @@ validate_counts <- function(y_W, y_R) {
     )
   )
 }
+
+
+# interpret_M_star() turns the prior-sweep tipping point from
+# sens_binomial() into a sentence. Same three-branch pattern as
+# interpret_omega_star(): 0 (baseline already fails), NA_integer_
+# (BF stays above threshold across the prior sweep), positive integer
+# (number of rival-favoring pseudo-observations required).
+interpret_M_star <- function(m, threshold = 20) {
+  if (!is.na(m) && m == 0L) {
+    return(paste0(
+      "The Bayes factor sits below threshold ", threshold,
+      " at baseline. No rival-favoring pseudo-observations are ",
+      "needed for the conclusion to fail."
+    ))
+  }
+  if (is.na(m)) {
+    return(paste0(
+      "The Bayes factor stays above threshold ", threshold,
+      " across the prior sweep the search considered. The conclusion ",
+      "is robust to any realistic rival-tilted prior."
+    ))
+  }
+  paste0(
+    "Adding M = ", m, " rival-favoring pseudo-observation",
+    if (m == 1L) "" else "s",
+    " (a Beta(1, M + 1) prior) drops the Bayes factor below ",
+    "threshold ", threshold, "."
+  )
+}
+
+
+# bf_omega_curve() returns a long-format data.frame of BF samples
+# along a log-spaced omega grid for one model. Pure function -- no
+# Shiny, no plotly. The plot wrapper composes binomial and urn curves
+# via rbind() and feeds them to plotly.
+#
+# Defaults: 80 grid points between omega = 0.25 and omega = 8 cover
+# four-fold pro-rival bias to eight-fold pro-H_1 bias, wider than any
+# observation-bias prior we expect in process tracing. Log spacing
+# gives equal visual weight to omega < 1 and omega > 1, which matters
+# because the tipping point is usually close to 1.
+bf_omega_curve <- function(y_W, y_R,
+                           model = c("binomial", "urn"),
+                           threshold = 20,
+                           theta_cut = 0.5,
+                           n_grid = 80L,
+                           omega_range = c(0.25, 8)) {
+  model <- match.arg(model)
+  omegas <- exp(seq(
+    log(omega_range[1]),
+    log(omega_range[2]),
+    length.out = n_grid
+  ))
+  bf_at <- if (model == "binomial") {
+    # bf_binomial uses stats::integrate; wrap in tryCatch so a
+    # quadrature failure at pathological omega yields NA rather than
+    # killing the curve.
+    function(om) tryCatch(
+      DrWrinch::bf_binomial(y_W, y_R, omega = om, theta_cut = theta_cut),
+      error = function(e) NA_real_
+    )
+  } else {
+    function(om) tryCatch(
+      DrWrinch::bf_urn(y_W, y_R, omega = om),
+      error = function(e) NA_real_
+    )
+  }
+  bfs <- vapply(omegas, bf_at, numeric(1))
+  data.frame(
+    omega = omegas,
+    bf = bfs,
+    model = model,
+    threshold = threshold,
+    stringsAsFactors = FALSE
+  )
+}
+
+
+# bf_M_curve() returns BF as a function of the prior pseudo-
+# observation count M, with prior Beta(1, M + 1). Used by the
+# binomial-only prior-sensitivity bar chart on the Sensitivity tab.
+bf_M_curve <- function(y_W, y_R,
+                       theta_cut = 0.5,
+                       M_max = 50L,
+                       threshold = 20) {
+  Ms <- 0:M_max
+  bfs <- vapply(Ms, function(M) {
+    DrWrinch::bf_binomial(
+      y_W, y_R,
+      prior_a = 1, prior_b = M + 1L,
+      theta_cut = theta_cut
+    )
+  }, numeric(1))
+  data.frame(
+    M = Ms,
+    bf = bfs,
+    threshold = threshold,
+    stringsAsFactors = FALSE
+  )
+}

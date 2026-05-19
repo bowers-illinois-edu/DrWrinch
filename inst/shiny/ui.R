@@ -73,6 +73,13 @@ bslib::page_sidebar(
     ),
 
     bslib::nav_panel(
+      title = "Sensitivity",
+      uiOutput("tipping_text"),
+      plotly::plotlyOutput("plot_omega", height = "360px"),
+      plotly::plotlyOutput("plot_M", height = "320px")
+    ),
+
+    bslib::nav_panel(
       title = "About",
       uiOutput("about_panel")
     )

@@ -114,3 +114,77 @@ test_that("interpret_omega_star mentions the threshold it was given", {
   out <- interpret_omega_star(1.3, threshold = 20)
   expect_match(out, "20", fixed = TRUE)
 })
+
+
+# ---- interpret_M_star --------------------------------------------------
+#
+# Same three-branch pattern as interpret_omega_star, but for the
+# prior-sweep tipping point M_star from sens_binomial(). Values:
+#   0           -- baseline already below threshold (the conclusion fails
+#                  without any rival-favoring pseudo-observations).
+#   NA_integer_ -- the BF stays above threshold across the searched
+#                  prior sweep [0, M_max].
+#   positive    -- the smallest integer M at which the Beta(1, M + 1)
+#                  prior drops the BF below threshold.
+
+test_that("interpret_M_star(0L) reports failure at baseline", {
+  out <- interpret_M_star(0L, threshold = 20)
+  expect_type(out, "character")
+  expect_match(out, "below threshold|already|baseline", ignore.case = TRUE)
+})
+
+test_that("interpret_M_star(NA_integer_) reports robust-to-prior-sweep", {
+  out <- interpret_M_star(NA_integer_, threshold = 20)
+  expect_type(out, "character")
+  expect_match(out, "robust|stays above|did not cross", ignore.case = TRUE)
+})
+
+test_that("interpret_M_star(14L) reports the integer count and threshold", {
+  out <- interpret_M_star(14L, threshold = 20)
+  expect_match(out, "14", fixed = TRUE)
+  expect_match(out, "20", fixed = TRUE)
+})
+
+
+# ---- bf_omega_curve ----------------------------------------------------
+
+test_that("bf_omega_curve(7, 3, 'urn') is monotone-decreasing in omega", {
+  df <- bf_omega_curve(7, 3, "urn", threshold = 20)
+  expect_equal(nrow(df), 80)
+  expect_true(all(diff(df$omega) > 0))
+  expect_true(all(diff(df$bf) <= 1e-9))
+})
+
+test_that("bf_omega_curve(7, 3, 'urn') near omega=1 brackets BF = 39", {
+  df <- bf_omega_curve(7, 3, "urn", threshold = 20)
+  idx <- which.min(abs(df$omega - 1))
+  expect_gt(df$bf[idx], 30)
+  expect_lt(df$bf[idx], 50)
+})
+
+test_that("bf_omega_curve propagates the threshold for downstream layers", {
+  df <- bf_omega_curve(7, 3, "urn", threshold = 25)
+  expect_true(all(df$threshold == 25))
+})
+
+test_that("bf_omega_curve labels the model in its 'model' column", {
+  df <- bf_omega_curve(7, 3, "binomial", threshold = 20)
+  expect_true(all(df$model == "binomial"))
+})
+
+
+# ---- bf_M_curve --------------------------------------------------------
+
+test_that("bf_M_curve(10, 0, M_max=50) is monotone-decreasing in M", {
+  df <- bf_M_curve(10, 0, theta_cut = 0.5, M_max = 50, threshold = 20)
+  expect_equal(nrow(df), 51)
+  expect_true(all(diff(df$bf) <= 1e-9))
+})
+
+test_that("bf_M_curve at M=0 reproduces bf_binomial under a uniform prior", {
+  df <- bf_M_curve(10, 0, theta_cut = 0.5, M_max = 5, threshold = 20)
+  expected <- DrWrinch::bf_binomial(
+    10, 0, prior_a = 1, prior_b = 1, theta_cut = 0.5
+  )
+  expect_equal(df$bf[1], expected)
+})

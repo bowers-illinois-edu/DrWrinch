@@ -31,7 +31,7 @@ run_app <- function(launch_browser = interactive(), ...) {
   # Shiny and bslib are runtime-only. Check at call time so the core
   # BF functions remain usable without the full Shiny install. If
   # either is missing, point the user at the exact install command.
-  for (pkg in c("shiny", "bslib")) {
+  for (pkg in c("shiny", "bslib", "plotly")) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       stop(
         "Install '", pkg, "' to use run_app(): ",
