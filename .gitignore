@@ -5,3 +5,6 @@
 .DS_Store
 .quarto
 docs
+vignettes/*.html
+vignettes/*.R
+inst/doc
