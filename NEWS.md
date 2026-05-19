@@ -18,7 +18,8 @@
   was blocking the GitHub Actions workflows).
 * Repository published at
   https://github.com/bowers-illinois-edu/DrWrinch; pkgdown site at
-  https://bowers-illinois-edu.github.io/DrWrinch/.
+  https://bowers-illinois-edu.github.io/DrWrinch/; Shiny app
+  deployed to https://jakebowers.shinyapps.io/drwrinch/.
 
 # DrWrinch 0.0.0.9002
 

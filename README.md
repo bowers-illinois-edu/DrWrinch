@@ -23,6 +23,20 @@ implements p-value methods for the same class of problems.
 remotes::install_github("bowers-illinois-edu/DrWrinch")
 ```
 
+## Interactive app
+
+DrWrinch ships with a Shiny app that exposes the four core functions
+through a browser UI:
+
+```r
+DrWrinch::run_app()
+```
+
+A hosted copy lives at <https://jakebowers.shinyapps.io/drwrinch/>.
+Defaults reproduce the paper's running example (`y_W = 7, y_R = 3,
+threshold = 20`); the Sensitivity tab shows omega_star and M_star
+tipping points with plotly curves.
+
 ## Status
 
 Under active development alongside the paper. The single-rival case is
