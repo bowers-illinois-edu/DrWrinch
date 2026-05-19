@@ -1,6 +1,6 @@
 Package: DrWrinch
 Title: Fully Specified Bayes Factors for Process Tracing
-Version: 0.0.0.9002
+Version: 0.0.1.9000
 Authors@R: c(
     person("Matias", "Lopez", role = c("aut", "cph"),
            email = "matiaslopez.uy@gmail.com",
@@ -40,7 +40,9 @@ Suggests:
     dplyr,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    shiny (>= 1.7.0),
+    bslib (>= 0.6.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0

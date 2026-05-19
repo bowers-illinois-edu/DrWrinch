@@ -2,5 +2,6 @@
 
 export(bf_binomial)
 export(bf_urn)
+export(run_app)
 export(sens_binomial)
 export(sens_urn)
