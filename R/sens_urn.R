@@ -1,24 +1,51 @@
 #' Sensitivity analysis for the urn Bayes factor
 #'
-#' Reports how the Bayes factor under the hypergeometric urn model moves
-#' as the coding-error rate `delta` and the observation-bias parameter
-#' `omega` vary across user-supplied grids. Returns a long-format data
-#' frame for direct plotting; companion plotting helpers are planned.
+#' Reports the bias tipping point for the urn Bayes factor: the
+#' smallest observation bias `omega > 1` at which the Bayes factor
+#' first drops below `threshold`.
 #'
-#' @param y_W Integer. Observed count favorable to the working theory.
-#' @param y_R Integer. Observed count favorable to the rival.
-#' @param delta_grid Numeric in \eqn{[0, 0.5)}. Grid of coding-error
-#'   rates. Default `seq(0, 0.2, by = 0.02)`.
-#' @param omega_grid Positive numeric. Grid of observation-bias odds
-#'   ratios. Default `c(0.5, 1, 2)`.
+#' `omega > 1` makes pro-\eqn{H_1} items more likely to be drawn than
+#' they are in the urn, so the apparent dominance of pro-\eqn{H_1}
+#' evidence is partly an artifact of observation, and the Bayes factor
+#' falls. `omega_star` is the value at which this fall first crosses
+#' `threshold`. If `bf_urn(y_W, y_R) < threshold` at baseline,
+#' `omega_star` is `0`.
 #'
-#' @return A data frame with columns `delta`, `omega`, and `bf`.
+#' @param y_W Non-negative integer. Observed count favorable to the
+#'   working theory.
+#' @param y_R Non-negative integer. Observed count favorable to the
+#'   rival.
+#' @param threshold Positive numeric. Decision threshold the Bayes
+#'   factor must remain at or above. Default `20`.
+#'
+#' @return A list with elements:
+#'   \describe{
+#'     \item{`bf`}{Bayes factor at `omega = 1`.}
+#'     \item{`omega_star`}{Bias tipping point. `0` if `bf < threshold`
+#'       at baseline; `NA_real_` if `bf` does not cross `threshold` for
+#'       any reachable `omega`.}
+#'   }
+#'
+#' @examples
+#' s <- sens_urn(7, 3)
+#' s$bf
+#' s$omega_star
 #'
 #' @seealso [bf_urn()], [sens_binomial()].
 #' @export
-sens_urn <- function(y_W, y_R,
-                     delta_grid = seq(0, 0.2, by = 0.02),
-                     omega_grid = c(0.5, 1, 2)) {
-  stop("Not yet implemented. See Paper/evalues.qmd sensitivity section ",
-       "and Paper/memo_sensitivity_separation.md.")
+sens_urn <- function(y_W, y_R, threshold = 20) {
+  stopifnot(
+    length(y_W) == 1L, length(y_R) == 1L,
+    y_W >= 0, y_R >= 0, y_W + y_R > 0,
+    threshold > 0
+  )
+
+  bf_base <- bf_urn(y_W, y_R)
+
+  omega_star <- .find_omega_tipping(
+    function(omega) bf_urn(y_W, y_R, omega = omega),
+    threshold
+  )
+
+  list(bf = bf_base, omega_star = omega_star)
 }
