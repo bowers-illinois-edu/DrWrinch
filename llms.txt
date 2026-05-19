@@ -52,6 +52,14 @@ flip the conclusion.
 - [`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md)
   : Sensitivity analysis for the urn Bayes factor
 
+## Interactive app
+
+Launch a Shiny app that exposes the four core functions through a
+browser UI.
+
+- [`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)
+  : Launch the DrWrinch Shiny app
+
 # Articles
 
 ### All vignettes

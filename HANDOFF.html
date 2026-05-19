@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,13 +76,13 @@
 </div>
 <div class="section level2">
 <h2 id="open-user-decisions-awaiting-answers-shiny-app">Open user decisions awaiting answers (Shiny app)<a class="anchor" aria-label="anchor" href="#open-user-decisions-awaiting-answers-shiny-app"></a></h2>
-<p>A planning agent produced a full implementation plan for the Shiny app in <code>PLAN_SHINY.md</code>. The architectural shape is settled (inst/shiny/ with <code>run_app()</code> launcher, deploy via rsconnect, Suggests-only deps). Six decisions are open:</p>
+<p>A planning agent produced a full implementation plan for the Shiny app in <code>PLAN_SHINY.md</code>. The architectural shape is settled (inst/shiny/ with <code><a href="reference/run_app.html">run_app()</a></code> launcher, deploy via rsconnect, Suggests-only deps). Six decisions are open:</p>
 <p><strong>A. Plot library.</strong> ggplot2 (recommended; already in Suggests, smaller deploy) or plotly (interactivity).</p>
 <p><strong>B. Model layout.</strong> Side-by-side cards (recommended; matches “compute both” vignette guidance) or tabs.</p>
 <p><strong>C. Advanced inputs.</strong> Hide <code>theta_cut</code>, <code>prior_a</code>, <code>prior_b</code> behind an Advanced accordion (recommended) or always-visible.</p>
 <p><strong>D. Urn-undefined messaging.</strong> Settled: mandatory friendly prose when <code>y_R &gt; y_W + 1</code>; the binomial card still renders.</p>
 <p><strong>E. shinyapps.io account.</strong> The user needs to confirm whether a personal account exists or to sign up.</p>
-<p><strong>F. CRAN submission timing.</strong> Plan recommends submitting <code>0.0.0.9002</code> to CRAN <strong>first</strong> (clean four-function package), then adding <code>run_app()</code> in <code>0.0.1</code> afterward.</p>
+<p><strong>F. CRAN submission timing.</strong> Plan recommends submitting <code>0.0.0.9002</code> to CRAN <strong>first</strong> (clean four-function package), then adding <code><a href="reference/run_app.html">run_app()</a></code> in <code>0.0.1</code> afterward.</p>
 <p>When resuming: ask the user which way A, B, C, E, F go. Then begin Phase 1 of <code>PLAN_SHINY.md</code>.</p>
 </div>
 <div class="section level2">

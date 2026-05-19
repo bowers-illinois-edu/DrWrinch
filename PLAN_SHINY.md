@@ -37,10 +37,12 @@ Constraints this places on the plan:
 1.  The app is essentially a thin GUI over four pure functions. Do not
     over-engineer.
 2.  CRAN cares about: examples that do not block (`\dontrun{}` for
-    `run_app()`), `inst/` size (Shiny apps with heavy CSS/JS bloat the
-    tarball), and that every package in `Suggests` is used only after a
+    [`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)),
+    `inst/` size (Shiny apps with heavy CSS/JS bloat the tarball), and
+    that every package in `Suggests` is used only after a
     [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html) guard
-    inside `run_app()`.
+    inside
+    [`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md).
 3.  The four functions already do all the validation we need — the
     server’s job is to translate Shiny inputs into well-formed calls,
     catch the documented `NA_real_` / `Inf` outcomes, and render them
@@ -52,10 +54,12 @@ Constraints this places on the plan:
 
 ### 1a. New code in `R/`
 
-**`R/run_app.R`** (new, ~40 lines) - Exports `run_app()`. - Signature:
-`run_app(launch_browser = interactive(), ...)`. The `...` is forwarded
-to `shiny::runApp()` so power users can pass `port`, `host`,
-`display.mode`, etc. - Body, in order: 1.
+**`R/run_app.R`** (new, ~40 lines) - Exports
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md). -
+Signature: `run_app(launch_browser = interactive(), ...)`. The `...` is
+forwarded to
+[`shiny::runApp()`](https://rdrr.io/pkg/shiny/man/runApp.html) so power
+users can pass `port`, `host`, `display.mode`, etc. - Body, in order: 1.
 [`requireNamespace("shiny", quietly = TRUE)`](https://rdrr.io/r/base/ns-load.html)
 — if missing,
 `stop("Install 'shiny' to use run_app(): install.packages('shiny')", call. = FALSE)`.
@@ -170,10 +174,11 @@ and contains a per-deploy hash; you do not want it in the package
 tarball.
 
 **`DESCRIPTION`**: bump version to `0.0.1.9000` (new exported function
-`run_app()` per the coding-standards bump rule). Add to `Suggests`: -
-`shiny`, `bslib`, plot lib (see Decision A), and `shinytest2` (testing,
-see section 6). - Do **not** promote any of these to `Imports`. The app
-is genuinely optional; CRAN reviewers prefer Suggests for runtime-only
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)
+per the coding-standards bump rule). Add to `Suggests`: - `shiny`,
+`bslib`, plot lib (see Decision A), and `shinytest2` (testing, see
+section 6). - Do **not** promote any of these to `Imports`. The app is
+genuinely optional; CRAN reviewers prefer Suggests for runtime-only
 dependencies that gate behind
 [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html).
 
@@ -181,8 +186,9 @@ dependencies that gate behind
 `export(run_app)`.
 
 **`NEWS.md`**: prepend a new `# DrWrinch 0.0.1.9000` block: “Added
-`run_app()`, an interactive Shiny app for the two models and their
-sensitivity tipping points. Hosted at \<shinyapps.io URL\>.”
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md),
+an interactive Shiny app for the two models and their sensitivity
+tipping points. Hosted at \<shinyapps.io URL\>.”
 
 **`_pkgdown.yml`**: add a new reference section “Interactive app” with
 `contents: run_app`. Also consider adding `articles:` pointing to a
@@ -241,8 +247,10 @@ register at <https://shinyapps.io> and run
 
 **Decision F — CRAN submission timing.** - The plan author recommends
 submitting the current `0.0.0.9002` (four core functions, clean check)
-**first**, then adding `run_app()` in `0.0.1` afterward. Cleaner first
-submission; deploy script depends on the CRAN binary existing.
+**first**, then adding
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)
+in `0.0.1` afterward. Cleaner first submission; deploy script depends on
+the CRAN binary existing.
 
 ------------------------------------------------------------------------
 
@@ -261,16 +269,18 @@ Add to `Suggests` (not `Imports`):
 and in `deploy.R` (`requireNamespace` guard).
 
 **Why not Imports for any of these:** the only entry point from the rest
-of the package into the app is `run_app()`, which
-`requireNamespace`-guards every Shiny call. A user who installs DrWrinch
-just to compute Bayes factors should never need Shiny.
+of the package into the app is
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md),
+which `requireNamespace`-guards every Shiny call. A user who installs
+DrWrinch just to compute Bayes factors should never need Shiny.
 
 **Why a version floor on `shiny` and `bslib`:**
 [`bslib::page_sidebar()`](https://rstudio.github.io/bslib/reference/page_sidebar.html)
 and
 [`bslib::navset_card_tab()`](https://rstudio.github.io/bslib/reference/navset.html)
-need bslib \>= 0.6. `shiny::bindEvent()`-style reactivity needs shiny
-\>= 1.6. The floors are conservative.
+need bslib \>= 0.6.
+[`shiny::bindEvent()`](https://rdrr.io/pkg/shiny/man/bindEvent.html)-style
+reactivity needs shiny \>= 1.6. The floors are conservative.
 
 ------------------------------------------------------------------------
 
@@ -409,10 +419,12 @@ move helpers into `R/app_helpers.R` and export them as
 `@keywords internal`, which is recommended only if a third test layer
 ends up needing them.
 
-**Layer 2 — Server logic (testthat + `shiny::testServer`).** File:
-`tests/testthat/test-app_server.R`. `skip_if_not_installed("shiny")`. -
-Construct a `testServer(app = "inst/shiny", expr = { ... })` block. -
-Set `session$setInputs(y_W = 7, y_R = 3, threshold = 20)` and assert
+**Layer 2 — Server logic (testthat +
+[`shiny::testServer`](https://rdrr.io/pkg/shiny/man/testServer.html)).**
+File: `tests/testthat/test-app_server.R`.
+`skip_if_not_installed("shiny")`. - Construct a
+`testServer(app = "inst/shiny", expr = { ... })` block. - Set
+`session$setInputs(y_W = 7, y_R = 3, threshold = 20)` and assert
 `bf_binom() ~= 7.83`, `bf_urn_v() == 39`,
 `sens_u()$omega_star ~= 1.304`. - Set `y_W = 2, y_R = 10` and assert
 `bf_urn_v()` is `NA` and the urn card output contains “undefined”. - Set
@@ -440,9 +452,11 @@ already picks up new files.
 ## 7. Deployment to shinyapps.io
 
 The constraint is one source of truth: the same `inst/shiny/` dir runs
-locally via `run_app()` and gets deployed to shinyapps.io. That’s
-straightforward because `rsconnect::deployApp(appDir = "inst/shiny")`
-packages exactly that directory.
+locally via
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)
+and gets deployed to shinyapps.io. That’s straightforward because
+`rsconnect::deployApp(appDir = "inst/shiny")` packages exactly that
+directory.
 
 **File: `deploy.R` at repo root** (not under `inst/`, not shipped): -
 Top:
@@ -486,9 +500,10 @@ for the R package tarball.
 Specific things `R CMD check` is going to complain about if we are not
 careful:
 
-1.  **`run_app()` examples block.** Wrap in `\dontrun{}` (not
-    `\donttest{}` — even `--run-donttest` will time out). The roxygen
-    example block is already drafted this way in section 1.
+1.  **[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)
+    examples block.** Wrap in `\dontrun{}` (not `\donttest{}` — even
+    `--run-donttest` will time out). The roxygen example block is
+    already drafted this way in section 1.
 2.  **`inst/shiny/` size.** Keep `www/` to essentials: 1 small CSS file
     (~2KB). No fonts, no images, no bundled JS libraries. shinyapps.io
     will load Bootstrap from CDN via bslib.
@@ -514,10 +529,11 @@ The package is at `0.0.0.9002` with `cran-comments.md` ready. **Decision
 F: do you want to land the Shiny app *before* the first CRAN submission,
 or push CRAN out for it?** Recommendation: submit to CRAN first at the
 current state (it’s clean, the four core functions are the
-contribution), then add `run_app()` in `0.0.1` as a follow-up release.
-This keeps the first CRAN submission simple and means the
-deploy-to-shinyapps story (which needs a CRAN binary) works on day one
-of the app’s release.
+contribution), then add
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)
+in `0.0.1` as a follow-up release. This keeps the first CRAN submission
+simple and means the deploy-to-shinyapps story (which needs a CRAN
+binary) works on day one of the app’s release.
 
 ------------------------------------------------------------------------
 

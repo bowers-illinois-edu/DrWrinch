@@ -61,8 +61,9 @@ Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).
 
 A planning agent produced a full implementation plan for the Shiny app
 in `PLAN_SHINY.md`. The architectural shape is settled (inst/shiny/ with
-`run_app()` launcher, deploy via rsconnect, Suggests-only deps). Six
-decisions are open:
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)
+launcher, deploy via rsconnect, Suggests-only deps). Six decisions are
+open:
 
 **A. Plot library.** ggplot2 (recommended; already in Suggests, smaller
 deploy) or plotly (interactivity).
@@ -80,7 +81,8 @@ Advanced accordion (recommended) or always-visible.
 personal account exists or to sign up.
 
 **F. CRAN submission timing.** Plan recommends submitting `0.0.0.9002`
-to CRAN **first** (clean four-function package), then adding `run_app()`
+to CRAN **first** (clean four-function package), then adding
+[`run_app()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/run_app.md)
 in `0.0.1` afterward.
 
 When resuming: ask the user which way A, B, C, E, F go. Then begin Phase
