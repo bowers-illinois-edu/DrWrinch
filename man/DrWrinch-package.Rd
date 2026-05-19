@@ -24,18 +24,19 @@ framework that became Jeffreys's theory of Bayes factors. See
 Useful links:
 \itemize{
   \item \url{https://github.com/bowers-illinois-edu/DrWrinch}
+  \item \url{https://bowers-illinois-edu.github.io/DrWrinch/}
   \item Report bugs at \url{https://github.com/bowers-illinois-edu/DrWrinch/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Jake Bowers \email{jwbowers@illinois.edu} (\href{https://orcid.org/0000-0002-4048-1166}{ORCID})
+\strong{Maintainer}: Jake Bowers \email{jwbowers@illinois.edu} (\href{https://orcid.org/0000-0002-4048-1166}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Jake Bowers \email{jwbowers@illinois.edu} (\href{https://orcid.org/0000-0002-4048-1166}{ORCID})
-  \item Matias Lopez \email{matiaslopez.uy@gmail.com} (\href{https://orcid.org/0000-0002-0871-2841}{ORCID})
-  \item Daniel Gajardo Cooper \email{drgajardo@uc.cl}
+  \item Jake Bowers \email{jwbowers@illinois.edu} (\href{https://orcid.org/0000-0002-4048-1166}{ORCID}) [copyright holder]
+  \item Matias Lopez \email{matiaslopez.uy@gmail.com} (\href{https://orcid.org/0000-0002-0871-2841}{ORCID}) [copyright holder]
+  \item Daniel Gajardo Cooper \email{drgajardo@uc.cl} [copyright holder]
 }
 
 }

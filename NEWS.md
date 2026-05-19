@@ -1,3 +1,14 @@
+# DrWrinch 0.0.0.9002
+
+* CRAN-readiness additions: `Depends: R (>= 4.0.0)`, `cph` role on all
+  authors, `inst/CITATION` pointing to the working paper.
+* Added `vignettes/getting-started.Rmd` walking through the paper
+  running example with both models and the sensitivity tipping points.
+* Added `cran-comments.md` for submission.
+* Added GitHub Actions workflows for R CMD check (matrix across
+  Ubuntu / macOS / Windows) and pkgdown deployment.
+* Added `_pkgdown.yml` for the package website.
+
 # DrWrinch 0.0.0.9001
 
 * Implemented `bf_urn()` (Formulation C of the hypergeometric urn model:

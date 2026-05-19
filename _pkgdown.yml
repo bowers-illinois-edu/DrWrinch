@@ -1,0 +1,14 @@
+url: https://bowers-illinois-edu.github.io/DrWrinch/
+template:
+  bootstrap: 5
+reference:
+- title: Bayes factors
+  desc: Compute Bayes factors under the binomial and hypergeometric urn models.
+  contents:
+  - bf_binomial
+  - bf_urn
+- title: Sensitivity analysis
+  desc: Locate the smallest perturbations of observation bias and prior that flip the conclusion.
+  contents:
+  - sens_binomial
+  - sens_urn
