@@ -6,3 +6,5 @@
 ^README\.Rmd$
 ^cran-comments\.md$
 ^_pkgdown\.yml$
+^HANDOFF\.md$
+^PLAN_SHINY\.md$
