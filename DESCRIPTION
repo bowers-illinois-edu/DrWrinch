@@ -1,0 +1,41 @@
+Package: DrWrinch
+Title: Fully Specified Bayes Factors for Process Tracing
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Matias", "Lopez", role = "aut",
+           email = "matiaslopez.uy@gmail.com",
+           comment = c(ORCID = "0000-0002-0871-2841")),
+    person("Jake", "Bowers", role = c("aut", "cre"),
+           email = "jwbowers@illinois.edu",
+           comment = c(ORCID = "0000-0002-4048-1166")),
+    person("Daniel", "Gajardo Cooper", role = "aut",
+           email = "drgajardo@uc.cl"))
+Description: Computes fully specified Bayes factors for process tracing,
+    as developed in Lopez, Bowers, and Gajardo Cooper (2026). The package
+    implements two generative models for evidence in favor of a working
+    theory against a single rival: a binomial model for open-ended
+    evidence collection, and a hypergeometric urn model for bounded
+    archives. Both models yield Bayes factors that tilt in favor of the
+    rival theory by construction, so the reported Bayes factor is a
+    lower bound on the evidence for the working theory. Sensitivity
+    analyses vary coding error and observation bias to show how the
+    conclusion changes under departures from the baseline assumptions.
+    Named after Dorothy Maud Wrinch (1894--1976,
+    <https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch>), whose joint
+    papers with Harold Jeffreys (1919, 1921, 1923) developed the
+    framework that became Jeffreys's theory of Bayes factors.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+URL: https://github.com/bowers-illinois-edu/DrWrinch
+BugReports: https://github.com/bowers-illinois-edu/DrWrinch/issues
+Imports:
+    stats,
+    BiasedUrn
+Suggests:
+    ggplot2,
+    dplyr,
+    testthat (>= 3.0.0),
+    DrBristol
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
