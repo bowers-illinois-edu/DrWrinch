@@ -38,77 +38,120 @@
 
 <div id="handoff-for-drwrinch" class="section level1">
 
-<p>Last touched: 2026-05-19 in a session run from <code>~/repos/fully_specified_bf/</code>. Pick up from here in a fresh Claude session run from <code>~/repos/DrWrinch/</code>.</p>
+<p>Last touched: 2026-05-19 (evening session in <code>~/repos/DrWrinch/</code>). Pick up from here in a fresh Claude session run from <code>~/repos/DrWrinch/</code>.</p>
 <div class="section level2">
 <h2 id="what-drwrinch-is">What DrWrinch is<a class="anchor" aria-label="anchor" href="#what-drwrinch-is"></a></h2>
 <p>The R package implementing Lopez, Bowers, and Gajardo Cooper (2026), “Fully specified Bayes factors for process tracing.” Named after Dorothy Maud Wrinch (1894–1976; joint papers with Harold Jeffreys in the early 1920s developed the framework that later became Jeffreys’s theory of Bayes factors).</p>
 <p>Companion package <code>DrBristol</code> (at <code>~/repos/DrBristol</code>) implements p-value methods for the same class of problems. DrBristol is mature, GitHub-only, named after Muriel Bristol; DrWrinch is its Bayes-factor sibling. Do not merge the two.</p>
-<p>The paper lives at <code>~/repos/fully_specified_bf</code>. Treat the paper as the source of truth for notation and methodology; DrWrinch is the companion code. Integration of DrWrinch into the paper is <strong>appendix-only</strong> — see the project memory at <code>~/.claude/projects/-Users-jwbowers-repos-fully-specified-bf/memory/project_drwrinch_paper_integration.md</code>. An appendix section now exists in <code>~/repos/fully_specified_bf/Paper/appendix.qmd</code> showing how to reproduce the running example with DrWrinch.</p>
+<p>The paper lives at <code>~/repos/fully_specified_bf</code>. Treat the paper as the source of truth for notation and methodology; DrWrinch is the companion code. Integration of DrWrinch into the paper is <strong>appendix-only</strong> — see the project memory at <code>~/.claude/projects/-Users-jwbowers-repos-fully-specified-bf/memory/project_drwrinch_paper_integration.md</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="current-public-surface-2026-05-19">Current public surface (2026-05-19)<a class="anchor" aria-label="anchor" href="#current-public-surface-2026-05-19"></a></h2>
+<ul><li>
+<strong>GitHub</strong>: <a href="https://github.com/bowers-illinois-edu/DrWrinch" class="external-link uri">https://github.com/bowers-illinois-edu/DrWrinch</a> (public, in the <code>bowers-illinois-edu</code> org). <code>main</code> is at version <code>0.0.1.9000</code>.</li>
+<li>
+<strong>pkgdown site</strong>: <a href="https://bowers-illinois-edu.github.io/DrWrinch/" class="uri">https://bowers-illinois-edu.github.io/DrWrinch/</a> (built from <code>gh-pages</code> via the pkgdown.yaml workflow on every push to <code>main</code>).</li>
+<li>
+<strong>Shiny app</strong>: <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a> (deployed via <code>deploy.R</code> at the repo root; rsconnect targets <code>appName = "drwrinch"</code> on the <code>jakebowers</code> shinyapps.io account).</li>
+<li>
+<strong>GitHub Actions</strong>: R-CMD-check passes across macOS-release, Windows-release, Ubuntu oldrel-1 / release / devel. The pkgdown workflow auto-deploys on every push to <code>main</code>.</li>
+</ul><p>CRAN is on hold indefinitely (per Decision F of <code>PLAN_SHINY.md</code>); the release path is GitHub plus pkgdown plus shinyapps.io, mirroring DrBristol.</p>
 </div>
 <div class="section level2">
 <h2 id="current-state-of-the-package">Current state of the package<a class="anchor" aria-label="anchor" href="#current-state-of-the-package"></a></h2>
-<p>Version <code>0.0.0.9002</code>. <code>devtools::check()</code> is clean (0 errors, 0 warnings, 0 notes). <code>devtools::test()</code> reports 119/119 passing.</p>
-<p>Files in place:</p>
+<p>Version <code>0.0.1.9000</code>. <code>devtools::test()</code> passes 195/195 locally and in CI. <code>devtools::check()</code> is clean (0 errors, 0 warnings, 0 notes).</p>
+<p>Exported functions: <code>bf_binomial</code>, <code>bf_urn</code>, <code>sens_binomial</code>, <code>sens_urn</code>, <code>run_app</code>.</p>
+<p>Files of note:</p>
 <ul><li>
-<code>R/bf_binomial.R</code>, <code>R/bf_urn.R</code>, <code>R/sens_binomial.R</code>, <code>R/sens_urn.R</code>, <code>R/utils.R</code> (internal <code>.find_omega_tipping</code>), <code>R/DrWrinch-package.R</code>.</li>
+<code>R/bf_binomial.R</code>, <code>R/bf_urn.R</code>, <code>R/sens_binomial.R</code>, <code>R/sens_urn.R</code>, <code>R/utils.R</code> (internal <code>.find_omega_tipping</code>), <code>R/DrWrinch-package.R</code>, <code>R/run_app.R</code>.</li>
 <li>
-<code>tests/testthat/test-bf_binomial.R</code>, <code>test-bf_urn.R</code>, <code>test-sens.R</code>.</li>
+<code>inst/shiny/</code> — the deployed Shiny app: <code>global.R</code>, <code>ui.R</code>, <code>server.R</code>, and <code>R/helpers.R</code> + <code>R/plots.R</code> for the formatter and plotly wrappers. Verdicts use the Kass &amp; Raftery (1995) scale (boundaries <code>1, 3, 20, 150</code>, upper-inclusive).</li>
 <li>
-<code>vignettes/getting-started.Rmd</code> (paper running example, both models, sensitivity).</li>
+<code>tests/testthat/test-bf_binomial.R</code>, <code>test-bf_urn.R</code>, <code>test-sens.R</code>, <code>test-app_helpers.R</code> (Layer 1 helpers + curves), <code>test-app_server.R</code> (Layer 2 <code><a href="https://rdrr.io/pkg/shiny/man/testServer.html" class="external-link">shiny::testServer</a></code> for both BF reactives, the urn-undefined branch, and the sensitivity-tab reactives).</li>
+<li>
+<code>vignettes/getting-started.Rmd</code> (paper running example).</li>
 <li>
 <code>inst/CITATION</code> (placeholder bibentry; update with venue/DOI on publication).</li>
 <li>
-<code>man/*.Rd</code> regenerated by <code>devtools::document()</code>.</li>
+<code>_pkgdown.yml</code> (Bootstrap 5; reference grouped Bayes factors / Sensitivity / Interactive app).</li>
 <li>
-<code>_pkgdown.yml</code> (Bootstrap 5; reference grouped by Bayes factor vs. sensitivity).</li>
+<code>.github/workflows/R-CMD-check.yaml</code>, <code>.github/workflows/pkgdown.yaml</code>.</li>
 <li>
-<code>cran-comments.md</code> (initial submission).</li>
-<li>
-<code>.github/workflows/R-CMD-check.yaml</code> (Ubuntu oldrel/release/devel, macOS, Windows).</li>
-<li>
-<code>.github/workflows/pkgdown.yaml</code> (auto-deploy to gh-pages).</li>
+<code>cran-comments.md</code> (kept for if/when CRAN comes back into scope).</li>
 <li>
 <code>LICENSE</code>, <code>LICENSE.md</code> (MIT; copyright in paper order).</li>
 <li>
 <code>NEWS.md</code>, <code>README.md</code>.</li>
-</ul><p>Two commits so far: - <code>935080d</code> Initial skeleton for DrWrinch - (next commit) Implement bf_urn, sens_binomial, sens_urn; add testthat suite - (latest commit) Add CRAN-readiness, vignette, pkgdown, GitHub Actions</p>
-<p>Authors in DESCRIPTION (paper order): Matias Lopez (aut, cph), Jake Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).</p>
+<li>
+<code>deploy.R</code> at repo root (in <code>.Rbuildignore</code>). Run from the repo root with <code>source("deploy.R")</code> to redeploy after changes; relies on <code>rsconnect::setAccountInfo(...)</code> having been run once on this machine.</li>
+</ul><p>Authors in DESCRIPTION (paper order): Matias Lopez (aut, cph), Jake Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).</p>
 </div>
 <div class="section level2">
-<h2 id="open-user-decisions-awaiting-answers-shiny-app">Open user decisions awaiting answers (Shiny app)<a class="anchor" aria-label="anchor" href="#open-user-decisions-awaiting-answers-shiny-app"></a></h2>
-<p>A planning agent produced a full implementation plan for the Shiny app in <code>PLAN_SHINY.md</code>. The architectural shape is settled (inst/shiny/ with <code><a href="reference/run_app.html">run_app()</a></code> launcher, deploy via rsconnect, Suggests-only deps). Six decisions are open:</p>
-<p><strong>A. Plot library.</strong> ggplot2 (recommended; already in Suggests, smaller deploy) or plotly (interactivity).</p>
-<p><strong>B. Model layout.</strong> Side-by-side cards (recommended; matches “compute both” vignette guidance) or tabs.</p>
-<p><strong>C. Advanced inputs.</strong> Hide <code>theta_cut</code>, <code>prior_a</code>, <code>prior_b</code> behind an Advanced accordion (recommended) or always-visible.</p>
-<p><strong>D. Urn-undefined messaging.</strong> Settled: mandatory friendly prose when <code>y_R &gt; y_W + 1</code>; the binomial card still renders.</p>
-<p><strong>E. shinyapps.io account.</strong> The user needs to confirm whether a personal account exists or to sign up.</p>
-<p><strong>F. CRAN submission timing.</strong> Plan recommends submitting <code>0.0.0.9002</code> to CRAN <strong>first</strong> (clean four-function package), then adding <code><a href="reference/run_app.html">run_app()</a></code> in <code>0.0.1</code> afterward.</p>
-<p>When resuming: ask the user which way A, B, C, E, F go. Then begin Phase 1 of <code>PLAN_SHINY.md</code>.</p>
-</div>
+<h2 id="what-this-session-delivered">What this session delivered<a class="anchor" aria-label="anchor" href="#what-this-session-delivered"></a></h2>
+<ol style="list-style-type: decimal"><li>
+<strong>Phase 1 (commit <code>8e8a6c1</code>)</strong> — MVP Shiny app: <code><a href="reference/run_app.html">run_app()</a></code> launcher, <code>inst/shiny/{global.R, ui.R, server.R}</code>, helpers under <code>inst/shiny/R/helpers.R</code>, Layer 1 tests for <code>format_bf</code> / <code>bf_label</code> / <code>interpret_omega_star</code>, Layer 2 <code>testServer</code> tests for <code>bf_binom</code> / <code>bf_urn_v</code> / the urn-undefined card branch. DESCRIPTION bumped to <code>0.0.1.9000</code>; <code>shiny</code> and <code>bslib</code> added to Suggests.</li>
+<li>
+<strong>Phase 2 (commit <code>b60386a</code>)</strong> — Sensitivity tab with two plotly outputs (<code>plot_omega</code>, <code>plot_M</code>) and the <code>tipping_text</code> renderUI prose. New helpers: <code>interpret_M_star</code>, <code>bf_omega_curve</code>, <code>bf_M_curve</code>. New file <code>inst/shiny/R/plots.R</code> for the plotly wrappers. <code>plotly</code> added to Suggests and to <code><a href="reference/run_app.html">run_app()</a></code>’s <code>requireNamespace</code> guard.</li>
+<li>
+<strong>Phase 3 (commit <code>e582d57</code>)</strong> — Polish: <code>validate_counts</code> now rejects non-integer numeric input via <code>x == round(x)</code>; About tab gained Running-example, Sensitivity-glossary, and Sources sections with citation and GitHub link; <code>inst/shiny/global.R</code> gained an <code>install_github</code> stanza for shinyapps.io cold-start; <code>deploy.R</code> at the repo root; <code>_pkgdown.yml</code> gained an Interactive-app reference section; <code>NEWS.md</code> gained a <code>0.0.1.9000</code> block.</li>
+<li>
+<strong>Phase 4 (this commit)</strong> — Live deployment to <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a>. The deploy initially failed with <code>HTTP 401: Unauthorized</code> while shinyapps.io’s build worker tried to fetch DrWrinch from GitHub — a stale OAuth token cached on Posit’s build infrastructure from a previously-enabled-now-disabled GitHub linkage in Posit’s Authentication settings. The fix was to toggle GitHub auth back on in Posit’s user settings, click through the OAuth flow, then toggle it back off. README.md and NEWS.md updated with the live URL; the orphan <code>drwrinch-v2</code> app from a deploy retry is terminated.</li>
+</ol></div>
+<div class="section level2">
+<h2 id="lessons-worth-keeping">Lessons worth keeping<a class="anchor" aria-label="anchor" href="#lessons-worth-keeping"></a></h2>
+<ul><li>
+<strong>Stale GITHUB_PAT in <code>~/.Renviron</code></strong> (commented out 2026-05-19, with a note pointing to <a href="https://github.com/settings/tokens" class="external-link uri">https://github.com/settings/tokens</a> for a fresh one). If <code>remotes::install_github</code> ever falls back to anonymous unexpectedly, check that this token still works.</li>
+<li>
+<strong>shinyapps.io’s “401 fetching GitHub” failure mode</strong> is almost always a stale OAuth cache, not a missing PAT. The toggle-on / toggle-off cycle in Posit Authentication is the fix.</li>
+<li>
+<strong><code>rsconnect</code> refuses to bundle locally-installed packages</strong> that lack <code>RemoteType</code> metadata. Trying to dodge GitHub via a local tarball doesn’t work cleanly; the right workarounds are
+<ol style="list-style-type: lower-alpha"><li>fix the OAuth cache (what worked this session), (b) R-universe.</li>
+</ol></li>
+<li>
+<strong>The Shiny app pulls DrWrinch from GitHub on shinyapps.io cold start</strong> via the <code>install_github</code> stanza in <code>inst/shiny/global.R</code>. ~30s one-time install per cold start; no cost in local dev where <code>devtools::load_all()</code> has already loaded it.</li>
+</ul></div>
+<div class="section level2">
+<h2 id="what-is-still-open">What is still open<a class="anchor" aria-label="anchor" href="#what-is-still-open"></a></h2>
+<ul><li>
+<strong>CRAN submission</strong>: held indefinitely per Decision F. If resumed, the work would be: revisit <code>cran-comments.md</code>, ensure <code>R CMD check --as-cran</code> is clean, decide whether <code>\dontrun{}</code> wrapping of <code><a href="reference/run_app.html">run_app()</a></code> is the right discipline for CRAN examples (it is), bump version to <code>0.0.1</code>, submit.</li>
+<li>
+<strong><code>inst/CITATION</code></strong> still has a placeholder bibentry. Replace with the real venue/DOI on paper publication.</li>
+<li>
+<strong>Layer 3 <code>shinytest2</code> snapshot tests</strong>: skipped this session (heavy, fragile across OSes). Worth adding if the Shiny app’s UI starts drifting visually; the substantive claims are already pinned at Layers 1 and 2.</li>
+<li>
+<strong>Posit GitHub re-link</strong>: GitHub auth is currently disabled in Posit Authentication (you toggled it off again after the OAuth refresh). If you ever want to publish to Posit Cloud, you will need to re-enable it.</li>
+</ul></div>
 <div class="section level2">
 <h2 id="how-to-resume">How to resume<a class="anchor" aria-label="anchor" href="#how-to-resume"></a></h2>
-<ol style="list-style-type: decimal"><li>Read in order: this file; <code>PLAN_SHINY.md</code>; <code>~/repos/ai_workflow/CLAUDE_CODING.md</code> (the user’s code-work rules — tests-before-implementation, pause for review at checkpoints, <code>devtools::document()</code> and <code>devtools::check()</code> before complete, “why” comments at branch points).</li>
-<li>Read <code>R/*.R</code> and <code>tests/testthat/*.R</code> to understand what’s already in the package.</li>
-<li>Ask the user to answer Decisions A, B, C, E, F. (D is settled.)</li>
-<li>Phase 1 of <code>PLAN_SHINY.md</code>: write <code>tests/testthat/test-app_helpers.R</code> first. Pause for review before implementing.</li>
+<ol style="list-style-type: decimal"><li>Read this file. If you are about to touch the Shiny app, read <code>PLAN_SHINY.md</code> too.</li>
+<li>Read <code>~/repos/ai_workflow/CLAUDE_CODING.md</code> for the user’s coding rules (tests-before-implementation, pause-for-review at checkpoints, <code>devtools::check()</code> before complete, “why” comments at branch points).</li>
+<li>Read <code>R/*.R</code>, <code>inst/shiny/*.R</code>, <code>inst/shiny/R/*.R</code>, and <code>tests/testthat/*.R</code> to ground yourself.</li>
+<li>The release-path commands are:
+<ul><li>
+<code>devtools::test()</code>, <code>devtools::check()</code>
+</li>
+<li>
+<code>git push origin main</code> (triggers the pkgdown workflow)</li>
+<li>
+<code>source("deploy.R")</code> (redeploys the Shiny app; needs <code>rsconnect::setAccountInfo()</code> once per machine, see <code>deploy.R</code>’s comment block)</li>
+</ul></li>
 </ol></div>
 <div class="section level2">
 <h2 id="constraints-inherited-from-the-paper-repos-claudemd-and-memory">Constraints inherited from the paper repo’s CLAUDE.md and memory<a class="anchor" aria-label="anchor" href="#constraints-inherited-from-the-paper-repos-claudemd-and-memory"></a></h2>
 <ul><li>
-<strong>No unicode.</strong> ASCII only in any file you write or edit. <code>---</code> for em dash, <code>--</code> for en dash, <code>-&gt;</code> for arrow, <code>"</code> and <code>'</code> straight quotes, <code>...</code> for ellipsis. (Exception in the paper’s <code>evalues.qmd</code> and <code>appendix.qmd</code>: Spanish names with accented characters are OK there. Does not apply to DrWrinch files.)</li>
+<strong>No unicode.</strong> ASCII only. <code>---</code> for em dash, <code>--</code> for en dash, <code>-&gt;</code> for arrow, <code>"</code> and <code>'</code> straight quotes, <code>...</code> for ellipsis.</li>
 <li>
-<strong>No methodological tribalism.</strong> Use Bayes factors as a tool, not a philosophical commitment. Do not introduce “Bayesian” labels.</li>
+<strong>No methodological tribalism.</strong> Bayes factors are a tool. Do not introduce “Bayesian” labels.</li>
 <li>
-<strong>No athletic/defense metaphors for thresholds.</strong> BFs do not “clear” or “withstand” thresholds; they are “above” or “below” them.</li>
+<strong>No athletic/defense metaphors for thresholds.</strong> BFs are “above” or “below” thresholds, not “clearing” or “withstanding” them.</li>
 <li>
-<strong>Plain language at branch points.</strong> Avoid “is appropriate,” “is reasonable,” structural metaphors (“load-bearing,” “scaffolding”). Name what depends on what.</li>
+<strong>Plain language at branch points.</strong> Avoid “is appropriate,” “is reasonable,” structural metaphors. Name what depends on what.</li>
 <li>
-<strong>R package work follows <code>CLAUDE_CODING.md</code>.</strong> This rule is durable — the user enforced it mid-session; tests must come before implementation, <code>check()</code> before complete, “why” comments at branch points.</li>
+<strong>R package work follows <code>CLAUDE_CODING.md</code>.</strong> Tests before implementation; <code>check()</code> before complete; “why” comments at branch points.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="drwrinch-and-the-paper-repo">DrWrinch and the paper repo<a class="anchor" aria-label="anchor" href="#drwrinch-and-the-paper-repo"></a></h2>
-<p>The paper repo’s renv currently has DrWrinch installed locally (via <code>renv::install("local::~/repos/DrWrinch")</code>) so the new appendix section renders. The renv lockfile was <strong>not</strong> snapshotted, so other machines rebuilding the paper would need to install DrWrinch first. The user has not pushed DrWrinch to GitHub yet — the <code>install_github("bowers-illinois-edu/DrWrinch")</code> line in the appendix will fail until that repo exists.</p>
-<p>When the user is ready, the GitHub creation and push can happen from either session; flag it before doing it (it’s a public action).</p>
+<p>The paper repo’s renv currently has DrWrinch installed locally (via <code>renv::install("local::~/repos/DrWrinch")</code>) so the new appendix section renders. The renv lockfile was not snapshotted, so other machines rebuilding the paper would still need to install DrWrinch first. With the GitHub repo published and version <code>0.0.1.9000</code> tagged via the commit log, the appendix’s <code>install_github("bowers-illinois-edu/DrWrinch")</code> line resolves without further action.</p>
 </div>
 </div>
 

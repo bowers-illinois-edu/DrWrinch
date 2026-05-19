@@ -65,6 +65,14 @@
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"bowers-illinois-edu/DrWrinch"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="interactive-app">Interactive app<a class="anchor" aria-label="anchor" href="#interactive-app"></a>
+</h2>
+<p>DrWrinch ships with a Shiny app that exposes the four core functions through a browser UI:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">DrWrinch</span><span class="fu">::</span><span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>A hosted copy lives at <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a>. Defaults reproduce the paper’s running example (<code>y_W = 7, y_R = 3, threshold = 20</code>); the Sensitivity tab shows omega_star and M_star tipping points with plotly curves.</p>
+</div>
+<div class="section level2">
 <h2 id="status">Status<a class="anchor" aria-label="anchor" href="#status"></a>
 </h2>
 <p>Under active development alongside the paper. The single-rival case is the current focus. Multiple-rival extensions are being developed in a companion paper and may live in a separate package.</p>
