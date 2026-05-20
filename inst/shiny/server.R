@@ -63,7 +63,16 @@ function(input, output, session) {
     tagList(
       tags$p(tags$strong("Bayes factor:"), " ", fmt$value),
       tags$p(tags$strong("Verdict (Kass & Raftery):"), " ", fmt$verdict),
-      tags$p(tags$strong("Direction:"), " ", fmt$direction)
+      tags$p(tags$strong("Direction:"), " ", fmt$direction),
+      tags$p(
+        tags$strong("What this number means."),
+        " This is the binomial Bayes factor integrated under a uniform ",
+        "prior on the working-theory probability theta -- a prior that ",
+        "gives no a priori weight to theta above the cutpoint. The ",
+        "reported value is conservative in that sense; the Sensitivity ",
+        "tab's M_star reports how far the prior can be tilted toward ",
+        "the rival before the BF drops below threshold."
+      )
     )
   })
 
@@ -88,7 +97,18 @@ function(input, output, session) {
       tagList(
         tags$p(tags$strong("Bayes factor:"), " ", fmt$value),
         tags$p(tags$strong("Verdict (Kass & Raftery):"), " ", fmt$verdict),
-        tags$p(tags$strong("Direction:"), " ", fmt$direction)
+        tags$p(tags$strong("Direction:"), " ", fmt$direction),
+        tags$p(
+          tags$strong("What this number means."),
+          " This is the smallest Bayes factor the rival can argue for ",
+          "within the family of urn compositions the paper's ",
+          "conditioning assumption admits: rival urn (y_W, y_W + 1) ",
+          "paired with working-theory urn (y_W + 1, max(1, y_R)). No ",
+          "admitted rival composition makes the data more probable ",
+          "for the rival, so a reported BF of 20 means at least 20 ",
+          "within that family. The bound is not global; specifications ",
+          "outside the conditioning assumption are not covered."
+        )
       )
     }
   })
@@ -114,6 +134,15 @@ function(input, output, session) {
     M_prose <- interpret_M_star(sb$M_star, threshold = th)
 
     tagList(
+      tags$p(
+        "The Result-tab Bayes factors are already conservative ",
+        "readings: the urn's is a lower bound across the admitted ",
+        "family of rival urn compositions, the binomial's is ",
+        "integrated under a rival-neutral uniform prior. The tipping ",
+        "points below ask how much further perturbation that ",
+        "conservative reading can absorb before the BF drops below ",
+        "threshold. Larger tipping points mean more room."
+      ),
       tags$h4("Observation-bias sensitivity"),
       tags$p(tags$strong("Binomial model:"), " ", binom_om_prose),
       tags$p(tags$strong("Urn model:"), " ", urn_om_prose),
