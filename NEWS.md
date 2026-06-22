@@ -1,3 +1,19 @@
+# DrWrinch 0.0.1.9001
+
+* Added `sens_coding()` -- the coding-error sensitivity tipping point
+  for both models: the smallest number of pro-working-theory
+  observations that would have to be re-coded as pro-rival before the
+  Bayes factor drops below the threshold. This is the paper's third
+  sensitivity question, alongside observation bias (`omega_star`) and
+  the rival-tilted prior (`M_star`). It is also surfaced in the Shiny
+  app's Sensitivity tab.
+* Refreshed the running example throughout (function examples, vignette,
+  README, Shiny defaults) to the paper's `(y_W = 9, y_R = 3)` case,
+  matching the submitted manuscript: the binomial Bayes factor is 20.67
+  (just above the threshold of 20) and the hypergeometric is 323. The
+  earlier `(7, 3)` example predated a revision of the paper.
+* `inst/CITATION` now points to the preprint, arXiv:2606.16683.
+
 # DrWrinch 0.0.1.9000
 
 * Added `run_app()` -- an interactive Shiny app exposing the four

@@ -177,6 +177,35 @@ interpret_M_star <- function(m, threshold = 20) {
 }
 
 
+# interpret_x_star() turns the coding-error tipping point from
+# sens_coding() into a sentence. Same three-branch pattern as
+# interpret_omega_star()/interpret_M_star(): 0 (baseline already fails),
+# NA_integer_ (no re-coding within the observed counts overturns it),
+# positive integer (number of pro-H_1 observations that must be re-coded
+# as pro-rival).
+interpret_x_star <- function(x, threshold = 20) {
+  if (!is.na(x) && x == 0L) {
+    return(paste0(
+      "The Bayes factor sits below threshold ", threshold,
+      " at baseline. No re-coding is needed for the conclusion to fail."
+    ))
+  }
+  if (is.na(x)) {
+    return(paste0(
+      "Re-coding pro-working-theory observations as pro-rival does not ",
+      "drop the Bayes factor below threshold ", threshold,
+      " within the observed counts. The conclusion does not turn on the ",
+      "coding of individual observations."
+    ))
+  }
+  paste0(
+    "Re-coding ", x, " pro-working-theory observation",
+    if (x == 1L) "" else "s",
+    " as pro-rival drops the Bayes factor below threshold ", threshold, "."
+  )
+}
+
+
 # bf_omega_curve() returns a long-format data.frame of BF samples
 # along a log-spaced omega grid for one model. Pure function -- no
 # Shiny, no plotly. The plot wrapper composes binomial and urn curves

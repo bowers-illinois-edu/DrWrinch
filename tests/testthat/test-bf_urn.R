@@ -7,8 +7,18 @@
 # Both tilt in favor of H_R by construction, so the reported BF is a
 # lower bound on the evidence for H_1.
 
-test_that("paper analytical value: bf_urn(7, 3) = 39", {
-  # Direct combinatorial calculation under Formulation C:
+test_that("paper analytical value: bf_urn(9, 3) = 323", {
+  # The paper's running example (nine pro-H_1 observations, three
+  # pro-rival). Direct combinatorial calculation under Formulation C:
+  #   WTF: (10, 3), n = 12. pr_wtf = C(10,9)*C(3,3) / C(13,12) = 10 / 13
+  #   RTF: (9, 10), n = 12. pr_rtf = C(9,9)*C(10,3) / C(19,12) = 120 / 50388
+  #   BF  = (10/13) / (120/50388) = 323
+  expect_equal(bf_urn(9, 3), 323, tolerance = 1e-12)
+})
+
+test_that("combinatorial cross-check at (7, 3) = 39", {
+  # A second exact Formulation C identity, kept as a regression check
+  # independent of the paper's running example:
   #   WTF: (8, 3), n = 10. pr_wtf = C(8,7)*C(3,3) / C(11,10) = 8 / 11
   #   RTF: (7, 8), n = 10. pr_rtf = C(7,7)*C(8,3) / C(15,10) = 56 / 3003
   #   BF  = (8/11) / (56/3003) = (8 * 3003) / (11 * 56) = 39

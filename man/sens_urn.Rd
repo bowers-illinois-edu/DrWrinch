@@ -39,11 +39,14 @@ falls. \code{omega_star} is the value at which this fall first crosses
 \code{omega_star} is \code{0}.
 }
 \examples{
-s <- sens_urn(7, 3)
+# The paper's running example. bf_urn(9, 3) = 323 is far above 20, so
+# pro-H_1 items must be ~2.4 times likelier to be observed before the
+# urn BF reaches the threshold.
+s <- sens_urn(9, 3)
 s$bf
 s$omega_star
 
 }
 \seealso{
-\code{\link[=bf_urn]{bf_urn()}}, \code{\link[=sens_binomial]{sens_binomial()}}.
+\code{\link[=bf_urn]{bf_urn()}}, \code{\link[=sens_binomial]{sens_binomial()}}, \code{\link[=sens_coding]{sens_coding()}}.
 }

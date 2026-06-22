@@ -54,12 +54,15 @@ If \code{bf_binomial(y_W, y_R) < threshold} at baseline, both tipping
 points are \code{0} (the conclusion fails before any perturbation).
 }
 \examples{
-s <- sens_binomial(7, 3)
+# The paper's running example. The binomial BF just clears 20, so both
+# tipping points are small: a slight bias or one rival-favoring
+# pseudo-observation overturns it.
+s <- sens_binomial(9, 3)
 s$bf
 s$omega_star
 s$M_star
 
 }
 \seealso{
-\code{\link[=bf_binomial]{bf_binomial()}}, \code{\link[=sens_urn]{sens_urn()}}.
+\code{\link[=bf_binomial]{bf_binomial()}}, \code{\link[=sens_urn]{sens_urn()}}, \code{\link[=sens_coding]{sens_coding()}}.
 }

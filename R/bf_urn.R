@@ -38,11 +38,14 @@
 #'   the RTF probability of the observed pattern is numerically zero.
 #'
 #' @examples
-#' bf_urn(7, 3)
-#' bf_urn(7, 3, omega = 0.5)
+#' # The paper's running example: nine pro-working-theory observations,
+#' # three pro-rival. The closed form is (10/13) / (120/50388) = 323.
+#' bf_urn(9, 3)
+#' bf_urn(9, 3, omega = 0.5)
 #'
 #' @seealso [bf_binomial()] for the open-ended-evidence case;
-#'   [sens_urn()] for sensitivity to omega.
+#'   [sens_urn()] for sensitivity to omega;
+#'   [sens_coding()] for sensitivity to coding error.
 #' @export
 bf_urn <- function(y_W, y_R, omega = 1) {
   stopifnot(

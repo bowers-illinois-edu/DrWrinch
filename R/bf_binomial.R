@@ -41,12 +41,15 @@
 #'   Returns `NA_real_` if the integrated likelihood is numerically zero.
 #'
 #' @examples
-#' bf_binomial(7, 3)
-#' bf_binomial(7, 3, omega = 0.5)
-#' bf_binomial(7, 3, prior_a = 1, prior_b = 4)
+#' # The paper's running example: nine pro-working-theory observations,
+#' # three pro-rival. The binomial Bayes factor sits just above 20.
+#' bf_binomial(9, 3)
+#' bf_binomial(9, 3, omega = 0.5)
+#' bf_binomial(9, 3, prior_a = 1, prior_b = 4)
 #'
 #' @seealso [bf_urn()] for the bounded-archive case;
-#'   [sens_binomial()] for sensitivity to omega and prior.
+#'   [sens_binomial()] for sensitivity to omega and prior;
+#'   [sens_coding()] for sensitivity to coding error.
 #' @export
 bf_binomial <- function(y_W, y_R,
                         omega = 1,

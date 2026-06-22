@@ -146,29 +146,65 @@ test_that("interpret_M_star(14L) reports the integer count and threshold", {
 })
 
 
+# ---- interpret_x_star --------------------------------------------------
+#
+# Coding-error tipping point from sens_coding(). Same three-branch
+# pattern as interpret_omega_star()/interpret_M_star():
+#   0           -- baseline already below threshold (no re-coding needed).
+#   NA_integer_ -- no re-coding within the observed counts overturns it.
+#   positive    -- the number of pro-H_1 observations that must be
+#                  re-coded as pro-rival to drop the BF below threshold.
+
+test_that("interpret_x_star(0L) reports failure at baseline", {
+  out <- interpret_x_star(0L, threshold = 20)
+  expect_type(out, "character")
+  expect_match(out, "below threshold|baseline|no re-coding", ignore.case = TRUE)
+})
+
+test_that("interpret_x_star(NA_integer_) reports robustness to re-coding", {
+  out <- interpret_x_star(NA_integer_, threshold = 20)
+  expect_type(out, "character")
+  expect_match(out, "does not|not turn", ignore.case = TRUE)
+})
+
+test_that("interpret_x_star(1L) names one re-coding (singular) and the threshold", {
+  out <- interpret_x_star(1L, threshold = 20)
+  expect_match(out, "1 pro-working-theory observation", fixed = TRUE)
+  expect_match(out, "20", fixed = TRUE)
+  # singular: must not pluralize at x = 1
+  expect_false(grepl("1 pro-working-theory observations", out, fixed = TRUE))
+})
+
+test_that("interpret_x_star(2L) pluralizes", {
+  out <- interpret_x_star(2L, threshold = 20)
+  expect_match(out, "2 pro-working-theory observations", fixed = TRUE)
+})
+
+
 # ---- bf_omega_curve ----------------------------------------------------
 
-test_that("bf_omega_curve(7, 3, 'urn') is monotone-decreasing in omega", {
-  df <- bf_omega_curve(7, 3, "urn", threshold = 20)
+test_that("bf_omega_curve(9, 3, 'urn') is monotone-decreasing in omega", {
+  df <- bf_omega_curve(9, 3, "urn", threshold = 20)
   expect_equal(nrow(df), 80)
   expect_true(all(diff(df$omega) > 0))
   expect_true(all(diff(df$bf) <= 1e-9))
 })
 
-test_that("bf_omega_curve(7, 3, 'urn') near omega=1 brackets BF = 39", {
-  df <- bf_omega_curve(7, 3, "urn", threshold = 20)
+test_that("bf_omega_curve(9, 3, 'urn') near omega=1 brackets BF = 323", {
+  # The paper's running example: bf_urn(9, 3) = 323 at omega = 1.
+  df <- bf_omega_curve(9, 3, "urn", threshold = 20)
   idx <- which.min(abs(df$omega - 1))
-  expect_gt(df$bf[idx], 30)
-  expect_lt(df$bf[idx], 50)
+  expect_gt(df$bf[idx], 250)
+  expect_lt(df$bf[idx], 400)
 })
 
 test_that("bf_omega_curve propagates the threshold for downstream layers", {
-  df <- bf_omega_curve(7, 3, "urn", threshold = 25)
+  df <- bf_omega_curve(9, 3, "urn", threshold = 25)
   expect_true(all(df$threshold == 25))
 })
 
 test_that("bf_omega_curve labels the model in its 'model' column", {
-  df <- bf_omega_curve(7, 3, "binomial", threshold = 20)
+  df <- bf_omega_curve(9, 3, "binomial", threshold = 20)
   expect_true(all(df$model == "binomial"))
 })
 

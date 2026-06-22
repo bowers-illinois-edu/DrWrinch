@@ -40,12 +40,15 @@
 #'   }
 #'
 #' @examples
-#' s <- sens_binomial(7, 3)
+#' # The paper's running example. The binomial BF just clears 20, so both
+#' # tipping points are small: a slight bias or one rival-favoring
+#' # pseudo-observation overturns it.
+#' s <- sens_binomial(9, 3)
 #' s$bf
 #' s$omega_star
 #' s$M_star
 #'
-#' @seealso [bf_binomial()], [sens_urn()].
+#' @seealso [bf_binomial()], [sens_urn()], [sens_coding()].
 #' @export
 sens_binomial <- function(y_W, y_R,
                           threshold = 20,

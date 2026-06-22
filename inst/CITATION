@@ -1,7 +1,7 @@
 citHeader("To cite DrWrinch in publications, please cite the paper it implements.")
 
 bibentry(
-  bibtype = "Unpublished",
+  bibtype = "Misc",
   title   = "Fully specified Bayes factors for process tracing",
   author  = c(
     person("Matias", "Lopez"),
@@ -9,6 +9,7 @@ bibentry(
     person("Daniel", "Gajardo Cooper")
   ),
   year    = "2026",
-  note    = "Working paper. Venue and DOI to be added on publication.",
-  url     = "https://github.com/bowers-illinois-edu/fully_specified_bf"
+  howpublished = "Preprint, arXiv:2606.16683 [stat.ME]",
+  note    = "Journal version under review; DOI to be added on publication.",
+  url     = "https://arxiv.org/abs/2606.16683"
 )

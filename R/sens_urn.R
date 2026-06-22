@@ -27,11 +27,14 @@
 #'   }
 #'
 #' @examples
-#' s <- sens_urn(7, 3)
+#' # The paper's running example. bf_urn(9, 3) = 323 is far above 20, so
+#' # pro-H_1 items must be ~2.4 times likelier to be observed before the
+#' # urn BF reaches the threshold.
+#' s <- sens_urn(9, 3)
 #' s$bf
 #' s$omega_star
 #'
-#' @seealso [bf_urn()], [sens_binomial()].
+#' @seealso [bf_urn()], [sens_binomial()], [sens_coding()].
 #' @export
 sens_urn <- function(y_W, y_R, threshold = 20) {
   stopifnot(

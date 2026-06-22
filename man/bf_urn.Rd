@@ -50,11 +50,14 @@ When \code{y_R > y_W + 1}, the RTF urn cannot supply a sample of size
 returns \code{NA_real_}.
 }
 \examples{
-bf_urn(7, 3)
-bf_urn(7, 3, omega = 0.5)
+# The paper's running example: nine pro-working-theory observations,
+# three pro-rival. The closed form is (10/13) / (120/50388) = 323.
+bf_urn(9, 3)
+bf_urn(9, 3, omega = 0.5)
 
 }
 \seealso{
 \code{\link[=bf_binomial]{bf_binomial()}} for the open-ended-evidence case;
-\code{\link[=sens_urn]{sens_urn()}} for sensitivity to omega.
+\code{\link[=sens_urn]{sens_urn()}} for sensitivity to omega;
+\code{\link[=sens_coding]{sens_coding()}} for sensitivity to coding error.
 }

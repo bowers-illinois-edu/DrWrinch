@@ -1,6 +1,6 @@
 Package: DrWrinch
 Title: Fully Specified Bayes Factors for Process Tracing
-Version: 0.0.1.9000
+Version: 0.0.1.9001
 Authors@R: c(
     person("Matias", "Lopez", role = c("aut", "cph"),
            email = "matiaslopez.uy@gmail.com",

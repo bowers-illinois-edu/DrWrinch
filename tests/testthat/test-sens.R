@@ -4,14 +4,15 @@
 # omega > 1 (and, for sens_binomial, the smallest rival-tilted prior
 # count M) at which the Bayes factor first drops below `threshold`.
 
-test_that("sens_urn(7, 3) matches the paper's reported omega_star", {
-  # Cross-validated against the paper's own helper
-  # `sens_bias_hyper_separated(rep(1, 7), rep(1, 3), threshold = 20)`
-  # (from ~/repos/fully_specified_bf/tests/bf_separated.R), which uses
-  # uniroot on the same hypergeometric BF function. We hard-code the
-  # numerical value here so this test is self-contained.
-  s <- sens_urn(7, 3, threshold = 20)
-  expect_equal(s$omega_star, 1.304023, tolerance = 1e-5)
+test_that("sens_urn(9, 3) matches the paper's reported omega_star", {
+  # The paper's running example (nine pro-H_1 observations, three
+  # pro-rival). Cross-validated against the paper's own uniroot on the
+  # hypergeometric BF; we hard-code the numerical value here so this
+  # test is self-contained. bf_urn(9, 3) = 323 sits far above 20, so
+  # pro-H_1 items must be ~2.4 times likelier to be observed before the
+  # urn BF reaches the threshold.
+  s <- sens_urn(9, 3, threshold = 20)
+  expect_equal(s$omega_star, 2.433984, tolerance = 1e-5)
 })
 
 test_that("sens returns 0 tipping points when baseline BF is below threshold", {

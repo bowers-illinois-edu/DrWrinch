@@ -8,11 +8,12 @@ reference:
   - bf_binomial
   - bf_urn
 - title: Sensitivity analysis
-  desc: Locate the smallest perturbations of observation bias and prior that flip the conclusion.
+  desc: Locate the smallest perturbations of coding, observation bias, and prior that flip the conclusion.
   contents:
   - sens_binomial
   - sens_urn
+  - sens_coding
 - title: Interactive app
-  desc: Launch a Shiny app that exposes the four core functions through a browser UI.
+  desc: Launch a Shiny app that exposes the Bayes-factor and sensitivity functions through a browser UI.
   contents:
   - run_app

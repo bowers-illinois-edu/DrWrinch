@@ -15,7 +15,7 @@ bslib::page_sidebar(
     numericInput(
       "y_W",
       "Pro-working-theory evidence (y_W)",
-      value = 7, min = 0, step = 1
+      value = 9, min = 0, step = 1
     ),
     numericInput(
       "y_R",

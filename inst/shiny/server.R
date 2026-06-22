@@ -58,6 +58,26 @@ function(input, output, session) {
     )
   })
 
+  # Coding-error reactives, the paper's third sensitivity question. Same
+  # pattern: call sens_coding() directly so the app's re-coding counts
+  # match the paper's. The urn branch returns NA when the baseline urn is
+  # undefined; the tipping_text output guards on that below.
+  sens_code_b <- reactive({
+    co <- counts_ok()
+    DrWrinch::sens_coding(
+      co$y_W, co$y_R, model = "binomial",
+      threshold = input$threshold, theta_cut = input$theta_cut
+    )
+  })
+
+  sens_code_u <- reactive({
+    co <- counts_ok()
+    DrWrinch::sens_coding(
+      co$y_W, co$y_R, model = "urn",
+      threshold = input$threshold
+    )
+  })
+
   output$result_binom <- renderUI({
     fmt <- format_bf(bf_binom())
     tagList(
@@ -133,6 +153,16 @@ function(input, output, session) {
     }
     M_prose <- interpret_M_star(sb$M_star, threshold = th)
 
+    code_b_prose <- interpret_x_star(sens_code_b()$x_star, threshold = th)
+    code_u_prose <- if (is.na(su$bf)) {
+      paste0(
+        "The urn model is undefined at these counts; no coding-error ",
+        "sensitivity is reported."
+      )
+    } else {
+      interpret_x_star(sens_code_u()$x_star, threshold = th)
+    }
+
     tagList(
       tags$p(
         "The Result-tab Bayes factors are already conservative ",
@@ -143,6 +173,9 @@ function(input, output, session) {
         "conservative reading can absorb before the BF drops below ",
         "threshold. Larger tipping points mean more room."
       ),
+      tags$h4("Coding-error sensitivity"),
+      tags$p(tags$strong("Binomial model:"), " ", code_b_prose),
+      tags$p(tags$strong("Urn model:"), " ", code_u_prose),
       tags$h4("Observation-bias sensitivity"),
       tags$p(tags$strong("Binomial model:"), " ", binom_om_prose),
       tags$p(tags$strong("Urn model:"), " ", urn_om_prose),
@@ -211,13 +244,18 @@ function(input, output, session) {
 
       tags$h4("Running example"),
       tags$p(
-        "The default inputs (y_W = 7, y_R = 3, threshold = 20) ",
-        "reproduce the running example from the paper. The urn ",
-        "returns BF = 39 -- above threshold 20, K&R 'strong' -- ",
-        "while the binomial returns BF ~ 7.83, below threshold and ",
-        "in the K&R 'positive' bin. The Sensitivity tab shows that ",
-        "the urn's verdict survives a roughly 30% pro-working-theory ",
-        "observation bias before flipping."
+        "The default inputs (y_W = 9, y_R = 3, threshold = 20) ",
+        "reproduce the running example from the paper. The binomial ",
+        "returns BF ~ 20.7 -- just above threshold 20, in the K&R ",
+        "'strong' bin -- while the urn returns BF = 323, far above ",
+        "threshold and in the K&R 'very strong' bin. The binomial ",
+        "clears the threshold by so little that the Sensitivity tab's ",
+        "three checks all overturn it with a small push: re-coding one ",
+        "of the nine pro-working-theory observations, a roughly 1% ",
+        "observation bias, or a single rival-favoring pseudo-observation ",
+        "in the prior. The urn is far more robust -- it takes two ",
+        "re-codings or a roughly 143% observation bias to bring it below ",
+        "threshold."
       ),
 
       tags$h4("Verdict scale"),

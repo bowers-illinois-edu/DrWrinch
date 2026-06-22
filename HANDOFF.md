@@ -1,7 +1,20 @@
 # HANDOFF for DrWrinch
 
-Last touched: 2026-05-19 (evening session in `~/repos/DrWrinch/`).
+Last touched: 2026-06-22 (paper-alignment session in `~/repos/DrWrinch/`).
 Pick up from here in a fresh Claude session run from `~/repos/DrWrinch/`.
+
+2026-06-22 session, in brief: the paper was submitted to APSR
+(2026-06-15) and posted to arXiv (arXiv:2606.16683) with the running
+example changed from `(y_W = 7, y_R = 3)` to `(9, 3)`. This session (a)
+refreshed the running example everywhere in the package to `(9, 3)` ---
+binomial BF 20.67 (just above 20), urn BF 323 --- and (b) added the
+exported `sens_coding()` for the paper's third sensitivity question
+(coding error), surfaced in the Shiny app's Sensitivity tab. Version
+bumped to `0.0.1.9001`; `inst/CITATION` now points to the arXiv
+preprint. See `NEWS.md` for the itemized change. Paper-side follow-up
+left undone (the paper repo, already on arXiv): its appendix still
+computes coding-error sensitivity with inline helpers and lists only
+four DrWrinch functions; it could now call `sens_coding()` and list it.
 
 ## What DrWrinch is
 
@@ -43,17 +56,17 @@ DrBristol.
 
 ## Current state of the package
 
-Version `0.0.1.9000`. `devtools::test()` passes 195/195 locally and
+Version `0.0.1.9001`. `devtools::test()` passes 236/236 locally and
 in CI. `devtools::check()` is clean (0 errors, 0 warnings, 0 notes).
 
 Exported functions: `bf_binomial`, `bf_urn`, `sens_binomial`,
-`sens_urn`, `run_app`.
+`sens_urn`, `sens_coding`, `run_app`.
 
 Files of note:
 
 - `R/bf_binomial.R`, `R/bf_urn.R`, `R/sens_binomial.R`,
-  `R/sens_urn.R`, `R/utils.R` (internal `.find_omega_tipping`),
-  `R/DrWrinch-package.R`, `R/run_app.R`.
+  `R/sens_urn.R`, `R/sens_coding.R`, `R/utils.R` (internal
+  `.find_omega_tipping`), `R/DrWrinch-package.R`, `R/run_app.R`.
 - `inst/shiny/` --- the deployed Shiny app: `global.R`, `ui.R`,
   `server.R`, and `R/helpers.R` + `R/plots.R` for the formatter and
   plotly wrappers. Verdicts use the Kass & Raftery (1995) scale
@@ -62,10 +75,11 @@ Files of note:
   `test-sens.R`, `test-app_helpers.R` (Layer 1 helpers + curves),
   `test-app_server.R` (Layer 2 `shiny::testServer` for both BF
   reactives, the urn-undefined branch, and the sensitivity-tab
-  reactives).
+  reactives), `test-sens_coding.R` (coding-error tipping points for
+  both models, pinned to the paper's running example).
 - `vignettes/getting-started.Rmd` (paper running example).
-- `inst/CITATION` (placeholder bibentry; update with venue/DOI on
-  publication).
+- `inst/CITATION` (preprint bibentry pointing to arXiv:2606.16683;
+  add the journal DOI on publication).
 - `_pkgdown.yml` (Bootstrap 5; reference grouped Bayes factors /
   Sensitivity / Interactive app).
 - `.github/workflows/R-CMD-check.yaml`,
@@ -143,8 +157,9 @@ Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).
   `R CMD check --as-cran` is clean, decide whether `\dontrun{}`
   wrapping of `run_app()` is the right discipline for CRAN
   examples (it is), bump version to `0.0.1`, submit.
-- **`inst/CITATION`** still has a placeholder bibentry. Replace
-  with the real venue/DOI on paper publication.
+- **`inst/CITATION`** points to the arXiv preprint
+  (arXiv:2606.16683). Replace `howpublished` / add a DOI when the
+  journal version is published.
 - **Layer 3 `shinytest2` snapshot tests**: skipped this session
   (heavy, fragile across OSes). Worth adding if the Shiny app's
   UI starts drifting visually; the substantive claims are already
