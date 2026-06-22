@@ -62,13 +62,17 @@ y_W + y_R\\, the construction is undefined, and the function returns
 [`bf_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_binomial.md)
 for the open-ended-evidence case;
 [`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md)
-for sensitivity to omega.
+for sensitivity to omega;
+[`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md)
+for sensitivity to coding error.
 
 ## Examples
 
 ``` r
-bf_urn(7, 3)
-#> [1] 39
-bf_urn(7, 3, omega = 0.5)
-#> [1] 281.6842
+# The paper's running example: nine pro-working-theory observations,
+# three pro-rival. The closed form is (10/13) / (120/50388) = 323.
+bf_urn(9, 3)
+#> [1] 323
+bf_urn(9, 3, omega = 0.5)
+#> [1] 4804.609
 ```

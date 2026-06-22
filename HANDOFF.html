@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,8 @@
 
 <div id="handoff-for-drwrinch" class="section level1">
 
-<p>Last touched: 2026-05-19 (evening session in <code>~/repos/DrWrinch/</code>). Pick up from here in a fresh Claude session run from <code>~/repos/DrWrinch/</code>.</p>
+<p>Last touched: 2026-06-22 (paper-alignment session in <code>~/repos/DrWrinch/</code>). Pick up from here in a fresh Claude session run from <code>~/repos/DrWrinch/</code>.</p>
+<p>2026-06-22 session, in brief: the paper was submitted to APSR (2026-06-15) and posted to arXiv (arXiv:2606.16683) with the running example changed from <code>(y_W = 7, y_R = 3)</code> to <code>(9, 3)</code>. This session (a) refreshed the running example everywhere in the package to <code>(9, 3)</code> — binomial BF 20.67 (just above 20), urn BF 323 — and (b) added the exported <code><a href="reference/sens_coding.html">sens_coding()</a></code> for the paper’s third sensitivity question (coding error), surfaced in the Shiny app’s Sensitivity tab. Version bumped to <code>0.0.1.9001</code>; <code>inst/CITATION</code> now points to the arXiv preprint. See <code>NEWS.md</code> for the itemized change. Paper-side follow-up left undone (the paper repo, already on arXiv): its appendix still computes coding-error sensitivity with inline helpers and lists only four DrWrinch functions; it could now call <code><a href="reference/sens_coding.html">sens_coding()</a></code> and list it.</p>
 <div class="section level2">
 <h2 id="what-drwrinch-is">What DrWrinch is<a class="anchor" aria-label="anchor" href="#what-drwrinch-is"></a></h2>
 <p>The R package implementing Lopez, Bowers, and Gajardo Cooper (2026), “Fully specified Bayes factors for process tracing.” Named after Dorothy Maud Wrinch (1894–1976; joint papers with Harold Jeffreys in the early 1920s developed the framework that later became Jeffreys’s theory of Bayes factors).</p>
@@ -59,19 +60,19 @@
 </div>
 <div class="section level2">
 <h2 id="current-state-of-the-package">Current state of the package<a class="anchor" aria-label="anchor" href="#current-state-of-the-package"></a></h2>
-<p>Version <code>0.0.1.9000</code>. <code>devtools::test()</code> passes 195/195 locally and in CI. <code>devtools::check()</code> is clean (0 errors, 0 warnings, 0 notes).</p>
-<p>Exported functions: <code>bf_binomial</code>, <code>bf_urn</code>, <code>sens_binomial</code>, <code>sens_urn</code>, <code>run_app</code>.</p>
+<p>Version <code>0.0.1.9001</code>. <code>devtools::test()</code> passes 236/236 locally and in CI. <code>devtools::check()</code> is clean (0 errors, 0 warnings, 0 notes).</p>
+<p>Exported functions: <code>bf_binomial</code>, <code>bf_urn</code>, <code>sens_binomial</code>, <code>sens_urn</code>, <code>sens_coding</code>, <code>run_app</code>.</p>
 <p>Files of note:</p>
 <ul><li>
-<code>R/bf_binomial.R</code>, <code>R/bf_urn.R</code>, <code>R/sens_binomial.R</code>, <code>R/sens_urn.R</code>, <code>R/utils.R</code> (internal <code>.find_omega_tipping</code>), <code>R/DrWrinch-package.R</code>, <code>R/run_app.R</code>.</li>
+<code>R/bf_binomial.R</code>, <code>R/bf_urn.R</code>, <code>R/sens_binomial.R</code>, <code>R/sens_urn.R</code>, <code>R/sens_coding.R</code>, <code>R/utils.R</code> (internal <code>.find_omega_tipping</code>), <code>R/DrWrinch-package.R</code>, <code>R/run_app.R</code>.</li>
 <li>
 <code>inst/shiny/</code> — the deployed Shiny app: <code>global.R</code>, <code>ui.R</code>, <code>server.R</code>, and <code>R/helpers.R</code> + <code>R/plots.R</code> for the formatter and plotly wrappers. Verdicts use the Kass &amp; Raftery (1995) scale (boundaries <code>1, 3, 20, 150</code>, upper-inclusive).</li>
 <li>
-<code>tests/testthat/test-bf_binomial.R</code>, <code>test-bf_urn.R</code>, <code>test-sens.R</code>, <code>test-app_helpers.R</code> (Layer 1 helpers + curves), <code>test-app_server.R</code> (Layer 2 <code><a href="https://rdrr.io/pkg/shiny/man/testServer.html" class="external-link">shiny::testServer</a></code> for both BF reactives, the urn-undefined branch, and the sensitivity-tab reactives).</li>
+<code>tests/testthat/test-bf_binomial.R</code>, <code>test-bf_urn.R</code>, <code>test-sens.R</code>, <code>test-app_helpers.R</code> (Layer 1 helpers + curves), <code>test-app_server.R</code> (Layer 2 <code><a href="https://rdrr.io/pkg/shiny/man/testServer.html" class="external-link">shiny::testServer</a></code> for both BF reactives, the urn-undefined branch, and the sensitivity-tab reactives), <code>test-sens_coding.R</code> (coding-error tipping points for both models, pinned to the paper’s running example).</li>
 <li>
 <code>vignettes/getting-started.Rmd</code> (paper running example).</li>
 <li>
-<code>inst/CITATION</code> (placeholder bibentry; update with venue/DOI on publication).</li>
+<code>inst/CITATION</code> (preprint bibentry pointing to arXiv:2606.16683; add the journal DOI on publication).</li>
 <li>
 <code>_pkgdown.yml</code> (Bootstrap 5; reference grouped Bayes factors / Sensitivity / Interactive app).</li>
 <li>
@@ -115,7 +116,7 @@
 <ul><li>
 <strong>CRAN submission</strong>: held indefinitely per Decision F. If resumed, the work would be: revisit <code>cran-comments.md</code>, ensure <code>R CMD check --as-cran</code> is clean, decide whether <code>\dontrun{}</code> wrapping of <code><a href="reference/run_app.html">run_app()</a></code> is the right discipline for CRAN examples (it is), bump version to <code>0.0.1</code>, submit.</li>
 <li>
-<strong><code>inst/CITATION</code></strong> still has a placeholder bibentry. Replace with the real venue/DOI on paper publication.</li>
+<strong><code>inst/CITATION</code></strong> points to the arXiv preprint (arXiv:2606.16683). Replace <code>howpublished</code> / add a DOI when the journal version is published.</li>
 <li>
 <strong>Layer 3 <code>shinytest2</code> snapshot tests</strong>: skipped this session (heavy, fragile across OSes). Worth adding if the Shiny app’s UI starts drifting visually; the substantive claims are already pinned at Layers 1 and 2.</li>
 <li>

@@ -17,7 +17,7 @@ $`H_1`$ by construction, so the reported Bayes factor is a lower bound
 on the evidence in favor of the working theory.
 
 This vignette works the running example from Lopez, Bowers, and Gajardo
-Cooper (2026): seven pieces of evidence favoring $`H_1`$ and three
+Cooper (2026): nine pieces of evidence favoring $`H_1`$ and three
 favoring $`H_R`$.
 
 ## Two models
@@ -31,8 +31,8 @@ universe is open-ended: ongoing interviews, an expanding archive.
 
 ``` r
 
-bf_binomial(y_W = 7, y_R = 3)
-#> [1] 7.827586
+bf_binomial(y_W = 9, y_R = 3)
+#> [1] 20.67196
 ```
 
 **Hypergeometric urn model (Formulation C).** Evidence is drawn without
@@ -46,12 +46,12 @@ bounded: a closed historical archive, a fixed roster of documents.
 
 ``` r
 
-bf_urn(y_W = 7, y_R = 3)
-#> [1] 39
+bf_urn(y_W = 9, y_R = 3)
+#> [1] 323
 ```
 
-The hypergeometric BF of 39 has a closed form:
-$`(8/11) / (56/3003) = 39`$.
+The hypergeometric BF of 323 has a closed form:
+$`(10/13) / (120/50388) = 323`$.
 
 ## When does each model apply?
 
@@ -95,16 +95,39 @@ threshold is $`20`$, the conventional cutoff for “strong” evidence).
 
 ``` r
 
-s_urn <- sens_urn(7, 3, threshold = 20)
+s_urn <- sens_urn(9, 3, threshold = 20)
 s_urn$bf
-#> [1] 39
+#> [1] 323
 s_urn$omega_star
-#> [1] 1.304023
+#> [1] 2.433984
 ```
 
-The reading: pro-$`H_1`$ items would have had to be roughly 1.3 times
-more likely to be noticed than pro-$`H_R`$ items before the conclusion
-reverses.
+The reading: pro-$`H_1`$ items would have had to be roughly 2.4 times
+more likely to be noticed than pro-$`H_R`$ items before the urn
+conclusion reverses.
+
+## Sensitivity to coding error
+
+A peer who cannot re-read every document can still ask how many of the
+pro-$`H_1`$ observations would have to be re-coded as pro-$`H_R`$ before
+the conclusion changes.
+[`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md)
+reports that tipping point for either model: re-coding $`x`$
+observations moves the counts from $`(y_W, y_R)`$ to
+$`(y_W - x, y_R + x)`$ and recomputes the same Bayes factor.
+
+``` r
+
+sens_coding(9, 3, model = "binomial", threshold = 20)$x_star
+#> [1] 1
+sens_coding(9, 3, model = "urn", threshold = 20)$x_star
+#> [1] 2
+```
+
+One re-coding overturns the binomial conclusion and two overturn the
+hypergeometric. The binomial tolerates less because its Bayes factor
+(20.67) starts only just above the threshold; the urn starts at 323 and
+so absorbs one more re-coding before crossing.
 
 ## Sensitivity to the prior on $`\theta`$
 
@@ -117,18 +140,19 @@ such $`M`$ that drives the Bayes factor below threshold.
 
 ``` r
 
-s_binom <- sens_binomial(17, 3, threshold = 20)
+s_binom <- sens_binomial(9, 3, threshold = 20)
 s_binom$bf
-#> [1] 1341.607
+#> [1] 20.67196
 s_binom$omega_star
-#> [1] 2.185972
+#> [1] 1.00981
 s_binom$M_star
-#> [1] 6
+#> [1] 1
 ```
 
-In this stronger example (17 pro-$`H_1`$ items, 3 pro-$`H_R`$ items),
-neither the observation bias nor a moderate number of rival-favoring
-pseudo-observations is enough to overturn the conclusion.
+At the running example the binomial Bayes factor only just clears the
+threshold, so `M_star` is 1: a single rival-favoring pseudo-observation
+in the prior drops it below 20. A larger evidence base would tolerate
+more.
 
 ## Weighted evidence
 
@@ -137,13 +161,14 @@ than the others can sum integer weights and pass the totals:
 
 ``` r
 
-# Six pro-H1 items at weight 1 and one "smoking gun" at weight 10
-w_W <- c(10, rep(1, 6))
+# Eight ordinary pro-H1 items at weight 1 and one "smoking gun" at
+# weight 10, matching the paper's weighted running example: W = 8 + 10 = 18.
+w_W <- c(10, rep(1, 8))
 w_R <- rep(1, 3)
 bf_binomial(sum(w_W), sum(w_R))
-#> [1] 775.148
+#> [1] 2336.962
 bf_urn(sum(w_W), sum(w_R))
-#> [1] 1023512
+#> [1] 11475735
 ```
 
 The “+1” rival-favoring construction goes through unchanged. See the

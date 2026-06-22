@@ -49,14 +49,18 @@ If `bf_urn(y_W, y_R) < threshold` at baseline, `omega_star` is `0`.
 ## See also
 
 [`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md),
-[`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md).
+[`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md),
+[`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md).
 
 ## Examples
 
 ``` r
-s <- sens_urn(7, 3)
+# The paper's running example. bf_urn(9, 3) = 323 is far above 20, so
+# pro-H_1 items must be ~2.4 times likelier to be observed before the
+# urn BF reaches the threshold.
+s <- sens_urn(9, 3)
 s$bf
-#> [1] 39
+#> [1] 323
 s$omega_star
-#> [1] 1.304023
+#> [1] 2.433984
 ```

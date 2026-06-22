@@ -70,16 +70,20 @@ are `0` (the conclusion fails before any perturbation).
 ## See also
 
 [`bf_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_binomial.md),
-[`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md).
+[`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md),
+[`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md).
 
 ## Examples
 
 ``` r
-s <- sens_binomial(7, 3)
+# The paper's running example. The binomial BF just clears 20, so both
+# tipping points are small: a slight bias or one rival-favoring
+# pseudo-observation overturns it.
+s <- sens_binomial(9, 3)
 s$bf
-#> [1] 7.827586
+#> [1] 20.67196
 s$omega_star
-#> [1] 0
+#> [1] 1.00981
 s$M_star
-#> [1] 0
+#> [1] 1
 ```

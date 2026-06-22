@@ -11,7 +11,7 @@ first drops below threshold."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,16 +94,19 @@ falls. <code>omega_star</code> is the value at which this fall first crosses
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="bf_urn.html">bf_urn()</a></code>, <code><a href="sens_binomial.html">sens_binomial()</a></code>.</p></div>
+    <div class="dont-index"><p><code><a href="bf_urn.html">bf_urn()</a></code>, <code><a href="sens_binomial.html">sens_binomial()</a></code>, <code><a href="sens_coding.html">sens_coding()</a></code>.</p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu">sens_urn</span><span class="op">(</span><span class="fl">7</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># The paper's running example. bf_urn(9, 3) = 323 is far above 20, so</span></span></span>
+<span class="r-in"><span><span class="co"># pro-H_1 items must be ~2.4 times likelier to be observed before the</span></span></span>
+<span class="r-in"><span><span class="co"># urn BF reaches the threshold.</span></span></span>
+<span class="r-in"><span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu">sens_urn</span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">s</span><span class="op">$</span><span class="va">bf</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 323</span>
 <span class="r-in"><span><span class="va">s</span><span class="op">$</span><span class="va">omega_star</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.304023</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.433984</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

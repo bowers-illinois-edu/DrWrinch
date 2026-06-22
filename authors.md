@@ -16,14 +16,15 @@ Source:
 [`inst/CITATION`](https://github.com/bowers-illinois-edu/DrWrinch/blob/main/inst/CITATION)
 
 Lopez M, Bowers J, Gajardo Cooper D (2026). “Fully specified Bayes
-factors for process tracing.” Working paper. Venue and DOI to be added
-on publication.,
-<https://github.com/bowers-illinois-edu/fully_specified_bf>.
+factors for process tracing.” Preprint, arXiv:2606.16683 \[stat.ME\].
+Journal version under review; DOI to be added on publication.,
+<https://arxiv.org/abs/2606.16683>.
 
-    @Unpublished{,
+    @Misc{,
       title = {Fully specified Bayes factors for process tracing},
       author = {Matias Lopez and Jake Bowers and Daniel {Gajardo Cooper}},
       year = {2026},
-      note = {Working paper. Venue and DOI to be added on publication.},
-      url = {https://github.com/bowers-illinois-edu/fully_specified_bf},
+      howpublished = {Preprint, arXiv:2606.16683 [stat.ME]},
+      note = {Journal version under review; DOI to be added on publication.},
+      url = {https://arxiv.org/abs/2606.16683},
     }

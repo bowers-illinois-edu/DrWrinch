@@ -72,15 +72,19 @@ replication; see the paper for the rationale.
 [`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md)
 for the bounded-archive case;
 [`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md)
-for sensitivity to omega and prior.
+for sensitivity to omega and prior;
+[`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md)
+for sensitivity to coding error.
 
 ## Examples
 
 ``` r
-bf_binomial(7, 3)
-#> [1] 7.827586
-bf_binomial(7, 3, omega = 0.5)
-#> [1] 68.20801
-bf_binomial(7, 3, prior_a = 1, prior_b = 4)
-#> [1] 1.529957
+# The paper's running example: nine pro-working-theory observations,
+# three pro-rival. The binomial Bayes factor sits just above 20.
+bf_binomial(9, 3)
+#> [1] 20.67196
+bf_binomial(9, 3, omega = 0.5)
+#> [1] 352.3387
+bf_binomial(9, 3, prior_a = 1, prior_b = 4)
+#> [1] 3.400457
 ```

@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@
 <div class="page-header"><h1 id="drwrinch">DrWrinch<a class="anchor" aria-label="anchor" href="#drwrinch"></a>
 </h1></div>
 <p>Fully specified Bayes factors for process tracing.</p>
-<p>This package implements the methods of Lopez, Bowers, and Gajardo Cooper (2026), “Fully specified Bayes factors for process tracing.” Two generative models for evidence in favor of a working theory against a single rival — a binomial model for open-ended evidence and a hypergeometric urn model for bounded archives — each yield a conservative Bayes factor. Sensitivity analyses vary coding error and observation bias.</p>
+<p>This package implements the methods of Lopez, Bowers, and Gajardo Cooper (2026), “Fully specified Bayes factors for process tracing” (<a href="https://arxiv.org/abs/2606.16683" class="external-link">arXiv:2606.16683</a>). Two generative models for evidence in favor of a working theory against a single rival — a binomial model for open-ended evidence and a hypergeometric urn model for bounded archives — each yield a conservative Bayes factor. Sensitivity analyses vary coding error, observation bias, and the prior.</p>
 <p>The package is named after <a href="https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch" class="external-link">Dorothy Maud Wrinch</a> (1894–1976), the mathematician whose joint papers with Harold Jeffreys (1919, 1921, 1923) developed the framework that became Jeffreys’s theory of Bayes factors. A companion package, <a href="https://github.com/bowers-illinois-edu/DrBristol" class="external-link">DrBristol</a>, implements p-value methods for the same class of problems.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -67,10 +67,10 @@
 <div class="section level2">
 <h2 id="interactive-app">Interactive app<a class="anchor" aria-label="anchor" href="#interactive-app"></a>
 </h2>
-<p>DrWrinch ships with a Shiny app that exposes the four core functions through a browser UI:</p>
+<p>DrWrinch ships with a Shiny app that exposes the Bayes-factor and sensitivity functions through a browser UI:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DrWrinch</span><span class="fu">::</span><span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>A hosted copy lives at <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a>. Defaults reproduce the paper’s running example (<code>y_W = 7, y_R = 3, threshold = 20</code>); the Sensitivity tab shows omega_star and M_star tipping points with plotly curves.</p>
+<p>A hosted copy lives at <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a>. Defaults reproduce the paper’s running example (<code>y_W = 9, y_R = 3, threshold = 20</code>); the Sensitivity tab reports the coding-error, observation-bias (omega_star), and prior (M_star) tipping points with plotly curves.</p>
 </div>
 <div class="section level2">
 <h2 id="status">Status<a class="anchor" aria-label="anchor" href="#status"></a>
