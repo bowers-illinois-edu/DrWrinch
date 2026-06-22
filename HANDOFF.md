@@ -5,16 +5,20 @@ Pick up from here in a fresh Claude session run from `~/repos/DrWrinch/`.
 
 2026-06-22 session, in brief: the paper was submitted to APSR
 (2026-06-15) and posted to arXiv (arXiv:2606.16683) with the running
-example changed from `(y_W = 7, y_R = 3)` to `(9, 3)`. This session (a)
-refreshed the running example everywhere in the package to `(9, 3)` ---
-binomial BF 20.67 (just above 20), urn BF 323 --- and (b) added the
+example changed from `(y_W = 7, y_R = 3)` to `(9, 3)`. This session:
+(a) refreshed the running example everywhere in the package to `(9, 3)`
+--- binomial BF 20.67 (just above 20), urn BF 323; (b) added the
 exported `sens_coding()` for the paper's third sensitivity question
-(coding error), surfaced in the Shiny app's Sensitivity tab. Version
-bumped to `0.0.1.9001`; `inst/CITATION` now points to the arXiv
-preprint. See `NEWS.md` for the itemized change. Paper-side follow-up
-left undone (the paper repo, already on arXiv): its appendix still
-computes coding-error sensitivity with inline helpers and lists only
-four DrWrinch functions; it could now call `sens_coding()` and list it.
+(coding error), surfaced in the Shiny Sensitivity tab; (c) added
+`test-applications.R`, real-data regression tests pinning the six
+published studies' counts; (d) fixed a shinyapps deploy failure (see
+Lessons) and verified the live app's Sensitivity tab in-browser; and
+(e) integrated `sens_coding()` into the paper repo --- the appendix
+demos and lists it, and the running example plus all six application
+analyses now cross-check every reported Bayes factor against DrWrinch
+via `stopifnot`. Version `0.0.1.9001`; `inst/CITATION` points to the
+arXiv preprint; `devtools::check()` clean; 266 tests pass. All DrWrinch
+and paper changes are committed and pushed. Nothing left in progress.
 
 ## What DrWrinch is
 
@@ -35,11 +39,11 @@ companion code. Integration of DrWrinch into the paper is
 **appendix-only** --- see the project memory at
 `~/.claude/projects/-Users-jwbowers-repos-fully-specified-bf/memory/project_drwrinch_paper_integration.md`.
 
-## Current public surface (2026-05-19)
+## Current public surface (2026-06-22)
 
 - **GitHub**: https://github.com/bowers-illinois-edu/DrWrinch
   (public, in the `bowers-illinois-edu` org). `main` is at version
-  `0.0.1.9000`.
+  `0.0.1.9001`.
 - **pkgdown site**: https://bowers-illinois-edu.github.io/DrWrinch/
   (built from `gh-pages` via the pkgdown.yaml workflow on every push
   to `main`).
@@ -56,7 +60,7 @@ DrBristol.
 
 ## Current state of the package
 
-Version `0.0.1.9001`. `devtools::test()` passes 236/236 locally and
+Version `0.0.1.9001`. `devtools::test()` passes 266/266 locally and
 in CI. `devtools::check()` is clean (0 errors, 0 warnings, 0 notes).
 
 Exported functions: `bf_binomial`, `bf_urn`, `sens_binomial`,
@@ -76,7 +80,10 @@ Files of note:
   `test-app_server.R` (Layer 2 `shiny::testServer` for both BF
   reactives, the urn-undefined branch, and the sensitivity-tab
   reactives), `test-sens_coding.R` (coding-error tipping points for
-  both models, pinned to the paper's running example).
+  both models, pinned to the paper's running example),
+  `test-applications.R` (real-data regression tests from the six
+  published studies reanalyzed in the paper: `bf_binomial`, `bf_urn`,
+  and `sens_coding` pinned to each study's counts).
 - `vignettes/getting-started.Rmd` (paper running example).
 - `inst/CITATION` (preprint bibentry pointing to arXiv:2606.16683;
   add the journal DOI on publication).
@@ -139,6 +146,24 @@ Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).
 - **shinyapps.io's "401 fetching GitHub" failure mode** is almost
   always a stale OAuth cache, not a missing PAT. The toggle-on /
   toggle-off cycle in Posit Authentication is the fix.
+- **shinyapps.io's "stale DrWrinch / function-not-found" failure mode**
+  (hit and fixed 2026-06-22). shinyapps installs DrWrinch into the
+  read-only system library (`/usr/lib/R`) at image-build time from its
+  manifest, and that copy can lag GitHub HEAD. A runtime
+  `install_github` cannot overwrite it (`mv ... Permission denied`,
+  "cannot remove earlier installation, is it in use?"), so the app
+  silently keeps the old version and errors on any newer function (this
+  session: `'sens_coding' is not an exported object`). The symptom is a
+  tab-level "An error has occurred" with the plots still rendering, and
+  the real cause is only visible via `rsconnect::showLogs()`. Fix in
+  `inst/shiny/global.R`: install the required version into a writable,
+  session-local library (`tempdir()`) placed FIRST on `.libPaths()`,
+  shadowing the stale system copy. Check the installed version with
+  `packageVersion()` --- NOT `requireNamespace()`, which loads the old
+  namespace and then blocks `library()` from picking up the reinstall.
+  The GitHub download and build succeed at runtime; only the install
+  *location* has to be writable. Costs ~30s per cold start. When the
+  required version changes, bump `.dw_needed` in `global.R`.
 - **`rsconnect` refuses to bundle locally-installed packages** that
   lack `RemoteType` metadata. Trying to dodge GitHub via a local
   tarball doesn't work cleanly; the right workarounds are
