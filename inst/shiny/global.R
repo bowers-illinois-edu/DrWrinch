@@ -22,7 +22,7 @@
 dir.create(.dw_lib, showWarnings = FALSE, recursive = TRUE)
 .libPaths(c(.dw_lib, .libPaths()))
 
-.dw_needed <- "0.0.1.9001"
+.dw_needed <- "0.0.2.0"
 .dw_have <- tryCatch(
   as.character(utils::packageVersion("DrWrinch")),
   error = function(e) NA_character_
@@ -46,4 +46,5 @@ library(DrWrinch)
 # explicitly here is belt-and-braces and makes the dependencies
 # obvious to a reader.
 source("R/helpers.R", local = TRUE)
+source("R/curves.R", local = TRUE)
 source("R/plots.R", local = TRUE)

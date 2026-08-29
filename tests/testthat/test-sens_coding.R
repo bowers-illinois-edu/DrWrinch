@@ -121,3 +121,113 @@ test_that("input validation rejects nonsense", {
   expect_error(sens_coding(9, 3, model = "binomial", threshold = -1))
   expect_error(sens_coding(9, 3, model = "not-a-model"))
 })
+
+# ---- the two names for the model the paper now has ----------------------
+
+test_that("model = \"binomial\" is accepted as the earlier name for uniform weights", {
+  # The paper renamed this Bayes factor. Old calls must keep working and
+  # must return the same thing, or test-applications.R and the paper's
+  # replication code would silently change what they report.
+  for (yc in list(c(9, 3), c(12, 0), c(7, 4))) {
+    old <- sens_coding(yc[1], yc[2], model = "binomial", threshold = 20)
+    new <- sens_coding(yc[1], yc[2], model = "uniform_weights",
+                       threshold = 20)
+    expect_equal(old, new,
+                 info = sprintf("y_W = %d, y_R = %d", yc[1], yc[2]))
+  }
+})
+
+test_that("uniform weights is the default model", {
+  expect_equal(sens_coding(9, 3, threshold = 20),
+               sens_coding(9, 3, model = "uniform_weights", threshold = 20))
+})
+
+# ---- the worst-case Bayes factor asks a different question --------------
+
+test_that("the worst-case branch reports the supplement's recoding table", {
+  # At nine observations against three the worst-case Bayes factor is
+  # 2.73, already below 20, so the researcher never drew a conclusion at
+  # that threshold and re-coding cannot overturn one. What re-coding
+  # moves is the separation she reports instead: how far apart the two
+  # theories' claims have to be before her counts reach 20. Each
+  # re-coding narrows the margin between the counts by two, so the
+  # required separation grows quickly.
+  s <- sens_coding(9, 3, model = "worst_case", threshold = 20)
+  tab <- s$recoding
+  expect_equal(tab$x, 0:3)
+  expect_equal(tab$y_W, c(9, 8, 7, 6))
+  expect_equal(tab$y_R, c(3, 4, 5, 6))
+  expect_equal(round(tab$bf, 2), c(2.73, 1.10, 0.56, 0.34))
+  expect_equal(tab$g_star[1:3], c(0.123, 0.179, 0.318))
+  # After three re-codings the counts are even, and no separation lifts
+  # the value to a threshold above one, so there is nothing to report.
+  expect_true(is.na(tab$g_star[4]))
+})
+
+test_that("the recoding table stops where the counts stop favoring the working theory", {
+  # Rows past that point would report a Bayes factor for a coding under
+  # which the working theory has less support than the rival, which is
+  # not a coding error a peer would propose in this direction.
+  for (yc in list(c(9, 3), c(12, 0), c(7, 4), c(14, 3))) {
+    y_W <- yc[1]
+    y_R <- yc[2]
+    tab <- sens_coding(y_W, y_R, model = "worst_case")$recoding
+    x_last <- max(tab$x)
+    expect_gt(y_W - (x_last - 1) - (y_R + (x_last - 1)), 0)
+    expect_lte(y_W - x_last - (y_R + x_last), 0)
+  }
+})
+
+test_that("even or rival-favoring counts give a single row and no separation", {
+  # At even counts the margin is already zero, so there is one coding to
+  # report and no separation to report with it.
+  for (yc in list(c(6, 6), c(5, 7))) {
+    tab <- sens_coding(yc[1], yc[2], model = "worst_case")$recoding
+    expect_equal(nrow(tab), 1L,
+                 info = sprintf("y_W = %d, y_R = %d", yc[1], yc[2]))
+    expect_true(is.na(tab$g_star[1]))
+  }
+})
+
+test_that("the baseline row is the observed coding", {
+  s <- sens_coding(9, 3, model = "worst_case", threshold = 20)
+  expect_equal(s$bf, bf_worst_case(9, 3))
+  expect_equal(s$recoding$bf[1], bf_worst_case(9, 3))
+  expect_equal(s$recoding$g_star[1], separation_g(9, 3, threshold = 20))
+})
+
+test_that("the separation column answers at the threshold the caller gave", {
+  # The separation is defined as the one at which the two-share version
+  # reaches the researcher's threshold, so a researcher who would set the
+  # rival aside only at 100 needs the theories further apart than one who
+  # would do it at 20.
+  at_20 <- sens_coding(9, 3, model = "worst_case", threshold = 20)$recoding
+  at_100 <- sens_coding(9, 3, model = "worst_case", threshold = 100)$recoding
+  expect_equal(at_20$g_star[1], separation_g(9, 3, threshold = 20))
+  expect_equal(at_100$g_star[1], separation_g(9, 3, threshold = 100))
+  expect_true(all(at_100$g_star[1:3] > at_20$g_star[1:3]))
+  # The Bayes factor column does not depend on the threshold.
+  expect_equal(at_20$bf, at_100$bf)
+})
+
+test_that("the worst-case branch reports no tipping point", {
+  # A tipping point answers "how many re-codings overturn the
+  # conclusion." The supplement asks a different question of this Bayes
+  # factor, and returning a number that answers neither would invite it
+  # to be read as the first.
+  s <- sens_coding(9, 3, model = "worst_case", threshold = 20)
+  expect_named(s, c("bf", "recoding"))
+  expect_null(s$x_star)
+})
+
+test_that("the urn model is still accepted", {
+  # Deprecated but not removed: the first arXiv version of the paper
+  # cites it, so calls from that replication code must still run.
+  s <- sens_coding(9, 3, model = "urn", threshold = 20)
+  expect_equal(s$x_star, 2L)
+})
+
+test_that("an unknown model name is rejected", {
+  expect_error(sens_coding(9, 3, model = "bounded"))
+  expect_error(sens_coding(9, 3, model = "worst-case"))
+})

@@ -40,8 +40,10 @@ bf_label <- function(bf) {
 
 # format_bf() packages a numeric BF into the three fields the UI cards
 # render: a printable value string, the K&R verdict, and the direction.
-# NA (urn undefined) and Inf (rival probability numerically zero) are
-# expected branches, not errors, and each gets its own labeling.
+# Both Bayes factors the app shows are defined at every pair of counts,
+# so NA should not arise; the branch stays because Inf can (a rival
+# probability that underflows to zero at very large counts) and because
+# a defensive label beats a blank cell.
 format_bf <- function(bf) {
   if (is.na(bf)) {
     return(list(
@@ -150,29 +152,36 @@ validate_counts <- function(y_W, y_R) {
 
 # interpret_M_star() turns the prior-sweep tipping point from
 # sens_binomial() into a sentence. Same three-branch pattern as
-# interpret_omega_star(): 0 (baseline already fails), NA_integer_
-# (BF stays above threshold across the prior sweep), positive integer
-# (number of rival-favoring pseudo-observations required).
+# interpret_omega_star(): 0 (already below threshold at baseline),
+# NA_integer_ (the sweep never crosses), positive integer (the number
+# of background cases favoring the rival that would be needed).
+#
+# The sentences say "posterior odds" and never "Bayes factor". A
+# Beta(1, M + 1) prior on the whole interval sets how much weight each
+# theory gets as well as how weight is spread inside each theory's
+# range. The Bayes factor renormalizes the first away and rises as M
+# grows; the posterior odds keep it and fall. Prose naming the Bayes
+# factor here would tell the reader the opposite of what happens.
 interpret_M_star <- function(m, threshold = 20) {
   if (!is.na(m) && m == 0L) {
     return(paste0(
-      "The Bayes factor sits below threshold ", threshold,
-      " at baseline. No rival-favoring pseudo-observations are ",
+      "The posterior odds sit below threshold ", threshold,
+      " at baseline. No background cases favoring the rival are ",
       "needed for the conclusion to fail."
     ))
   }
   if (is.na(m)) {
     return(paste0(
-      "The Bayes factor stays above threshold ", threshold,
+      "The posterior odds stay above threshold ", threshold,
       " across the prior sweep the search considered. The conclusion ",
       "is robust to any realistic rival-tilted prior."
     ))
   }
   paste0(
-    "Adding M = ", m, " rival-favoring pseudo-observation",
+    "Granting M = ", m, " background case",
     if (m == 1L) "" else "s",
-    " (a Beta(1, M + 1) prior) drops the Bayes factor below ",
-    "threshold ", threshold, "."
+    " favoring the rival (a Beta(1, M + 1) prior) drops the posterior ",
+    "odds below threshold ", threshold, "."
   )
 }
 
@@ -206,72 +215,32 @@ interpret_x_star <- function(x, threshold = 20) {
 }
 
 
-# bf_omega_curve() returns a long-format data.frame of BF samples
-# along a log-spaced omega grid for one model. Pure function -- no
-# Shiny, no plotly. The plot wrapper composes binomial and urn curves
-# via rbind() and feeds them to plotly.
+# interpret_separation() turns the separation from separation_g() into a
+# sentence. When the worst-case Bayes factor is below the researcher's
+# threshold she reports the separation instead: how far apart the two
+# theories' claims would have to be before her counts reach it. The
+# sentence gives both shares as percentages, because "the working theory
+# claims at least 62.3 percent of the evidence" is what a reader can
+# argue with, while "g = 0.123" is not.
 #
-# Defaults: 80 grid points between omega = 0.25 and omega = 8 cover
-# four-fold pro-rival bias to eight-fold pro-H_1 bias, wider than any
-# observation-bias prior we expect in process tracing. Log spacing
-# gives equal visual weight to omega < 1 and omega > 1, which matters
-# because the tipping point is usually close to 1.
-bf_omega_curve <- function(y_W, y_R,
-                           model = c("binomial", "urn"),
-                           threshold = 20,
-                           theta_cut = 0.5,
-                           n_grid = 80L,
-                           omega_range = c(0.25, 8)) {
-  model <- match.arg(model)
-  omegas <- exp(seq(
-    log(omega_range[1]),
-    log(omega_range[2]),
-    length.out = n_grid
-  ))
-  bf_at <- if (model == "binomial") {
-    # bf_binomial uses stats::integrate; wrap in tryCatch so a
-    # quadrature failure at pathological omega yields NA rather than
-    # killing the curve.
-    function(om) tryCatch(
-      DrWrinch::bf_binomial(y_W, y_R, omega = om, theta_cut = theta_cut),
-      error = function(e) NA_real_
-    )
-  } else {
-    function(om) tryCatch(
-      DrWrinch::bf_urn(y_W, y_R, omega = om),
-      error = function(e) NA_real_
-    )
+# separation_g() returns NA when the counts do not favor the working
+# theory, since then no separation reaches a threshold above one. That
+# branch gets its own sentence rather than a printed NA.
+interpret_separation <- function(g, threshold = 20) {
+  if (is.na(g)) {
+    return(paste0(
+      "At these counts no separation between the two theories brings ",
+      "the Bayes factor to ", threshold,
+      ": the evidence does not favor the working theory, so moving the ",
+      "two claims apart cannot lift the value above one."
+    ))
   }
-  bfs <- vapply(omegas, bf_at, numeric(1))
-  data.frame(
-    omega = omegas,
-    bf = bfs,
-    model = model,
-    threshold = threshold,
-    stringsAsFactors = FALSE
-  )
-}
-
-
-# bf_M_curve() returns BF as a function of the prior pseudo-
-# observation count M, with prior Beta(1, M + 1). Used by the
-# binomial-only prior-sensitivity bar chart on the Sensitivity tab.
-bf_M_curve <- function(y_W, y_R,
-                       theta_cut = 0.5,
-                       M_max = 50L,
-                       threshold = 20) {
-  Ms <- 0:M_max
-  bfs <- vapply(Ms, function(M) {
-    DrWrinch::bf_binomial(
-      y_W, y_R,
-      prior_a = 1, prior_b = M + 1L,
-      theta_cut = theta_cut
-    )
-  }, numeric(1))
-  data.frame(
-    M = Ms,
-    bf = bfs,
-    threshold = threshold,
-    stringsAsFactors = FALSE
+  paste0(
+    "Reaching a Bayes factor of ", threshold,
+    " would take a working theory claiming at least ",
+    format(round(100 * (0.5 + g), 1), nsmall = 1),
+    " percent of the evidence and a rival claiming at most ",
+    format(round(100 * (0.5 - g), 1), nsmall = 1),
+    " percent, a separation of ", g, " on each side of an even split."
   )
 }

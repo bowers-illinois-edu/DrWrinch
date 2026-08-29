@@ -11,3 +11,4 @@
 ^\.claude$
 ^deploy\.R$
 ^inst/shiny/rsconnect$
+^PLAN_one_model_two_bfs\.md$

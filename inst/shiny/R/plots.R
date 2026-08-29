@@ -1,117 +1,145 @@
-# plotly wrappers around the pure curve functions in helpers.R.
-# Kept in a separate file so that the data computation can be tested
-# without loading plotly, and so the plot file can be regenerated
-# without touching the helpers.
+# plotly wrappers around the pure data functions in curves.R. Kept in a
+# separate file so the numbers behind each picture can be tested without
+# loading plotly.
 
-# plot_bf_vs_omega: two-series line plot of BF as omega varies.
-# Binomial in one color, urn in another (or omitted when undefined),
-# threshold as a dashed horizontal line, omega_star tipping points as
-# dotted vertical lines.
-plot_bf_vs_omega <- function(y_W, y_R, threshold,
-                             theta_cut = 0.5,
-                             omega_star_b = NULL,
-                             omega_star_u = NULL,
-                             urn_defined = TRUE) {
-  df_b <- bf_omega_curve(y_W, y_R, "binomial", threshold, theta_cut)
-  df <- if (urn_defined) {
-    df_u <- bf_omega_curve(y_W, y_R, "urn", threshold, theta_cut)
-    rbind(df_b, df_u)
-  } else {
-    df_b
-  }
-  # Drop NaN/NA/non-finite BF rows so plotly's log y-axis does not
-  # silently truncate. The cause is usually a quadrature failure at
-  # extreme omega; the curve is monotone so a gap is acceptable.
-  df <- df[is.finite(df$bf), , drop = FALSE]
+# Colors, named once. The three-bar picture shades one hue by role: the
+# shared numerator lightest, the averaged denominator mid, the
+# best-single-share denominator solid.
+NUM_COL  <- "rgba(135, 206, 235, 0.45)"
+AVG_COL  <- "rgba(135, 206, 235, 0.85)"
+HALF_COL <- "#2c7fb8"
+LINE_COL <- "#666666"
+MARK_COL <- "#d62728"
 
-  p <- plotly::plot_ly(
-    data = df,
-    x = ~omega, y = ~bf, color = ~model,
-    type = "scatter", mode = "lines",
-    colors = c("binomial" = "#1f77b4", "urn" = "#ff7f0e")
+
+# plot_bf_decomposition: the three probabilities behind both Bayes
+# factors, at every count of N observations the researcher might have
+# reported. Three bars per count. Dividing the first bar by the second
+# gives the uniform-weights Bayes factor and by the third gives the
+# worst-case one, so a reader can see where both numbers come from
+# rather than take them on trust.
+plot_bf_decomposition <- function(y_W, y_R) {
+  df <- bf_decomposition(y_W, y_R)
+  n <- y_W + y_R
+
+  p <- plotly::plot_ly(df, x = ~k, type = "bar")
+  p <- plotly::add_trace(
+    p, y = ~numerator, name = "averaged over shares above one half",
+    marker = list(color = NUM_COL)
   )
-  # Threshold reference line spanning the visible omega range. Drawn
-  # as a trace (rather than a layout shape) so it appears in the
-  # plotly legend and the user can toggle it.
-  p <- plotly::add_lines(
-    p,
-    x = range(df$omega),
-    y = c(threshold, threshold),
-    name = paste0("threshold = ", threshold),
-    line = list(dash = "dash", color = "#666666"),
-    inherit = FALSE
+  p <- plotly::add_trace(
+    p, y = ~den_avg, name = "averaged over shares at or below one half",
+    marker = list(color = AVG_COL)
   )
-  # omega_star markers as vertical reference lines via layout shapes.
-  # Only draw markers that fall inside the plotted domain and that
-  # represent a real tipping point (positive finite value).
-  shapes <- list()
-  add_marker <- function(om, color) {
-    if (!is.null(om) && is.finite(om) && om > 1) {
-      list(
-        type = "line",
-        x0 = om, x1 = om,
-        yref = "paper", y0 = 0, y1 = 1,
-        line = list(dash = "dot", color = color, width = 1)
-      )
-    } else {
-      NULL
-    }
-  }
-  shapes <- Filter(Negate(is.null), list(
-    add_marker(omega_star_b, "#1f77b4"),
-    if (urn_defined) add_marker(omega_star_u, "#ff7f0e") else NULL
-  ))
+  p <- plotly::add_trace(
+    p, y = ~den_half, name = "at a share of one half, the rival's best case",
+    marker = list(color = HALF_COL)
+  )
+  # Mark the count the researcher actually reported, so the two
+  # divisions the cards print can be located in the picture.
   p <- plotly::layout(
     p,
-    xaxis = list(type = "log", title = "Observation bias (omega)"),
-    yaxis = list(type = "log", title = "Bayes factor"),
-    title = "BF vs. observation bias",
-    hovermode = "x unified",
-    shapes = shapes
+    barmode = "group",
+    xaxis = list(
+      title = paste0("observations supporting the working theory, of ", n),
+      dtick = 1
+    ),
+    yaxis = list(title = "probability of the count"),
+    legend = list(orientation = "h", y = -0.25),
+    shapes = list(list(
+      type = "line",
+      x0 = y_W, x1 = y_W, yref = "paper", y0 = 0, y1 = 1,
+      line = list(dash = "dot", color = MARK_COL, width = 1)
+    )),
+    annotations = list(list(
+      x = y_W, y = 1, yref = "paper", text = paste0("observed: ", y_W),
+      showarrow = FALSE, yanchor = "bottom", font = list(color = MARK_COL)
+    ))
   )
   p
 }
 
 
-# plot_bf_vs_M: bar chart of BF as a function of rival-favoring
-# pseudo-observations M (Beta(1, M+1) prior). Threshold horizontal
-# line; M_star vertical reference if available.
-plot_bf_vs_M <- function(y_W, y_R, threshold,
-                         theta_cut = 0.5,
-                         M_max = 50L,
-                         M_star = NULL) {
-  df <- bf_M_curve(y_W, y_R, theta_cut, M_max, threshold)
+# plot_bf_vs_omega: the uniform-weights Bayes factor as the assumed
+# search bias grows, with the threshold as a dashed line and the
+# tipping point as a dotted vertical one.
+plot_bf_vs_omega <- function(y_W, y_R, threshold,
+                             theta_cut = 0.5,
+                             omega_star = NULL) {
+  df <- bf_omega_curve(y_W, y_R, threshold, theta_cut)
+  # A quadrature failure at an extreme omega leaves a gap rather than
+  # letting the log axis truncate the curve silently.
+  df <- df[is.finite(df$bf), , drop = FALSE]
 
   p <- plotly::plot_ly(
-    data = df,
-    x = ~M, y = ~bf,
-    type = "bar",
-    marker = list(color = "#1f77b4"),
-    name = "BF (binomial)"
+    data = df, x = ~omega, y = ~bf,
+    type = "scatter", mode = "lines",
+    name = "uniform-weights Bayes factor",
+    line = list(color = HALF_COL)
   )
   p <- plotly::add_lines(
     p,
-    x = c(0, M_max),
-    y = c(threshold, threshold),
+    x = range(df$omega), y = c(threshold, threshold),
     name = paste0("threshold = ", threshold),
-    line = list(dash = "dash", color = "#666666"),
+    line = list(dash = "dash", color = LINE_COL),
     inherit = FALSE
   )
-  shape_list <- list()
-  if (!is.null(M_star) && !is.na(M_star) && M_star > 0L) {
-    shape_list <- list(list(
-      type = "line",
-      x0 = M_star, x1 = M_star,
+  shapes <- if (!is.null(omega_star) && is.finite(omega_star) &&
+                omega_star > 1) {
+    list(list(
+      type = "line", x0 = omega_star, x1 = omega_star,
       yref = "paper", y0 = 0, y1 = 1,
-      line = list(dash = "dot", color = "#d62728", width = 1)
+      line = list(dash = "dot", color = MARK_COL, width = 1)
     ))
+  } else {
+    list()
   }
-  p <- plotly::layout(
+  plotly::layout(
     p,
-    xaxis = list(title = "Rival-favoring pseudo-observations (M)"),
+    xaxis = list(type = "log",
+                 title = "assumed search bias toward the working theory"),
     yaxis = list(type = "log", title = "Bayes factor"),
-    title = "BF under Beta(1, M+1) priors",
-    shapes = shape_list
+    hovermode = "x unified",
+    shapes = shapes
   )
-  p
+}
+
+
+# plot_post_odds_vs_M: the posterior odds as background cases favoring
+# the rival are granted. The y axis says posterior odds, not Bayes
+# factor: under these priors the Bayes factor rises while the posterior
+# odds fall, so labeling the axis wrongly would reverse the reading.
+plot_post_odds_vs_M <- function(y_W, y_R, threshold,
+                                theta_cut = 0.5,
+                                M_max = 50L,
+                                M_star = NULL) {
+  df <- post_odds_M_curve(y_W, y_R, theta_cut, M_max, threshold)
+
+  p <- plotly::plot_ly(
+    data = df, x = ~M, y = ~post_odds,
+    type = "bar", marker = list(color = HALF_COL),
+    name = "posterior odds"
+  )
+  p <- plotly::add_lines(
+    p,
+    x = c(0, M_max), y = c(threshold, threshold),
+    name = paste0("threshold = ", threshold),
+    line = list(dash = "dash", color = LINE_COL),
+    inherit = FALSE
+  )
+  shapes <- if (!is.null(M_star) && !is.na(M_star) && M_star > 0L) {
+    list(list(
+      type = "line", x0 = M_star, x1 = M_star,
+      yref = "paper", y0 = 0, y1 = 1,
+      line = list(dash = "dot", color = MARK_COL, width = 1)
+    ))
+  } else {
+    list()
+  }
+  plotly::layout(
+    p,
+    xaxis = list(title = "background cases favoring the rival (M)"),
+    yaxis = list(type = "log", title = "posterior odds"),
+    shapes = shapes
+  )
 }

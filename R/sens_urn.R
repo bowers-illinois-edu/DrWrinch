@@ -1,4 +1,15 @@
-#' Sensitivity analysis for the urn Bayes factor
+#' Sensitivity analysis for the urn Bayes factor (deprecated)
+#'
+#' Deprecated. The paper no longer uses the hypergeometric urn model,
+#' so there is no longer a reason to ask how search bias moves its Bayes
+#' factor. The same question about the worst-case Bayes factor is
+#' answered by [bf_separated_bias()], which tilts both theories' claims
+#' by the assumed bias, and the coding-error question by
+#' [sens_coding()] with `model = "worst_case"`.
+#'
+#' This function is not removed, because the first arXiv version of the
+#' paper cites it and its replication code calls it. It returns exactly
+#' what it always returned and warns once per session.
 #'
 #' Reports the bias tipping point for the urn Bayes factor: the
 #' smallest observation bias `omega > 1` at which the Bayes factor
@@ -34,9 +45,23 @@
 #' s$bf
 #' s$omega_star
 #'
-#' @seealso [bf_urn()], [sens_binomial()], [sens_coding()].
+#' @seealso [bf_separated_bias()] and [sens_coding()] for the same two
+#'   questions asked of the worst-case Bayes factor; [sens_binomial()]
+#'   for them asked of the uniform-weights Bayes factor; [bf_urn()] for
+#'   the Bayes factor swept here.
 #' @export
 sens_urn <- function(y_W, y_R, threshold = 20) {
+  .deprecate_once(
+    "sens_urn",
+    paste("sens_urn() is deprecated. The paper no longer uses the",
+          "hypergeometric urn model. The search-bias question it answers",
+          "is answered for the worst-case Bayes factor by",
+          "bf_separated_bias(), and the coding-error question by",
+          "sens_coding(model = \"worst_case\"); see bf_worst_case() for",
+          "the Bayes factor itself. sens_urn() is kept for the first",
+          "arXiv version's replication code and still returns what it",
+          "always returned.")
+  )
   stopifnot(
     length(y_W) == 1L, length(y_R) == 1L,
     y_W >= 0, y_R >= 0, y_W + y_R > 0,

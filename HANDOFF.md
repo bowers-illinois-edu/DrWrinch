@@ -1,7 +1,41 @@
 # HANDOFF for DrWrinch
 
-Last touched: 2026-06-22 (paper-alignment session in `~/repos/DrWrinch/`).
-Pick up from here in a fresh Claude session run from `~/repos/DrWrinch/`.
+Last touched: 2026-08-29 (one-model rewrite, tasks 1-7 of
+`PLAN_one_model_two_bfs.md`). Pick up from here in a fresh Claude session
+run from `~/repos/DrWrinch/`, and read `PLAN_one_model_two_bfs.md` next:
+only task 8 is still open, and it belongs to a session in the paper repository.
+
+2026-08-29 session, in brief: the paper dropped the hypergeometric urn
+and now has one model with two Bayes factors computed from it, so this
+session added the second one. New: `bf_worst_case()`, `bf_separated()`,
+`separation_g()`, `bf_separated_bias()` (`R/bf_worst_case.R`);
+`bf_uniform_weights()` beside `bf_binomial()` in `R/bf_binomial.R`; and
+`bf_rescaled()` (`R/bf_rescaled.R`) for weights the researcher states
+within each theory's range. `sens_coding()` now takes
+`model = "uniform_weights"` or `"worst_case"` and returns the
+supplement's recoding table for the second; `bf_urn()` and `sens_urn()`
+are deprecated but unchanged, warning once per session through
+`.deprecate_once()` in `R/deprecated.R`. The Shiny app shows the two
+Bayes factors side by side over the three-bar picture of where they come
+from and no longer offers the urn, a cutpoint, or a whole-interval Beta
+prior; its data functions moved to `inst/shiny/R/curves.R`. README, the
+package roxygen, DESCRIPTION, and the vignette are rewritten for one
+model. Version bumped to `0.0.2.0`; `devtools::check()` clean; 1391
+tests pass. Nothing is committed. Version left at `0.0.1.9001`, to be bumped
+before the next push.
+
+Two things a later session must not have to remember on its own. First,
+`bf_binomial()` returns posterior odds, not a Bayes factor, under any
+prior but the uniform, and its roxygen used to say otherwise; the fix is
+in the help page, in `NEWS.md`, and pinned by
+`tests/testthat/test-bf_uniform_weights.R`, but `sens_binomial()`'s
+`M_star` roxygen now carries the same correction. Second,
+`Paper/appendix.qmd` in the paper repository defines its own
+`bf_rescaled(kk, rr, tau)`, which the package's new export will shadow
+silently; a TODO comment sits above that definition, and the plan's task
+8 repeats it. Third, `vignettes/getting-started.Rmd` still teaches two
+probability models and calls the deprecated urn functions, so task 7 has
+to rewrite it as well as the README.
 
 2026-06-22 session, in brief: the paper was submitted to APSR
 (2026-06-15) and posted to arXiv (arXiv:2606.16683) with the running

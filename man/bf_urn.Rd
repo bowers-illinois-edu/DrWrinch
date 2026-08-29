@@ -2,7 +2,7 @@
 % Please edit documentation in R/bf_urn.R
 \name{bf_urn}
 \alias{bf_urn}
-\title{Bayes factor under the hypergeometric urn model}
+\title{Bayes factor under the hypergeometric urn model (deprecated)}
 \usage{
 bf_urn(y_W, y_R, omega = 1)
 }
@@ -22,6 +22,21 @@ A length-1 numeric: the Bayes factor in favor of \eqn{H_1}.
 the RTF probability of the observed pattern is numerically zero.
 }
 \description{
+Deprecated. The paper began with two probability models and now has
+one: each observation supports the working theory with probability
+\eqn{\theta}, the share of the evidence that supports it, and the two
+Bayes factors it reports differ only in what they do with the range of
+shares the rival claims. The urn model, which described a body of
+evidence of a stated size, is no longer in the paper. Use
+\code{\link[=bf_worst_case]{bf_worst_case()}} for the Bayes factor that evaluates the rival at her
+best single share, or \code{\link[=bf_uniform_weights]{bf_uniform_weights()}} for the one that averages
+over her whole range.
+}
+\details{
+This function is not removed, because the first arXiv version of the
+paper cites it and its replication code calls it. It returns exactly
+what it always returned and warns once per session.
+
 Computes the Bayes factor for a working theory \eqn{H_1} against a
 single rival \eqn{H_R}, given observed counts \code{y_W} of evidence
 favorable to \eqn{H_1} and \code{y_R} of evidence favorable to \eqn{H_R},
@@ -31,8 +46,7 @@ Favorable (WTF) sub-model has urn composition \eqn{(y_W + 1,
 composition \eqn{(y_W, y_W + 1)}. Both constructions tilt in favor
 of the rival, so the Bayes factor returned is a lower bound on the
 evidence for \eqn{H_1}.
-}
-\details{
+
 This model fits research designs where the evidence base is bounded
 and fixed --- a closed historical archive, a fixed roster of
 documents. For open-ended evidence collection, see \code{\link[=bf_binomial]{bf_binomial()}}.
@@ -57,7 +71,7 @@ bf_urn(9, 3, omega = 0.5)
 
 }
 \seealso{
-\code{\link[=bf_binomial]{bf_binomial()}} for the open-ended-evidence case;
-\code{\link[=sens_urn]{sens_urn()}} for sensitivity to omega;
-\code{\link[=sens_coding]{sens_coding()}} for sensitivity to coding error.
+\code{\link[=bf_worst_case]{bf_worst_case()}} and \code{\link[=bf_uniform_weights]{bf_uniform_weights()}}, the two Bayes
+factors the paper now reports; \code{\link[=sens_coding]{sens_coding()}} for sensitivity to
+coding error under either of them.
 }

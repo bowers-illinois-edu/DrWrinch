@@ -1,11 +1,13 @@
 #' Launch the DrWrinch Shiny app
 #'
-#' Starts an interactive Shiny session that computes the binomial and
-#' urn Bayes factors and their verdicts on the Kass & Raftery (1995)
-#' scale. The four core functions ([bf_binomial()], [bf_urn()],
-#' [sens_binomial()], [sens_urn()]) are usable from the command line
-#' without launching the app; this function is a convenience wrapper
-#' for users who prefer a GUI.
+#' Starts an interactive Shiny session showing the two Bayes factors the
+#' paper computes from one model, side by side, together with the three
+#' probabilities they are built from: the numerator they share and the
+#' two denominators that separate them. A Sensitivity tab reports what a
+#' reader would have to grant before the researcher's report would
+#' change. Every function the app calls ([bf_uniform_weights()],
+#' [bf_worst_case()], [separation_g()], [sens_coding()],
+#' [sens_binomial()]) works from the command line without it.
 #'
 #' The Shiny stack (shiny, bslib) is in `Suggests`, not `Imports`, so
 #' users who only want the core Bayes factor functions do not have to
@@ -25,7 +27,9 @@
 #' run_app()
 #' }
 #'
-#' @seealso [bf_binomial()], [bf_urn()], [sens_binomial()], [sens_urn()].
+#' @seealso [bf_uniform_weights()] and [bf_worst_case()], the two Bayes
+#'   factors the app shows; [sens_coding()] and [sens_binomial()] for the
+#'   sensitivity tab.
 #' @export
 run_app <- function(launch_browser = interactive(), ...) {
   # Shiny and bslib are runtime-only. Check at call time so the core

@@ -18,12 +18,14 @@ Invisibly returns the value of \code{\link[shiny:runApp]{shiny::runApp()}}. Call
 its side effect of starting a Shiny session.
 }
 \description{
-Starts an interactive Shiny session that computes the binomial and
-urn Bayes factors and their verdicts on the Kass & Raftery (1995)
-scale. The four core functions (\code{\link[=bf_binomial]{bf_binomial()}}, \code{\link[=bf_urn]{bf_urn()}},
-\code{\link[=sens_binomial]{sens_binomial()}}, \code{\link[=sens_urn]{sens_urn()}}) are usable from the command line
-without launching the app; this function is a convenience wrapper
-for users who prefer a GUI.
+Starts an interactive Shiny session showing the two Bayes factors the
+paper computes from one model, side by side, together with the three
+probabilities they are built from: the numerator they share and the
+two denominators that separate them. A Sensitivity tab reports what a
+reader would have to grant before the researcher's report would
+change. Every function the app calls (\code{\link[=bf_uniform_weights]{bf_uniform_weights()}},
+\code{\link[=bf_worst_case]{bf_worst_case()}}, \code{\link[=separation_g]{separation_g()}}, \code{\link[=sens_coding]{sens_coding()}},
+\code{\link[=sens_binomial]{sens_binomial()}}) works from the command line without it.
 }
 \details{
 The Shiny stack (shiny, bslib) is in \code{Suggests}, not \code{Imports}, so
@@ -38,5 +40,7 @@ run_app()
 
 }
 \seealso{
-\code{\link[=bf_binomial]{bf_binomial()}}, \code{\link[=bf_urn]{bf_urn()}}, \code{\link[=sens_binomial]{sens_binomial()}}, \code{\link[=sens_urn]{sens_urn()}}.
+\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} and \code{\link[=bf_worst_case]{bf_worst_case()}}, the two Bayes
+factors the app shows; \code{\link[=sens_coding]{sens_coding()}} and \code{\link[=sens_binomial]{sens_binomial()}} for the
+sensitivity tab.
 }

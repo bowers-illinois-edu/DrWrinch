@@ -1,4 +1,18 @@
-#' Bayes factor under the hypergeometric urn model
+#' Bayes factor under the hypergeometric urn model (deprecated)
+#'
+#' Deprecated. The paper began with two probability models and now has
+#' one: each observation supports the working theory with probability
+#' \eqn{\theta}, the share of the evidence that supports it, and the two
+#' Bayes factors it reports differ only in what they do with the range of
+#' shares the rival claims. The urn model, which described a body of
+#' evidence of a stated size, is no longer in the paper. Use
+#' [bf_worst_case()] for the Bayes factor that evaluates the rival at her
+#' best single share, or [bf_uniform_weights()] for the one that averages
+#' over her whole range.
+#'
+#' This function is not removed, because the first arXiv version of the
+#' paper cites it and its replication code calls it. It returns exactly
+#' what it always returned and warns once per session.
 #'
 #' Computes the Bayes factor for a working theory \eqn{H_1} against a
 #' single rival \eqn{H_R}, given observed counts `y_W` of evidence
@@ -43,11 +57,21 @@
 #' bf_urn(9, 3)
 #' bf_urn(9, 3, omega = 0.5)
 #'
-#' @seealso [bf_binomial()] for the open-ended-evidence case;
-#'   [sens_urn()] for sensitivity to omega;
-#'   [sens_coding()] for sensitivity to coding error.
+#' @seealso [bf_worst_case()] and [bf_uniform_weights()], the two Bayes
+#'   factors the paper now reports; [sens_coding()] for sensitivity to
+#'   coding error under either of them.
 #' @export
 bf_urn <- function(y_W, y_R, omega = 1) {
+  .deprecate_once(
+    "bf_urn",
+    paste("bf_urn() is deprecated. The paper no longer uses the",
+          "hypergeometric urn model: it now has one model and two Bayes",
+          "factors computed from it. Use bf_worst_case() for the Bayes",
+          "factor that evaluates the rival at her best single share, or",
+          "bf_uniform_weights() for the one that averages over her whole",
+          "range. bf_urn() is kept for the first arXiv version's",
+          "replication code and still returns what it always returned.")
+  )
   stopifnot(
     length(y_W) == 1L, length(y_R) == 1L,
     y_W >= 0, y_R >= 0, y_W + y_R > 0,

@@ -7,7 +7,7 @@
 sens_coding(
   y_W,
   y_R,
-  model = c("binomial", "urn"),
+  model = c("uniform_weights", "worst_case", "binomial", "urn"),
   threshold = 20,
   theta_cut = 0.5
 )
@@ -19,66 +19,112 @@ working theory.}
 \item{y_R}{Non-negative integer. Observed count favorable to the
 rival.}
 
-\item{model}{Which Bayes factor to recompute after re-coding:
-\code{"binomial"} (open-ended evidence) or \code{"urn"} (bounded archive).}
+\item{model}{Which Bayes factor to recompute after re-coding.
+\code{"uniform_weights"} (the default) averages over the rival's whole
+range; \code{"worst_case"} evaluates her at one half; \code{"binomial"} is the
+earlier name for \code{"uniform_weights"} and returns the same thing;
+\code{"urn"} is the superseded bounded-archive model.}
 
-\item{threshold}{Positive numeric. Decision threshold the Bayes
-factor must remain at or above. Default \code{20}.}
+\item{threshold}{Positive numeric. The value at which the researcher
+would set the rival aside. Default \code{20}. Under \code{"worst_case"} this
+is the threshold the reported separations answer at.}
 
-\item{theta_cut}{Numeric in (0, 1). Cutpoint for the binomial model;
-ignored by the urn model. Default \code{0.5}.}
+\item{theta_cut}{Numeric in (0, 1). Cutpoint for the uniform-weights
+model; ignored by \code{"worst_case"} and \code{"urn"}, whose cut is fixed at
+one half by construction. Default \code{0.5}.}
 }
 \value{
-A list with elements:
+For \code{"uniform_weights"}, \code{"binomial"}, and \code{"urn"}, a list
+with elements:
 \describe{
-\item{\code{bf}}{Bayes factor at the observed coding (no re-coding).}
+\item{\code{bf}}{Bayes factor at the observed coding.}
 \item{\code{x_star}}{Smallest integer \code{x >= 0} re-codings at which the
-Bayes factor drops below \code{threshold}. \code{0} if \code{bf < threshold}
-at baseline; \code{NA_integer_} if no re-coding in \verb{[0, y_W]} with a
-defined Bayes factor drops it below \code{threshold}.}
+Bayes factor drops below \code{threshold}. \code{0} if it is already below
+\code{threshold} at the observed coding; \code{NA_integer_} if no
+re-coding in \verb{[0, y_W]} with a defined Bayes factor drops it
+below \code{threshold}.}
+}
+For \code{"worst_case"}, a list with elements:
+\describe{
+\item{\code{bf}}{Worst-case Bayes factor at the observed coding.}
+\item{\code{recoding}}{A data frame with one row per re-coding and
+columns \code{x} (re-codings), \code{y_W} and \code{y_R} (the counts after
+them), \code{bf} (the worst-case Bayes factor there), and \code{g_star}
+(the separation at which the two-share version reaches
+\code{threshold}, \code{NA} once the counts no longer favor the working
+theory).}
 }
 }
 \description{
-Reports the coding-error tipping point: the smallest number of pro-
-working-theory observations that would have to be re-coded as
-pro-rival before the Bayes factor first drops below \code{threshold}.
+A peer cannot re-read every document the way the original researcher
+did, so the coding of any one piece of evidence can be disputed but
+not settled at a distance. What can be computed is how much re-coding
+it would take to change what the researcher reports. Re-coding \code{x}
+observations relabels \code{x} items that supported the working theory as
+supporting the rival, moving the counts from \verb{(y_W, y_R)} to
+\verb{(y_W - x, y_R + x)}. The number of observations does not change; only
+the split does.
 }
 \details{
-This is the third sensitivity question in the paper, alongside
-observation bias (\code{\link[=sens_urn]{sens_urn()}} and \code{\link[=sens_binomial]{sens_binomial()}}'s \code{omega_star})
-and the rival-tilted prior (\code{\link[=sens_binomial]{sens_binomial()}}'s \code{M_star}). A peer
-cannot re-read every document, but she can ask how many pro-\eqn{H_1}
-observations would have to be re-coded for the conclusion to change.
-
-Re-coding \code{x} observations relabels \code{x} pro-\eqn{H_1} items as
-pro-rival, moving the counts from \verb{(y_W, y_R)} to
-\verb{(y_W - x, y_R + x)}. The total number of observations
-\eqn{n = y_W + y_R} does not change; only the split does. The same
-model's Bayes factor is then recomputed at the new counts. One
-function serves both models because the mechanism is the relabeling;
-\code{model} only selects which Bayes factor to recompute --- \code{\link[=bf_binomial]{bf_binomial()}}
-for open-ended evidence, \code{\link[=bf_urn]{bf_urn()}} for a bounded archive.
-
-Re-coding moves evidence toward equipoise, so the Bayes factor falls
-as \code{x} grows. For the urn model, re-coding eventually shrinks the
-rival-favorable urn below the sample size (the swap regime, where
-\code{\link[=bf_urn]{bf_urn()}} is undefined and returns \code{NA}); these re-codings are
-skipped rather than counted as a crossing. Because the Bayes factor
-reaches equipoise before that point for any \code{threshold > 1}, the
-tipping point is found within the defined range in ordinary use.
-
-If \verb{bf_<model>(y_W, y_R) < threshold} at baseline, \code{x_star} is \code{0}
-(the conclusion fails before any re-coding).
+The two Bayes factors in this package answer that question
+differently, so this function returns different things for them.
 }
+\section{What re-coding does to the uniform-weights Bayes factor}{
+
+\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} averages over the rival's whole range of
+shares, and at the running example it sits at 20.67, just above a
+threshold of 20. So the question a peer asks has an answer in whole
+re-codings: how many would it take to bring the value below the
+threshold? The function returns that number as \code{x_star}. At nine
+observations against three it is one, and the conclusion tolerates so
+little re-coding precisely because the value started so close to the
+threshold. If the value is already below the threshold at the observed
+coding, \code{x_star} is \code{0}.
+}
+
+\section{What re-coding does to the worst-case Bayes factor}{
+
+\code{\link[=bf_worst_case]{bf_worst_case()}} hands the rival her best single share, so at the
+same counts it reports 2.73, which was never above 20. Re-coding
+cannot overturn a conclusion the researcher did not draw. What it
+moves is the separation she reports beside the value: how far apart
+the two theories' claims would have to be before her counts reach her
+threshold (\code{\link[=separation_g]{separation_g()}}). Each re-coding narrows the margin
+between the counts by two, so the required separation grows quickly.
+The function returns one row per re-coding rather than a tipping
+point. At nine observations against three the separation runs from
+0.123 at the agreed coding to 0.179 after one re-coding and 0.318
+after two, and after three the counts are even and no separation
+reaches a threshold above one.
+
+Rows run from the observed coding up to the first re-coding at which
+the counts stop favoring the working theory, because past that point
+the coding error a peer would be proposing has changed direction.
+}
+
+\section{The superseded urn model}{
+
+\code{model = "urn"} recomputes \code{\link[=bf_urn]{bf_urn()}} and returns a tipping point in
+the same shape as the uniform-weights branch. The paper no longer uses
+that model; the option is kept because the first arXiv version cites
+it. Re-coding eventually shrinks the rival-favorable urn below the
+sample size, where \code{\link[=bf_urn]{bf_urn()}} is undefined and returns \code{NA}; those
+re-codings are skipped rather than counted as a crossing, so an
+undefined value never masquerades as a tipping point.
+}
+
 \examples{
-# The paper's running example: one re-coding overturns the binomial
-# conclusion, two overturn the hypergeometric.
-sens_coding(9, 3, model = "binomial")$x_star
-sens_coding(9, 3, model = "urn")$x_star
+# The paper's running example. One re-coding takes the uniform-weights
+# Bayes factor below 20.
+sens_coding(9, 3)$x_star
+
+# The same counts under the worst-case Bayes factor, which was never
+# above 20: what re-coding moves is the separation she reports.
+sens_coding(9, 3, model = "worst_case")$recoding
 
 }
 \seealso{
-\code{\link[=sens_binomial]{sens_binomial()}} and \code{\link[=sens_urn]{sens_urn()}} for observation-bias and
-prior sensitivity; \code{\link[=bf_binomial]{bf_binomial()}} and \code{\link[=bf_urn]{bf_urn()}} for the Bayes
-factors themselves.
+\code{\link[=sens_binomial]{sens_binomial()}} for observation-bias and prior
+sensitivity; \code{\link[=bf_uniform_weights]{bf_uniform_weights()}}, \code{\link[=bf_worst_case]{bf_worst_case()}}, and
+\code{\link[=separation_g]{separation_g()}} for the quantities recomputed here.
 }

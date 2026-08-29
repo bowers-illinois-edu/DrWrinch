@@ -1,6 +1,6 @@
 Package: DrWrinch
 Title: Fully Specified Bayes Factors for Process Tracing
-Version: 0.0.1.9001
+Version: 0.0.2.0
 Authors@R: c(
     person("Matias", "Lopez", role = c("aut", "cph"),
            email = "matiaslopez.uy@gmail.com",
@@ -11,15 +11,19 @@ Authors@R: c(
     person("Daniel", "Gajardo Cooper", role = c("aut", "cph"),
            email = "drgajardo@uc.cl"))
 Description: Computes fully specified Bayes factors for process tracing,
-    as developed in Lopez, Bowers, and Gajardo Cooper (2026). The package
-    implements two generative models for evidence in favor of a working
-    theory against a single rival: a binomial model for open-ended
-    evidence collection, and a hypergeometric urn model for bounded
-    archives. Both models yield Bayes factors that tilt in favor of the
-    rival theory by construction, so the reported Bayes factor is a
-    lower bound on the evidence for the working theory. Sensitivity
-    analyses vary coding error and observation bias to show how the
-    conclusion changes under departures from the baseline assumptions.
+    as developed in Lopez, Bowers, and Gajardo Cooper (2026). One model
+    underlies the package: each observation supports a working theory
+    with probability theta, the share of the evidence that supports it,
+    where the working theory claims theta above one half and a single
+    rival claims theta at or below it. Because the rival claims a range
+    of shares rather than one share, two Bayes factors follow, sharing a
+    numerator and differing in how they treat that range: one averages
+    the probability of the counts over the whole range, the other
+    evaluates the rival at the single share that makes the counts most
+    probable. The second is a lower bound and carries an error rate of at
+    most one in twenty at a threshold of 20. Sensitivity analyses vary
+    coding error, search bias, and the weight given the rival to show
+    what a reader would have to grant for the conclusion to change.
     Named after Dorothy Maud Wrinch (1894--1976,
     <https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch>), whose joint
     papers with Harold Jeffreys (1919, 1921, 1923) developed the

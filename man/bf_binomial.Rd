@@ -2,7 +2,7 @@
 % Please edit documentation in R/bf_binomial.R
 \name{bf_binomial}
 \alias{bf_binomial}
-\title{Bayes factor under the binomial model}
+\title{Posterior odds on the working theory under a whole-interval Beta prior}
 \usage{
 bf_binomial(y_W, y_R, omega = 1, prior_a = 1, prior_b = 1, theta_cut = 0.5)
 }
@@ -17,55 +17,105 @@ evidence favorable to the rival.}
 Default \code{1} (unbiased).}
 
 \item{prior_a, prior_b}{Positive numerics. Beta prior shape
-parameters on \code{theta}. Default uniform prior, \code{1} and \code{1}.}
+parameters on \code{theta}, on the whole interval from zero to one.
+Default uniform prior, \code{1} and \code{1}.}
 
-\item{theta_cut}{Numeric in (0, 1). Cutpoint separating \eqn{H_1}
-from \eqn{H_R}. Default \code{0.5}.}
+\item{theta_cut}{Numeric in (0, 1). Cutpoint separating the working
+theory from the rival. Default \code{0.5}.}
 }
 \value{
-A length-1 numeric: the Bayes factor in favor of \eqn{H_1}.
+A length-1 numeric: the posterior odds on the working theory
+against the rival. Under the default uniform prior these are the
+uniform-weights Bayes factor; under any other prior they are not.
 Returns \code{NA_real_} if the integrated likelihood is numerically zero.
 }
 \description{
-Computes the Bayes factor for a working theory \eqn{H_1: \theta >
-\theta_{\text{cut}}} against a rival \eqn{H_R: \theta \le
-\theta_{\text{cut}}}, given \code{y_W} pieces of evidence favorable to
-\eqn{H_1} and \code{y_R} pieces favorable to \eqn{H_R}, treated as
-\eqn{n = y_W + y_R} independent Bernoulli draws from an infinite
-evidence universe with success probability \code{theta}.
+One model underlies every Bayes factor in this package. Each
+observation supports the working theory with probability
+\eqn{\theta}, the share of the evidence that supports it. The working
+theory claims \eqn{\theta > \theta_{\text{cut}}} and the rival claims
+\eqn{\theta \le \theta_{\text{cut}}}, with the cut at one half unless
+the researcher moves it. The researcher has coded \code{y_W} observations
+as supporting the working theory and \code{y_R} as supporting the rival,
+and treats them as \eqn{n = y_W + y_R} independent draws.
 }
 \details{
-This model fits research designs where the evidence universe is
-open-ended --- ongoing interviews, an expanding archive, a growing
-set of cases. For bounded archives, see \code{\link[=bf_urn]{bf_urn()}}.
+At the default uniform prior this function returns the uniform-weights
+Bayes factor, 20.67 at nine observations against three, and
+\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} is the name to use for it. This function is the
+earlier name for that number and is kept for one release. It is not a
+plain alias, because it also carries the whole-interval Beta prior
+that \code{\link[=sens_binomial]{sens_binomial()}} needs, and under any prior but the uniform the
+number it returns is a different object.
+}
+\section{Why a tilted prior returns posterior odds rather than a Bayes factor}{
 
-Under a \code{Beta(prior_a, prior_b)} prior on \code{theta} and observation
-bias \code{omega = 1} (unbiased), the posterior is
-\code{Beta(prior_a + y_W, prior_b + y_R)} and the Bayes factor is the
-ratio of posterior masses on the two sides of \code{theta_cut}. Under
-observation bias \code{omega != 1}, the probability that an item supports
-\eqn{H_1} given it was observed is `q = omega * theta / (1 + (omega -
-\enumerate{
-\item 
-\itemize{
-\item theta)\verb{(Fisher's odds-ratio transformation); the Bayes factor is then computed by numerical integration.}omega > 1\verb{makes pro- \eqn{H_1} items likelier to be observed than they are in the universe;}omega < 1` makes them less likely.
+A \code{Beta(prior_a, prior_b)} prior on the whole interval from zero to
+one does two jobs at once. It says how the researcher spreads her
+weight over the shares inside each theory's range, and it also says
+how much weight she gives each theory: the prior mass above the cut,
+call it \eqn{\pi_1}, sets the prior odds \eqn{\pi_1 / (1 - \pi_1)}.
+The Bayes factor renormalizes the prior to each theory's range before
+averaging the likelihood, so the prior odds cancel out of it. The
+posterior odds keep them: posterior odds are prior odds times Bayes
+factor.
+
+This function returns the ratio of posterior masses on the two sides
+of the cut, which is the posterior odds. Under the uniform prior the
+two theories get equal weight, the prior odds are one, and the
+posterior odds and the Bayes factor coincide --- a fact about that
+prior, not a definition. Under a \code{Beta(1, M + 1)} prior, which reads
+as M background cases all favoring the rival, the two separate and
+move in opposite directions. At nine observations against three:
+
+\tabular{rrr}{
+background cases M \tab posterior odds \tab Bayes factor \cr
+0 \tab 20.67 \tab 20.67 \cr
+1 \tab 10.14 \tab 30.41 \cr
+2 \tab  5.63 \tab 39.39 \cr
+3 \tab  3.40 \tab 51.01 \cr
+4 \tab  2.18 \tab 67.56
 }
-}
+
+Tilting the prior toward the rival commits her to shares near zero,
+under which nine of twelve is more surprising still, so the evidence
+discriminates more sharply and the Bayes factor rises. The same tilt
+lowers the prior odds by more, so the posterior odds fall. A
+researcher who wants weights inside each theory's range without
+moving the weight between the theories states them through
+\code{\link[=bf_rescaled]{bf_rescaled()}} instead.
+
+Under observation bias \code{omega != 1}, the probability that an item
+supports the working theory given it was observed is
+\code{q = omega * theta / (1 + (omega - 1) * theta)} (Fisher's odds-ratio
+transformation); the value is then computed by numerical integration.
+\code{omega > 1} makes evidence for the working theory likelier to be
+observed than it is in the evidence as a whole; \code{omega < 1} makes it
+less likely.
 
 For weighted analyses, sum the weights first and pass the sums:
 \code{bf_binomial(sum(w_W), sum(w_R))}. Integer weights act as effective
-replication; see the paper for the rationale.
+replication; see the paper for the rationale. Those are weights on
+observations, a different object from the weights on shares that
+\code{\link[=bf_rescaled]{bf_rescaled()}} takes.
 }
+
 \examples{
 # The paper's running example: nine pro-working-theory observations,
-# three pro-rival. The binomial Bayes factor sits just above 20.
+# three pro-rival. At the uniform prior this is the uniform-weights
+# Bayes factor.
 bf_binomial(9, 3)
 bf_binomial(9, 3, omega = 0.5)
-bf_binomial(9, 3, prior_a = 1, prior_b = 4)
+
+# One background case favoring the rival. The posterior odds fall to
+# 10.14 even though the Bayes factor rises to 30.41.
+bf_binomial(9, 3, prior_a = 1, prior_b = 2)
 
 }
 \seealso{
-\code{\link[=bf_urn]{bf_urn()}} for the bounded-archive case;
-\code{\link[=sens_binomial]{sens_binomial()}} for sensitivity to omega and prior;
+\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} for this number under the uniform
+default; \code{\link[=bf_rescaled]{bf_rescaled()}} for weights stated within each theory's
+range; \code{\link[=bf_worst_case]{bf_worst_case()}} for the other Bayes factor from the same
+model; \code{\link[=sens_binomial]{sens_binomial()}} for sensitivity to omega and prior;
 \code{\link[=sens_coding]{sens_coding()}} for sensitivity to coding error.
 }

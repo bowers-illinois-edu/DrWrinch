@@ -2,7 +2,7 @@
 % Please edit documentation in R/sens_binomial.R
 \name{sens_binomial}
 \alias{sens_binomial}
-\title{Sensitivity analysis for the binomial Bayes factor}
+\title{Sensitivity to search bias and to a prior tilted toward the rival}
 \usage{
 sens_binomial(y_W, y_R, threshold = 20, theta_cut = 0.5, M_max = 200L)
 }
@@ -13,8 +13,8 @@ working theory.}
 \item{y_R}{Non-negative integer. Observed count favorable to the
 rival.}
 
-\item{threshold}{Positive numeric. Decision threshold the Bayes
-factor must remain at or above. Default \code{20}.}
+\item{threshold}{Positive numeric. The value at which the researcher
+would set the rival aside. Default \code{20}.}
 
 \item{theta_cut}{Numeric in (0, 1). Cutpoint. Default \code{0.5}.}
 
@@ -24,39 +24,62 @@ sweep. Default \code{200}.}
 \value{
 A list with elements:
 \describe{
-\item{\code{bf}}{Bayes factor at the baseline (\code{omega = 1}, uniform prior).}
-\item{\code{omega_star}}{Bias tipping point. \code{0} if \code{bf < threshold}
-at baseline; \code{NA_real_} if \code{bf} does not cross \code{threshold} for
-any reachable \code{omega}.}
-\item{\code{M_star}}{Smallest integer \code{M >= 0} with Beta(1, M + 1)
-prior at which the Bayes factor drops below \code{threshold}.
-\code{0} if \code{bf < threshold} at baseline; \code{NA_integer_} if the BF
-does not drop below threshold within \verb{[0, M_max]}.}
+\item{\code{bf}}{The uniform-weights Bayes factor at the baseline
+(\code{omega = 1}, uniform prior).}
+\item{\code{omega_star}}{Search-bias tipping point in the Bayes
+factor. \code{0} if \code{bf < threshold} at baseline; \code{NA_real_} if the
+value does not cross \code{threshold} for any reachable \code{omega}.}
+\item{\code{M_star}}{Smallest integer \code{M >= 0} at which the posterior
+odds under a \code{Beta(1, M + 1)} prior fall below \code{threshold},
+not a Bayes-factor tipping point. \code{0} if \code{bf < threshold} at
+baseline; \code{NA_integer_} if the posterior odds stay at or above
+\code{threshold} throughout \verb{[0, M_max]}.}
 }
 }
 \description{
-Reports tipping points for the binomial Bayes factor: the smallest
-observation bias \code{omega > 1} and the smallest rival-tilted prior
-Beta(1, M + 1) at which the Bayes factor first drops below
-\code{threshold}.
+Two questions a peer asks about the uniform-weights Bayes factor, each
+answered by the value at which the researcher's report would change.
+The counts are \code{y_W} observations supporting the working theory and
+\code{y_R} supporting the rival.
 }
-\details{
-\code{omega > 1} makes pro-\eqn{H_1} items more likely to be observed
-than they are in the universe, so the apparent dominance of pro-
-\eqn{H_1} evidence is partly an artifact of observation, and the
-Bayes factor falls. \code{omega_star} is the value at which this fall
-first crosses \code{threshold}. Beta(1, M + 1) priors place all density
-on \eqn{\theta < 1} and posit \code{M} pseudo-observations all favoring
-the rival. \code{M_star} is the smallest integer \code{M} at which the Bayes
-factor first drops below \code{threshold}.
+\section{Search bias}{
 
-If \code{bf_binomial(y_W, y_R) < threshold} at baseline, both tipping
-points are \code{0} (the conclusion fails before any perturbation).
+\code{omega} is the odds by which the search favored surfacing evidence for
+the working theory: at \code{omega > 1} part of the apparent dominance of
+the counts came from how the researcher looked rather than from what
+is there, so the value falls as \code{omega} rises. \code{omega_star} is the
+bias at which it first falls below \code{threshold}. The prior stays
+uniform throughout this sweep, so the two theories keep equal weight
+and the value being swept is the Bayes factor.
 }
+
+\section{Why M_star is a posterior-odds tipping point}{
+
+A \code{Beta(1, M + 1)} prior on the whole interval reads as \code{M} background
+cases all favoring the rival, so sweeping \code{M} asks how many the
+researcher would have to grant before her report changed. That prior
+moves weight between the two theories as well as within their ranges,
+and \code{\link[=bf_binomial]{bf_binomial()}} returns the ratio of posterior masses either side
+of the cut, which is the posterior odds. \code{M_star} is therefore the
+smallest \code{M} at which the \emph{posterior odds} fall below \code{threshold}.
+
+It could not be anything else. Tilting the prior toward the rival
+commits her to shares near zero, under which counts favoring the
+working theory are more surprising still, so the Bayes factor \emph{rises}
+with \code{M} --- from 20.67 to 30.41, 39.39, 51.01 and 67.56 over the
+first five values at nine observations against three. A Bayes-factor
+tipping point under these priors would not exist. The prior odds fall
+faster than the Bayes factor rises, which is what sends the posterior
+odds down. The table in \code{\link[=bf_binomial]{bf_binomial()}} shows both columns.
+
+If the baseline value is already below \code{threshold}, both tipping
+points are \code{0}.
+}
+
 \examples{
-# The paper's running example. The binomial BF just clears 20, so both
-# tipping points are small: a slight bias or one rival-favoring
-# pseudo-observation overturns it.
+# The paper's running example. The Bayes factor just clears 20, so
+# both tipping points are small: a slight search bias, or one
+# background case favoring the rival, changes what she would report.
 s <- sens_binomial(9, 3)
 s$bf
 s$omega_star
@@ -64,5 +87,8 @@ s$M_star
 
 }
 \seealso{
-\code{\link[=bf_binomial]{bf_binomial()}}, \code{\link[=sens_urn]{sens_urn()}}, \code{\link[=sens_coding]{sens_coding()}}.
+\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} and \code{\link[=bf_binomial]{bf_binomial()}} for the value
+being swept; \code{\link[=sens_coding]{sens_coding()}} for sensitivity to coding error;
+\code{\link[=bf_rescaled]{bf_rescaled()}} for weights stated within each theory's range, which
+move weight within the ranges without moving it between them.
 }

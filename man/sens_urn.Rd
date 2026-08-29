@@ -2,7 +2,7 @@
 % Please edit documentation in R/sens_urn.R
 \name{sens_urn}
 \alias{sens_urn}
-\title{Sensitivity analysis for the urn Bayes factor}
+\title{Sensitivity analysis for the urn Bayes factor (deprecated)}
 \usage{
 sens_urn(y_W, y_R, threshold = 20)
 }
@@ -26,11 +26,22 @@ any reachable \code{omega}.}
 }
 }
 \description{
+Deprecated. The paper no longer uses the hypergeometric urn model,
+so there is no longer a reason to ask how search bias moves its Bayes
+factor. The same question about the worst-case Bayes factor is
+answered by \code{\link[=bf_separated_bias]{bf_separated_bias()}}, which tilts both theories' claims
+by the assumed bias, and the coding-error question by
+\code{\link[=sens_coding]{sens_coding()}} with \code{model = "worst_case"}.
+}
+\details{
+This function is not removed, because the first arXiv version of the
+paper cites it and its replication code calls it. It returns exactly
+what it always returned and warns once per session.
+
 Reports the bias tipping point for the urn Bayes factor: the
 smallest observation bias \code{omega > 1} at which the Bayes factor
 first drops below \code{threshold}.
-}
-\details{
+
 \code{omega > 1} makes pro-\eqn{H_1} items more likely to be drawn than
 they are in the urn, so the apparent dominance of pro-\eqn{H_1}
 evidence is partly an artifact of observation, and the Bayes factor
@@ -48,5 +59,8 @@ s$omega_star
 
 }
 \seealso{
-\code{\link[=bf_urn]{bf_urn()}}, \code{\link[=sens_binomial]{sens_binomial()}}, \code{\link[=sens_coding]{sens_coding()}}.
+\code{\link[=bf_separated_bias]{bf_separated_bias()}} and \code{\link[=sens_coding]{sens_coding()}} for the same two
+questions asked of the worst-case Bayes factor; \code{\link[=sens_binomial]{sens_binomial()}}
+for them asked of the uniform-weights Bayes factor; \code{\link[=bf_urn]{bf_urn()}} for
+the Bayes factor swept here.
 }

@@ -17,6 +17,7 @@ if (!nzchar(helpers_path) || !file.exists(helpers_path)) {
   )
 }
 source(helpers_path, local = TRUE)
+source(file.path(dirname(helpers_path), "curves.R"), local = TRUE)
 
 
 # ---- format_bf ----------------------------------------------------------
@@ -145,6 +146,17 @@ test_that("interpret_M_star(14L) reports the integer count and threshold", {
   expect_match(out, "20", fixed = TRUE)
 })
 
+test_that("interpret_M_star names the posterior odds, not the Bayes factor", {
+  # What a Beta(1, M + 1) prior drops below the threshold is the
+  # posterior odds. The Bayes factor rises with M, so prose saying the
+  # Bayes factor falls would tell the reader the opposite of the truth.
+  for (m in list(0L, NA_integer_, 14L)) {
+    out <- interpret_M_star(m, threshold = 20)
+    expect_match(out, "posterior odds", ignore.case = TRUE)
+    expect_false(grepl("Bayes factor", out, fixed = TRUE))
+  }
+})
+
 
 # ---- interpret_x_star --------------------------------------------------
 #
@@ -183,46 +195,68 @@ test_that("interpret_x_star(2L) pluralizes", {
 
 # ---- bf_omega_curve ----------------------------------------------------
 
-test_that("bf_omega_curve(9, 3, 'urn') is monotone-decreasing in omega", {
-  df <- bf_omega_curve(9, 3, "urn", threshold = 20)
+test_that("bf_omega_curve(9, 3) is monotone-decreasing in omega", {
+  # Granting more search bias toward the working theory can only lower
+  # the value, so the curve the app draws must fall from left to right.
+  df <- bf_omega_curve(9, 3, threshold = 20)
   expect_equal(nrow(df), 80)
   expect_true(all(diff(df$omega) > 0))
   expect_true(all(diff(df$bf) <= 1e-9))
 })
 
-test_that("bf_omega_curve(9, 3, 'urn') near omega=1 brackets BF = 323", {
-  # The paper's running example: bf_urn(9, 3) = 323 at omega = 1.
-  df <- bf_omega_curve(9, 3, "urn", threshold = 20)
+test_that("bf_omega_curve near omega = 1 brackets the unbiased value", {
+  # At an unbiased search the curve must pass through the number the
+  # Result tab shows, 20.67 at the running example.
+  df <- bf_omega_curve(9, 3, threshold = 20)
   idx <- which.min(abs(df$omega - 1))
-  expect_gt(df$bf[idx], 250)
-  expect_lt(df$bf[idx], 400)
+  expect_gt(df$bf[idx], 19)
+  expect_lt(df$bf[idx], 23)
 })
 
 test_that("bf_omega_curve propagates the threshold for downstream layers", {
-  df <- bf_omega_curve(9, 3, "urn", threshold = 25)
+  df <- bf_omega_curve(9, 3, threshold = 25)
   expect_true(all(df$threshold == 25))
 })
 
-test_that("bf_omega_curve labels the model in its 'model' column", {
-  df <- bf_omega_curve(9, 3, "binomial", threshold = 20)
-  expect_true(all(df$model == "binomial"))
-})
 
+# ---- post_odds_M_curve -------------------------------------------------
+#
+# A Beta(1, M + 1) prior on the whole interval from zero to one moves
+# weight between the two theories as well as within their ranges, so
+# what falls as M rises is the posterior odds, not the Bayes factor.
+# The column is named for what it holds.
 
-# ---- bf_M_curve --------------------------------------------------------
-
-test_that("bf_M_curve(10, 0, M_max=50) is monotone-decreasing in M", {
-  df <- bf_M_curve(10, 0, theta_cut = 0.5, M_max = 50, threshold = 20)
+test_that("post_odds_M_curve(10, 0, M_max=50) falls as M rises", {
+  df <- post_odds_M_curve(10, 0, M_max = 50, threshold = 20)
   expect_equal(nrow(df), 51)
-  expect_true(all(diff(df$bf) <= 1e-9))
+  expect_true(all(diff(df$post_odds) <= 1e-9))
 })
 
-test_that("bf_M_curve at M=0 reproduces bf_binomial under a uniform prior", {
-  df <- bf_M_curve(10, 0, theta_cut = 0.5, M_max = 5, threshold = 20)
-  expected <- DrWrinch::bf_binomial(
-    10, 0, prior_a = 1, prior_b = 1, theta_cut = 0.5
-  )
-  expect_equal(df$bf[1], expected)
+test_that("post_odds_M_curve at M = 0 is the uniform-weights Bayes factor", {
+  # At M = 0 the prior is uniform, the two theories carry equal weight,
+  # the prior odds are one, and the posterior odds and the Bayes factor
+  # coincide. That is the only M at which they do.
+  df <- post_odds_M_curve(10, 0, M_max = 5, threshold = 20)
+  expect_equal(df$post_odds[1], DrWrinch::bf_uniform_weights(10, 0))
+})
+
+test_that("the Bayes factor rises where the posterior odds fall", {
+  # The fact that makes the naming matter. Tilting the prior toward the
+  # rival commits her to shares near zero, under which the counts are
+  # more surprising still, so the Bayes factor rises even as the
+  # posterior odds fall.
+  df <- post_odds_M_curve(9, 3, M_max = 4, threshold = 20)
+  bayes_factor <- vapply(0:4, function(M) {
+    lik <- function(t) stats::dbinom(9, 12, t)
+    num <- stats::integrate(
+      function(t) lik(t) * stats::dbeta(t, 1, M + 1), 0.5, 1)$value
+    den <- stats::integrate(
+      function(t) lik(t) * stats::dbeta(t, 1, M + 1), 0, 0.5)$value
+    pi_1 <- 1 - stats::pbeta(0.5, 1, M + 1)
+    (num / pi_1) / (den / (1 - pi_1))
+  }, numeric(1))
+  expect_true(all(diff(df$post_odds) < 0))
+  expect_true(all(diff(bayes_factor) > 0))
 })
 
 
