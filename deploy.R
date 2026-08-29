@@ -28,6 +28,7 @@ rsconnect::deployApp(
     "ui.R",
     "server.R",
     "R/helpers.R",
+    "R/curves.R",
     "R/plots.R"
   ),
   forceUpdate = TRUE

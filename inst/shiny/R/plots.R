@@ -22,17 +22,26 @@ plot_bf_decomposition <- function(y_W, y_R) {
   df <- bf_decomposition(y_W, y_R)
   n <- y_W + y_R
 
-  p <- plotly::plot_ly(df, x = ~k, type = "bar")
+  # The bar type belongs on each add_trace() below, never here: a
+  # type on the base call materialises a fourth trace built from x
+  # alone, which plotly draws with the count itself as the height.
+  # That trace has no name, reaches the legend as "trace 0", and its
+  # heights run to n while every real bar is a probability below one,
+  # so it takes over the y scale and flattens the three real bars.
+  p <- plotly::plot_ly(df, x = ~k)
   p <- plotly::add_trace(
-    p, y = ~numerator, name = "averaged over shares above one half",
+    p, y = ~numerator, type = "bar",
+    name = "averaged over shares above one half",
     marker = list(color = NUM_COL)
   )
   p <- plotly::add_trace(
-    p, y = ~den_avg, name = "averaged over shares at or below one half",
+    p, y = ~den_avg, type = "bar",
+    name = "averaged over shares at or below one half",
     marker = list(color = AVG_COL)
   )
   p <- plotly::add_trace(
-    p, y = ~den_half, name = "at a share of one half, the rival's best case",
+    p, y = ~den_half, type = "bar",
+    name = "at a share of one half, the rival's best case",
     marker = list(color = HALF_COL)
   )
   # Mark the count the researcher actually reported, so the two
@@ -45,7 +54,12 @@ plot_bf_decomposition <- function(y_W, y_R) {
       dtick = 1
     ),
     yaxis = list(title = "probability of the count"),
-    legend = list(orientation = "h", y = -0.25),
+    # The horizontal legend and the x-axis title are both drawn below
+    # the plotting area, so moving the legend down without widening
+    # the bottom margin prints the axis title on top of it. The two
+    # settings only work as a pair.
+    legend = list(orientation = "h", y = -0.32, yanchor = "top"),
+    margin = list(b = 120),
     shapes = list(list(
       type = "line",
       x0 = y_W, x1 = y_W, yref = "paper", y0 = 0, y1 = 1,
@@ -70,6 +84,12 @@ plot_bf_vs_omega <- function(y_W, y_R, threshold,
   # A quadrature failure at an extreme omega leaves a gap rather than
   # letting the log axis truncate the curve silently.
   df <- df[is.finite(df$bf), , drop = FALSE]
+
+  # Doublings spanning the data: 0.25, 0.5, 1, 2, 4, 8 at the defaults.
+  omega_ticks <- 2^(seq(
+    floor(log2(min(df$omega))),
+    ceiling(log2(max(df$omega)))
+  ))
 
   p <- plotly::plot_ly(
     data = df, x = ~omega, y = ~bf,
@@ -96,8 +116,19 @@ plot_bf_vs_omega <- function(y_W, y_R, threshold,
   }
   plotly::layout(
     p,
-    xaxis = list(type = "log",
-                 title = "assumed search bias toward the working theory"),
+    # plotly labels a log axis's minor ticks with their mantissa, which
+    # turned the range from 0.25 to 8 into "3 4 5 6 7 8 9 1 2 3 4 5 6 7
+    # 8". The middle "1" was a search bias of one, the point at which the
+    # search favours neither theory, and nothing on the axis said so.
+    # The ticks below are the doublings either side of that point, taken
+    # from the data so they still fit if omega_range is widened.
+    xaxis = list(
+      type = "log",
+      title = "assumed search bias toward the working theory",
+      tickmode = "array",
+      tickvals = omega_ticks,
+      ticktext = as.character(omega_ticks)
+    ),
     yaxis = list(type = "log", title = "Bayes factor"),
     hovermode = "x unified",
     shapes = shapes

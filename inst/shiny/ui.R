@@ -17,6 +17,14 @@ bslib::page_sidebar(
   title = "DrWrinch: Bayes factors for process tracing",
   theme = bslib::bs_theme(version = 5),
 
+  # Not fillable. A fillable page forces each tab to fit the viewport
+  # height, which collapsed the Sensitivity tab's two plots -- 360px
+  # and 320px of requested height, under a paragraph of text -- into
+  # unreadable strips with no way to scroll to them. Ordinary document
+  # flow honours the heights the plots ask for and lets the page
+  # scroll when a tab is taller than the window.
+  fillable = FALSE,
+
   sidebar = bslib::sidebar(
     title = "Evidence counts",
     width = 320,
@@ -47,6 +55,15 @@ bslib::page_sidebar(
 
   bslib::navset_card_tab(
     id = "main_tabs",
+
+    # Give each tab its natural height instead of squeezing it to fit
+    # the card. bslib wraps every nav_panel in a card_body() that is
+    # fillable by default, which compressed the Sensitivity tab's two
+    # plots -- 360px and 320px of requested height -- into strips about
+    # twenty pixels tall, with no way to scroll to them. navset_card_tab()
+    # has no fillable argument in bslib 0.11, so the wrapper it applies
+    # is replaced with a non-fillable one.
+    wrapper = function(...) bslib::card_body(..., fillable = FALSE),
 
     bslib::nav_panel(
       title = "Result",
