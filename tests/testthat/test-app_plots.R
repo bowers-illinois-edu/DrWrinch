@@ -137,3 +137,27 @@ test_that("the search-bias axis is labelled with search-bias values", {
   expect_length(layout$xaxis$tickvals, 6)
   expect_equal(layout$xaxis$tickmode, "array")
 })
+
+
+test_that("both sensitivity y axes carry one tick per decade", {
+  # plotly labelled these log axes with mantissas and SI prefixes. The
+  # Bayes-factor axis read "2 / 10k / 5 / 2 / 1000 / 5" and the
+  # posterior-odds axis read "1 / 0.01 / 100u / 1u / 10n", where u and n
+  # were micro and nano. A reader could not tell which gridline was
+  # which. One tick per decade, written as a power of ten, can only be
+  # read one way.
+  built <- list(
+    plotly::plotly_build(plot_bf_vs_omega(Y_W, Y_R, threshold = 20)),
+    plotly::plotly_build(
+      plot_post_odds_vs_M(Y_W, Y_R, threshold = 20, M_max = 10L)
+    )
+  )
+  for (b in built) {
+    y <- b$x$layout$yaxis
+    expect_equal(y$tickmode, "array")
+    expect_equal(y$exponentformat, "power")
+    expect_gt(length(y$tickvals), 1)
+    # Every tick value is a whole power of ten.
+    expect_equal(log10(y$tickvals), round(log10(y$tickvals)))
+  }
+})

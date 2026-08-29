@@ -12,6 +12,24 @@ LINE_COL <- "#666666"
 MARK_COL <- "#d62728"
 
 
+# decade_ticks: one tick per power of ten spanning the values given.
+# Both sensitivity plots put a quantity that runs over many decades on a
+# log axis, and plotly labels such an axis with a mixture of mantissas
+# ("2" and "5" between the decades) and SI prefixes ("100u" for a
+# hundred-millionth), which leaves a reader unable to say what a given
+# gridline is. Ticks only at the decades, written as powers of ten, can
+# be read one way. Values at or below zero cannot sit on a log axis, so
+# they take no part in setting the range. The dashed threshold line is
+# part of both pictures, so its value is passed in alongside the data.
+decade_ticks <- function(x) {
+  x <- x[is.finite(x) & x > 0]
+  if (length(x) == 0L) {
+    return(numeric(0))
+  }
+  10^(seq(floor(log10(min(x))), ceiling(log10(max(x)))))
+}
+
+
 # plot_bf_decomposition: the three probabilities behind both Bayes
 # factors, at every count of N observations the researcher might have
 # reported. Three bars per count. Dividing the first bar by the second
@@ -91,6 +109,11 @@ plot_bf_vs_omega <- function(y_W, y_R, threshold,
     ceiling(log2(max(df$omega)))
   ))
 
+  # One tick per decade on the Bayes-factor axis. plotly labelled its
+  # minor ticks with their mantissa and abbreviated the large values
+  # with SI prefixes, so the axis read "2 / 10k / 5 / 2 / 1000 / 5".
+  bf_ticks <- decade_ticks(c(df$bf, threshold))
+
   p <- plotly::plot_ly(
     data = df, x = ~omega, y = ~bf,
     type = "scatter", mode = "lines",
@@ -129,7 +152,13 @@ plot_bf_vs_omega <- function(y_W, y_R, threshold,
       tickvals = omega_ticks,
       ticktext = as.character(omega_ticks)
     ),
-    yaxis = list(type = "log", title = "Bayes factor"),
+    yaxis = list(
+      type = "log",
+      title = "Bayes factor",
+      tickmode = "array",
+      tickvals = bf_ticks,
+      exponentformat = "power"
+    ),
     hovermode = "x unified",
     shapes = shapes
   )
@@ -145,6 +174,10 @@ plot_post_odds_vs_M <- function(y_W, y_R, threshold,
                                 M_max = 50L,
                                 M_star = NULL) {
   df <- post_odds_M_curve(y_W, y_R, theta_cut, M_max, threshold)
+
+  # The odds fall through eight decades, which plotly wrote as
+  # "1 / 0.01 / 100u / 1u / 10n" using SI prefixes for micro and nano.
+  odds_ticks <- decade_ticks(c(df$post_odds, threshold))
 
   p <- plotly::plot_ly(
     data = df, x = ~M, y = ~post_odds,
@@ -170,7 +203,13 @@ plot_post_odds_vs_M <- function(y_W, y_R, threshold,
   plotly::layout(
     p,
     xaxis = list(title = "background cases favoring the rival (M)"),
-    yaxis = list(type = "log", title = "posterior odds"),
+    yaxis = list(
+      type = "log",
+      title = "posterior odds",
+      tickmode = "array",
+      tickvals = odds_ticks,
+      exponentformat = "power"
+    ),
     shapes = shapes
   )
 }
