@@ -29,11 +29,12 @@ Two things a later session must not have to remember on its own. First,
 prior but the uniform, and its roxygen used to say otherwise; the fix is
 in the help page, in `NEWS.md`, and pinned by
 `tests/testthat/test-bf_uniform_weights.R`, but `sens_binomial()`'s
-`M_star` roxygen now carries the same correction. Second,
-`Paper/appendix.qmd` in the paper repository defines its own
-`bf_rescaled(kk, rr, tau)`, which the package's new export will shadow
-silently; a TODO comment sits above that definition, and the plan's task
-8 repeats it. Third, `vignettes/getting-started.Rmd` still teaches two
+`M_star` roxygen now carries the same correction. Second, the name
+collision between the package's `bf_rescaled()` and the paper's own is
+already resolved: the paper repository renamed its local one to
+`bf_count_rescaled()` in commit `1dd4ec1`. Task 8 is now just the switch
+from `source(here::here("tests/..."))` to `library(DrWrinch)` in
+`Paper/evalues.qmd` and `Paper/appendix.qmd`, plus `renv.lock`. Third, `vignettes/getting-started.Rmd` still teaches two
 probability models and calls the deprecated urn functions, so task 7 has
 to rewrite it as well as the README.
 

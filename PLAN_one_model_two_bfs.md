@@ -162,14 +162,18 @@ toward the rival, a Bayes-factor tipping point under those priors does
 not exist, so `M_star` could only ever have been a posterior-odds
 tipping point.
 
-**Task 8 has a name collision waiting for it.** The package now exports
-`bf_rescaled(y_W, y_R, a1, b1, aR, bR)`. `Paper/appendix.qmd` in the
-paper repository already defines a different `bf_rescaled(kk, rr, tau)`
-in the dependence section, the count-rescaling approximation. Both accept
-three numbers without complaint, so once that document loads the package
-the existing call `bf_rescaled(9, 3, tau)` returns a wrong number rather
-than failing. A TODO comment sits above the local definition in
-`Paper/appendix.qmd` saying to rename it in the session that does task 8.
+**Resolved 2026-08-29: task 8's name collision.** The package exports
+`bf_rescaled(y_W, y_R, a1, b1, aR, bR)`, and `Paper/appendix.qmd` in the
+paper repository defined a different `bf_rescaled(kk, rr, tau)` in the
+dependence section. Both accept three numbers without complaint, so the
+existing call would have returned a wrong number rather than failing once
+that document loaded the package. The paper repository's commit `1dd4ec1`
+renamed the local one to `bf_count_rescaled()` and records the reason
+above the definition. What task 8 still has to do is the switch itself:
+`Paper/evalues.qmd` still sources `tests/bf_bounded.R`,
+`tests/bf_rescaled.R`, `tests/bf_weighted.R`, and `tests/bf_separated.R`,
+and `Paper/appendix.qmd` sources `../tests/bf_rescaled.R`. Those become
+`library(DrWrinch)`, and `renv.lock` there needs updating.
 
 **Done 2026-08-29: task 7 included the vignette.** The plan's task 7 names the
 README and the package-level roxygen. `vignettes/getting-started.Rmd`
