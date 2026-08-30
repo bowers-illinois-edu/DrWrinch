@@ -8,3 +8,7 @@ docs
 vignettes/*.html
 vignettes/*.R
 inst/doc
+
+# Deployment records: rsconnect rewrites bundleId here on every deploy.
+# The application is pinned by appId in deploy.R instead.
+inst/shiny/rsconnect/
