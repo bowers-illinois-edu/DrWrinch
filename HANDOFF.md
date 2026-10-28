@@ -1,5 +1,5 @@
 ---
-next: Nothing is pending in the package. The paper-repository edits listed in PLAN_decision_rule.md were made on 2026-10-27 in ~/repos/fully_specified_bf (see its HANDOFF.md), committed, and pushed.
+next: Nothing is pending in the package. On 2026-10-27, at Jake's request, Claude made the paper-repository edits listed in PLAN_decision_rule.md in ~/repos/fully_specified_bf, and committed and pushed them (see that repository's HANDOFF.md).
 kind: code
 project_kind: R package
 milestone: the paper and its appendix built on DrWrinch 0.0.2.1 from GitHub
