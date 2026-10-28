@@ -2,6 +2,12 @@
 
 Written 2026-10-27 by Claude for Jake, in this repository.
 
+Status at the end of 2026-10-27: the package changes below are made, in
+DrWrinch 0.0.2.1 (commit `f3c04a8`), which is on GitHub and on
+shinyapps.io. The edits to the paper repository are not made. The
+sections from “What changed in the paper” through “Decisions” describe
+the package as it stood before the update.
+
 DrWrinch was last updated on 2026-08-29: version 0.0.2.0, commit
 `e551b80`, already pushed to GitHub. Since then the paper
 (`~/repos/fully_specified_bf`, last commit `c93870c` on 2026-10-19) has
@@ -9,7 +15,8 @@ changed its rule for setting the rival aside, added two computations the
 package lacks, re-coded one application, and added a finite-archive
 version of both Bayes factors. Most of what the package has to do in
 response follows from the paper with no choice left open. Three choices
-about the package’s interface remain, and they need your decision.
+about the package’s interface were left open, and the section “Your
+answers, 2026-10-27” records how you settled them.
 
 ## What changed in the paper
 
@@ -26,22 +33,23 @@ both conditions hold, because 20.67 is at least 20 and 2.73 is above 1.
 The error-rate theorem is still in the supplement, but the authors no
 longer rest the main paper’s rule on it.
 
-No function in the package computes whether this rule holds, and three
-places still follow the old rule:
+No function in the package computed whether this rule held, and three
+places followed the old rule:
 
-- `sens_binomial()` returns the search bias at which the uniform-weights
-  Bayes factor falls below 20. It returns nothing about the worst-case
-  Bayes factor.
-- `sens_coding(model = "worst_case")` returns a table of separations
+- `sens_binomial()` returned the search bias at which the
+  uniform-weights Bayes factor falls below 20. It returned nothing about
+  the worst-case Bayes factor.
+- `sens_coding(model = "worst_case")` returned a table of separations
   $`g^*`$, one row per re-coding. The supplement has commented that
   table out (`Paper/appendix.qmd`, lines 1157–1186). The main paper
   still computes $`g^*`$ in one code chunk but no longer mentions it in
   its text.
-- The Shiny app applies one threshold to both Bayes factors. Its
-  worst-case card says that a researcher who sets the rival aside at the
-  typed threshold is misled “at most one time in twenty,” whatever
-  threshold was typed. The guarantee at a threshold $`t`$ is one time in
-  $`t`$, so at the paper’s threshold of 1 it promises nothing.
+- The Shiny app applied one threshold to both Bayes factors. Its panel
+  for the worst-case Bayes factor said that a researcher who sets the
+  rival aside at the typed threshold is misled “at most one time in
+  twenty,” whatever threshold was typed. The guarantee at a threshold
+  $`t`$ is one time in $`t`$, so at the paper’s threshold of 1 it
+  promises nothing.
 
 ### Both sensitivity analyses now ask when either condition fails
 
@@ -50,8 +58,8 @@ the researcher would no longer set the rival aside: either the
 uniform-weights Bayes factor has fallen to 20 or the worst-case Bayes
 factor has fallen to 1, whichever happens at the smaller bias
 (`Paper/evalues.qmd`, sec-sensitivity, and the function `omega_star()`
-in the paper’s `tests/bf_weighted.R`). The second half needs the
-worst-case Bayes factor under a biased search, which Daniel added on
+in the paper’s `tests/bf_weighted.R`). The worst-case condition needs
+the worst-case Bayes factor under a biased search, which Daniel added on
 2026-10-01 as `worst_bf_weighted()`. A search with bias $`\omega`$ turns
 a share $`\theta`$ of the evidence into a share
 $`\omega\theta/(\omega\theta + 1 - \theta)`$ among the observations
@@ -86,7 +94,7 @@ state. The replications’ sensitivity tables report it beside the
 uniform-weights value: at nine of twelve it is 2.07 under Beta(1/2, 1/2)
 and 4.38 under Beta(10, 10). The package’s
 [`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
-takes no weights.
+took no weights.
 
 ### One application was re-coded
 
@@ -96,19 +104,18 @@ for the working theory and 3 for the rival to 11 and 2 (commit
 a rival predictor. The uniform-weights Bayes factor rises from 33.86 to
 153.57. The worst-case Bayes factor rises from 3.97 to 14.91. The number
 of re-codings that takes the uniform-weights value below 20 rises from
-one to two. `tests/testthat/test-applications.R` still pins the old
-counts.
+one to two. `tests/testthat/test-applications.R` pinned the old counts.
 
 ### The supplement has a finite-archive version of both Bayes factors
 
 On 2026-09-11 Daniel added the section “Finite evidence without
-replacement” (`Paper/appendix.qmd`, lines 143–245). Write $`M`$ for the
-number of documents in the archive and $`K`$ for the number that support
-the working theory. The working theory claims $`K > M/2`$ and the rival
-claims $`K`$ at most $`M/2`$. The uniform-weights version averages the
-hypergeometric probability of the counts over each theory’s values of
-$`K`$. The worst-case version evaluates the rival at the largest $`K`$
-at or below $`M/2`$. At nine of twelve drawn from an archive of 20, the
+replacement” (`Paper/appendix.qmd`, lines 143–245). An archive holds
+$`M`$ documents, and $`K`$ of them support the working theory. The
+working theory claims $`K > M/2`$ and the rival claims $`K`$ at most
+$`M/2`$. The uniform-weights version averages the hypergeometric
+probability of the counts over each theory’s values of $`K`$. The
+worst-case version evaluates the rival at the largest $`K`$ at or below
+$`M/2`$. At nine of twelve drawn from an archive of 20, the
 uniform-weights version is 162.88. In every case the authors computed,
 whenever the binomial Bayes factors meet the rule, the finite ones meet
 it too. So a researcher need not choose $`M`$, but may vary it as a
@@ -118,16 +125,17 @@ counts.
 
 ### Two analyses the package offers are no longer in the paper
 
-The whole-interval Beta$`(1, M + 1)`$ prior, which `sens_binomial()`
-uses for `M_star` and which the app draws in its second sensitivity
-plot, now sits inside a commented block of the supplement (lines
-465–532). The separated Bayes factor and its separation $`g^*`$ are
-commented out of the supplement (lines 769–1062).
+The whole-interval Beta$`(1, M + 1)`$ prior, where $`M`$ counts
+background cases favoring the rival rather than documents in an archive,
+was what `sens_binomial()` used for `M_star` and what the app drew in
+its second sensitivity plot. It now sits inside a commented block of the
+supplement (lines 465–532). The separated Bayes factor and its
+separation $`g^*`$ are commented out of the supplement (lines 769–1062).
 
 ### The paper dropped gendered pronouns
 
 On 2026-08-30 you removed “she,” “her,” “he,” and “his” from both
-documents. The package’s help pages, README, vignette, and app still use
+documents. The package’s help pages, README, vignette, and app used
 “she” for the researcher and “her” for the rival, on 221 lines.
 
 ## Five worst-case cells in the supplement’s study tables
@@ -180,15 +188,15 @@ no rival observations, and for Hammoud-Gallego and Freier
 $`k/r = 11/2 = 5.5`$ is above 5.
 
 None of the paper’s decisions or tipping points change. Every affected
-cell is below 1 under both computations, so the rule keeps the rival
-there either way. And each bias at which the paper reports the
-worst-case value reaching 1 is below $`k/r`$ for its study: 1.56 against
-3 for Andersen, 2.01 against 4 for Mor, 2.49 against 4.67 for Winward,
-and 2.81 against 5.5 for Hammoud-Gallego and Freier. That ordering holds
-for any counts. At the bias where $`\omega/(1 + \omega)`$ equals
-$`k/N`$, the denominator is the largest probability the counts can have
-at any share, and the numerator averages smaller probabilities, so the
-worst-case value is below 1 at that bias. It starts above 1 at
+cell is below 1 under both computations, so a researcher following the
+rule keeps the rival there either way. And each bias at which the paper
+reports the worst-case value reaching 1 is below $`k/r`$ for its study:
+1.56 against 3 for Andersen, 2.01 against 4 for Mor, 2.49 against 4.67
+for Winward, and 2.81 against 5.5 for Hammoud-Gallego and Freier. That
+ordering holds for any counts. At the bias where $`\omega/(1 + \omega)`$
+equals $`k/N`$, the denominator is the largest probability the counts
+can have at any share, and the numerator averages smaller probabilities,
+so the worst-case value is below 1 at that bias. It starts above 1 at
 $`\omega = 1`$ whenever the rule holds, so it reaches 1 at a smaller
 bias, where one half is still the rival’s best share.
 
@@ -291,7 +299,7 @@ replications still compute the urn’s Bayes factor (column `hyper_bf`)
 and the separation (`separation_g`), which no table prints; removing
 them is cleanup, not a fix.
 
-## What I will change without asking
+## Changes made without asking
 
 1.  [`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
     gains three arguments: `omega` for search bias, which matches
@@ -299,8 +307,8 @@ them is cleanup, not a fix.
     theory’s weights, which match
     [`bf_rescaled()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_rescaled.md).
     The closed form stays as the fast path at the defaults. Other values
-    are integrated, as `bf_binomial()` already integrates when `omega`
-    is not 1.
+    are integrated, as `bf_binomial()` integrated when `omega` was not
+    1.
 2.  `test-applications.R` moves Hammoud-Gallego and Freier to (11, 2).
     It also pins each study’s $`\omega^\star`$ as the applications table
     reports it: 5.49, 1.74, 1.70, 1.14, and 1.01, no entry for Pavone
@@ -317,10 +325,10 @@ them is cleanup, not a fix.
     20. They drop the gendered pronouns by the four rules you used in
         the paper: drop the possessive, recast the sentence, use
         singular “they,” or name the role.
-5.  The app takes two thresholds, 20 and 1, and says whether the rule
-    sets the rival aside. It reports $`\omega^\star`$ and the coding
-    tipping point under the rule. The worst-case card loses its
-    separation line.
+5.  The app takes two thresholds, 20 and 1, and says whether a
+    researcher following the rule sets the rival aside. It reports
+    $`\omega^\star`$ and the coding tipping point under the rule. The
+    panel for the worst-case Bayes factor loses its separation line.
 6.  The root finder behind
     [`sens_bias()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_bias.md)
     uses the paper’s tolerance, so that its biases agree with the
@@ -328,8 +336,8 @@ them is cleanup, not a fix.
 7.  The version moves from 0.0.2.0 to 0.0.2.1, and `.dw_needed` in
     `inst/shiny/global.R` moves with it.
 
-I will not touch the paper repository. The section before this one lists
-the edits it needs, and those edits need the new functions first.
+This session did not change the paper repository. The section before
+this one lists the edits it needs.
 
 ## Decisions
 
@@ -399,9 +407,8 @@ the edits it needs, and those edits need the new functions first.
 
 Dropping `bf_binomial()` and `bf_urn()` breaks the two cross-checks in
 the paper’s `tests/bf_weighted.R` that call them through `DrWrinch::`,
-as soon as the paper’s renv library gets the new version. The switch to
-[`library(DrWrinch)`](https://github.com/bowers-illinois-edu/DrWrinch)
-in the paper has to remove those two checks.
+as soon as the paper’s renv library gets the new version. Item 1 of the
+section on the paper repository says how to fix each one.
 
 ## Tests written before implementation
 
@@ -410,7 +417,7 @@ Rewritten: `test-bf_uniform_weights.R`, `test-bf_worst_case.R`,
 `test-bf_finite.R`, `test-sens_bias.R`. Removed with the functions they
 tested: `test-bf_binomial.R`, `test-bf_urn.R`, `test-sens.R`,
 `test-deprecated.R`, `setup-deprecation.R`. The app’s four test files
-are rewritten after the functions passed their tests and before the app
+were rewritten after the functions passed their tests and before the app
 was changed: `test-app_helpers.R` (new helpers `interpret_rule()`,
 `interpret_bias()`, `interpret_coding()`, and a `bf_omega_curve()` that
 returns both Bayes factors), `test-app_plots.R` (one bias picture with
@@ -419,8 +426,17 @@ inputs, a rule card, no separation, no prior sweep), and
 `test-app_decomposition.R` (renamed from `test-app_worst_case.R`, with
 the separation tests removed).
 
-One behavior the tests pin that the memo did not anticipate: the
+The tests pin one behavior the memo did not anticipate. The
 finite-archive worst-case value is 0/0, and so `NaN`, when neither the
 working theory nor the half-split archive can produce the counts (no
 supporting document in a full reading of an archive of six). That
 happens only when the counts favor the rival.
+
+## Decision
+
+The paper’s HANDOFF says Matias Lopez plans to submit by 2026-10-30.
+Should the paper-repository edits above be made before that submission?
+I recommend yes. The supplement’s reproduction section calls functions
+that are no longer on GitHub, so a reviewer who installs the package to
+reproduce the running example would meet errors, and the five worst-case
+cells would otherwise go out computed with the rival held at one half.

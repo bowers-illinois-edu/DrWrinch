@@ -28,9 +28,10 @@ differ in the denominator.
   one half at these counts. It gives 2.73, the smallest Bayes factor any
   weights on the rival’s shares can give.
 
-The paper’s rule sets the rival aside, at least provisionally, when the
-uniform-weights Bayes factor is 20 or more and the worst-case Bayes
-factor is above 1. Nine of twelve meets both conditions.
+Under the paper’s rule, a researcher sets the rival aside, at least
+provisionally, when the uniform-weights Bayes factor is 20 or more and
+the worst-case Bayes factor is above 1. Nine of twelve meets both
+conditions.
 
 [`sens_bias()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_bias.md)
 and

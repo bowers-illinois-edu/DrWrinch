@@ -10,11 +10,11 @@ the edits the paper repository needs once this version is on GitHub.
 The R package implementing Lopez, Bowers, and Gajardo Cooper (2026),
 “Fully specified Bayes factors for process tracing.” The paper is in
 `~/repos/fully_specified_bf` and is the source of truth for notation and
-methods. Named after Dorothy Maud Wrinch (1894–1976), whose joint papers
-with Harold Jeffreys developed the framework that became Jeffreys’s
-theory of Bayes factors. The companion package `DrBristol`
-(`~/repos/DrBristol`) implements p-value methods for the same problems;
-the two stay separate.
+methods. The package is named after Dorothy Maud Wrinch (1894–1976),
+whose joint papers with Harold Jeffreys developed the framework that
+became Jeffreys’s theory of Bayes factors. The companion package
+`DrBristol` (`~/repos/DrBristol`) implements p-value methods for the
+same problems; the two stay separate.
 
 ## State of the package, 2026-10-27
 
@@ -22,13 +22,15 @@ Version 0.0.2.1, commit `f3c04a8`, pushed to `main` on 2026-10-27. All
 134 tests (1101 expectations) succeed with no warnings, and
 `devtools::check()` reports 0 errors, 0 warnings, 0 notes. The pkgdown
 workflow rebuilt the site from that commit; its previous run, on
-2026-08-30, had failed. The hosted app runs 0.0.2.1: both tabs render
-the running example, with the rule set aside at 20.67 and 2.73, one
-re-coding, and a bias of 1.01.
+2026-08-30, had failed. The hosted app runs 0.0.2.1. Both tabs render
+the running example: Bayes factors of 20.67 and 2.73, under which a
+researcher following the rule sets the rival aside, and a decision that
+one re-coding or a bias of 1.01 would change.
 
-The paper’s rule sets the rival aside, at least provisionally, when the
-uniform-weights Bayes factor is 20 or more and the worst-case Bayes
-factor is above 1. The exported functions follow it:
+Under the paper’s rule, a researcher sets the rival aside, at least
+provisionally, when the uniform-weights Bayes factor is 20 or more and
+the worst-case Bayes factor is above 1. The exported functions follow
+it:
 
 - `bf_uniform_weights(y_W, y_R, omega)`, in `R/bf_uniform_weights.R`.
 - `bf_worst_case(y_W, y_R, omega, a1, b1)`, in `R/bf_worst_case.R`.
@@ -78,13 +80,14 @@ Bayes factors against the bias. `.dw_needed` in `inst/shiny/global.R` is
 
 The paper still sources its own `tests/*.R`. Two cross-checks in its
 `tests/bf_weighted.R` call `DrWrinch::bf_binomial()` and
-`DrWrinch::bf_urn()`, so the paper, the supplement, and the replications
-will stop with an error as soon as the paper’s renv library installs
-this version. `PLAN_decision_rule.md` lists those fixes, the
-supplement’s reproduction section rewrite, the `renv.lock` update, and
-the five worst-case cells. The current arXiv preprint’s reproduction
-section calls removed functions, so the next arXiv replacement is what
-brings the preprint and the package back into agreement.
+`DrWrinch::bf_urn()`, so rendering the paper or the supplement, or
+running the replications, will stop with an error as soon as the paper’s
+renv library installs this version. `PLAN_decision_rule.md` lists those
+fixes, the supplement’s reproduction section rewrite, the `renv.lock`
+update, and the five worst-case cells. The current arXiv preprint’s
+reproduction section calls removed functions, so the next arXiv
+replacement is what brings the preprint and the package back into
+agreement.
 
 ## Deployment failures and their fixes
 
