@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,207 +70,294 @@
 <div class="section level2">
 <h2 id="the-problem">The problem<a class="anchor" aria-label="anchor" href="#the-problem"></a>
 </h2>
-<p>A researcher classifying within-case evidence for a working theory
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>1</mn></msub><annotation encoding="application/x-tex">H_1</annotation></semantics></math>)
-against a single rival
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>R</mi></msub><annotation encoding="application/x-tex">H_R</annotation></semantics></math>)
-wants to summarize the weight of evidence with a Bayes factor. The
-challenge is that the per-observation probabilities a Bayes factor
-requires are hard to motivate without overcommitting. DrWrinch supplies
-two fully specified generative models that produce those probabilities,
-both tilted against
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>1</mn></msub><annotation encoding="application/x-tex">H_1</annotation></semantics></math>
-by construction, so the reported Bayes factor is a lower bound on the
-evidence in favor of the working theory.</p>
-<p>This vignette works the running example from Lopez, Bowers, and
-Gajardo Cooper (2026): nine pieces of evidence favoring
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>1</mn></msub><annotation encoding="application/x-tex">H_1</annotation></semantics></math>
-and three favoring
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>R</mi></msub><annotation encoding="application/x-tex">H_R</annotation></semantics></math>.</p>
+<p>A researcher studying democratic breakdown has read the sources and
+coded each observation as supporting a working theory or a single rival.
+Nine observations support the working theory and three support the
+rival. The researcher wants to say how much more probable those twelve
+observations are if the working theory holds than if the rival does, in
+a way a critic cannot call arithmetic chosen to suit the conclusion.</p>
+<p>A Bayes factor is that ratio of probabilities. Getting it takes a
+probability for the counts under each theory, and a theory stated in
+words does not supply one. Lopez, Bowers, and Gajardo Cooper (2026)
+derive both probabilities from one model, which this package implements.
+This vignette works their running example: nine observations for the
+working theory, three for the rival.</p>
 </div>
 <div class="section level2">
-<h2 id="two-models">Two models<a class="anchor" aria-label="anchor" href="#two-models"></a>
+<h2 id="one-model">One model<a class="anchor" aria-label="anchor" href="#one-model"></a>
 </h2>
-<p><strong>Binomial model.</strong> Each observation is an independent
-Bernoulli draw from an infinite evidence universe with success
-probability
+<p>Suppose each observation the researcher might have made supports the
+working theory with probability
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>.
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>1</mn></msub><annotation encoding="application/x-tex">H_1</annotation></semantics></math>
-corresponds to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>&gt;</mo><mn>1</mn><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">\theta &gt; 1/2</annotation></semantics></math>.
-Under a uniform prior on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>,
-the Bayes factor is the ratio of posterior masses on the two sides of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">1/2</annotation></semantics></math>.
-This model fits research designs where the evidence universe is
-open-ended: ongoing interviews, an expanding archive.</p>
+Read
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+as the share of the available evidence that supports the working theory.
+The working theory claims that share is above one half. The rival claims
+it is at or below one half.</p>
+<p>At a given share, the probability of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+supporting observations out of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+is the binomial probability, so every number below is one a reader can
+recompute.</p>
+</div>
+<div class="section level2">
+<h2 id="why-one-model-gives-two-bayes-factors">Why one model gives two Bayes factors<a class="anchor" aria-label="anchor" href="#why-one-model-gives-two-bayes-factors"></a>
+</h2>
+<p>Each theory names a range of shares, and a range is not a probability
+for the counts. The researcher turns the working theory’s range into a
+probability by averaging the binomial probability over the shares above
+one half, giving each share the same weight. That average is the
+numerator of both Bayes factors.</p>
+<p>For the rival there are two answers. The first holds the rival to
+every share in its range equally and averages the same way. The second
+gives the rival the share in its range that makes the counts most
+probable, which is one half when the counts favor the working theory.
+Both denominators, and the numerator they share, are numbers anyone can
+compute:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bf_binomial.html">bf_binomial</a></span><span class="op">(</span>y_W <span class="op">=</span> <span class="fl">9</span>, y_R <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 20.67196</span></span></code></pre></div>
-<p><strong>Hypergeometric urn model (Formulation C).</strong> Evidence
-is drawn without replacement from a finite urn. The Working Theory
-Favorable (WTF) sub-model has urn composition
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>y</mi><mi>W</mi></msub><mo>+</mo><mn>1</mn><mo>,</mo><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><msub><mi>y</mi><mi>R</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(y_W + 1, \max(1, y_R))</annotation></semantics></math>;
-the Rival Theory Favorable (RTF) sub-model has urn composition
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>y</mi><mi>W</mi></msub><mo>,</mo><msub><mi>y</mi><mi>W</mi></msub><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(y_W, y_W + 1)</annotation></semantics></math>.
-The construction adds one unobserved
-pro-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>1</mn></msub><annotation encoding="application/x-tex">H_1</annotation></semantics></math>
-item to the working theory’s urn and tilts the rival’s urn toward
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>R</mi></msub><annotation encoding="application/x-tex">H_R</annotation></semantics></math>
-by exactly one item. This model fits research designs where the evidence
-base is bounded: a closed historical archive, a fixed roster of
-documents.</p>
+<code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">12</span></span>
+<span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fl">9</span></span>
+<span></span>
+<span><span class="co"># Averaging over a range half as wide as the interval from 0 to 1 means</span></span>
+<span><span class="co"># dividing the integral by one half, which is the factor of 2 below.</span></span>
+<span><span class="va">numerator</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/integrate.html" class="external-link">integrate</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">dbinom</a></span><span class="op">(</span><span class="va">k</span>, <span class="va">n</span>, <span class="va">t</span><span class="op">)</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="va">den_avg</span>   <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/integrate.html" class="external-link">integrate</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">dbinom</a></span><span class="op">(</span><span class="va">k</span>, <span class="va">n</span>, <span class="va">t</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="va">den_half</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">dbinom</a></span><span class="op">(</span><span class="va">k</span>, <span class="va">n</span>, <span class="fl">0.5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>numerator <span class="op">=</span> <span class="va">numerator</span>, den_avg <span class="op">=</span> <span class="va">den_avg</span>, den_half <span class="op">=</span> <span class="va">den_half</span><span class="op">)</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; numerator   den_avg  den_half </span></span>
+<span><span class="co">#&gt;   0.14675   0.00710   0.05371</span></span></code></pre></div>
+<p>Dividing the shared numerator by each denominator gives the two Bayes
+factors, and the package computes each directly:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bf_urn.html">bf_urn</a></span><span class="op">(</span>y_W <span class="op">=</span> <span class="fl">9</span>, y_R <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 323</span></span></code></pre></div>
-<p>The hypergeometric BF of 323 has a closed form:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>10</mn><mi>/</mi><mn>13</mn><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>120</mn><mi>/</mi><mn>50388</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>323</mn></mrow><annotation encoding="application/x-tex">(10/13) / (120/50388) = 323</annotation></semantics></math>.</p>
-</div>
-<div class="section level2">
-<h2 id="when-does-each-model-apply">When does each model apply?<a class="anchor" aria-label="anchor" href="#when-does-each-model-apply"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr class="header">
-<th>Design</th>
-<th>Model</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Ongoing interviews, growing archive, open-ended fieldwork</td>
-<td><code><a href="../reference/bf_binomial.html">bf_binomial()</a></code></td>
-</tr>
-<tr class="even">
-<td>Closed historical archive, fixed roster of documents</td>
-<td><code><a href="../reference/bf_urn.html">bf_urn()</a></code></td>
-</tr>
-</tbody>
-</table>
-<p>When in doubt, compute both. They report different but compatible
-quantities: the binomial conditions on the evidence universe being
-infinite; the urn conditions on it being bounded.</p>
-</div>
-<div class="section level2">
-<h2 id="a-property-worth-knowing">A property worth knowing<a class="anchor" aria-label="anchor" href="#a-property-worth-knowing"></a>
-</h2>
-<p>Under symmetric evidence
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>W</mi></msub><mo>=</mo><msub><mi>y</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">y_W = y_R</annotation></semantics></math>),
-both Bayes factors are exactly
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
-– no evidence in either direction.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>by_hand <span class="op">=</span> <span class="va">numerator</span> <span class="op">/</span> <span class="va">den_avg</span>, from_package <span class="op">=</span> <span class="fu"><a href="../reference/bf_uniform_weights.html">bf_uniform_weights</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      by_hand from_package </span></span>
+<span><span class="co">#&gt;     20.67196     20.67196</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>by_hand <span class="op">=</span> <span class="va">numerator</span> <span class="op">/</span> <span class="va">den_half</span>, from_package <span class="op">=</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      by_hand from_package </span></span>
+<span><span class="co">#&gt;     2.732168     2.732168</span></span></code></pre></div>
+<p>The twelve observations give 20.67 under uniform weights and 2.73 in
+the worst case. The numerator cancels from the ratio of the two Bayes
+factors, so that ratio is the ratio of the denominators:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/bf_binomial.html">bf_binomial</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1</span></span>
-<span><span class="fu"><a href="../reference/bf_urn.html">bf_urn</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
-<p>For <code><a href="../reference/bf_urn.html">bf_urn()</a></code> this is the central property distinguishing
-Formulation C from naive constructions: the urn model returns 1 rather
-than
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>∞</mi><annotation encoding="application/x-tex">\infty</annotation></semantics></math>
-or
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>
-at the equipoise point.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>ratio_of_bayes_factors <span class="op">=</span> <span class="fu"><a href="../reference/bf_uniform_weights.html">bf_uniform_weights</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>        ratio_of_denominators <span class="op">=</span> <span class="va">den_half</span> <span class="op">/</span> <span class="va">den_avg</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ratio_of_bayes_factors  ratio_of_denominators </span></span>
+<span><span class="co">#&gt;                   7.57                   7.57</span></span></code></pre></div>
+<p>Nine of twelve is 7.57 times as probable at a share of exactly one
+half as it is on average across the shares from zero to one half. The
+average includes shares near zero, under which nine of twelve is very
+improbable, and those shares are what lift 2.73 to 20.67.</p>
+<p>The worst-case value is the smallest Bayes factor any weights on the
+rival’s shares can give, because no share in the rival’s range gives
+nine of twelve a higher probability than one half does. A critic who
+says the researcher chose weights for the rival that flattered the
+working theory can be answered with that number.</p>
 </div>
 <div class="section level2">
-<h2 id="sensitivity-to-observation-bias">Sensitivity to observation bias<a class="anchor" aria-label="anchor" href="#sensitivity-to-observation-bias"></a>
+<h2 id="the-rule-for-setting-the-rival-aside">The rule for setting the rival aside<a class="anchor" aria-label="anchor" href="#the-rule-for-setting-the-rival-aside"></a>
 </h2>
-<p>A reviewer might ask: how robust is the conclusion to the possibility
-that
-pro-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>1</mn></msub><annotation encoding="application/x-tex">H_1</annotation></semantics></math>
-items were more likely to be observed than
-pro-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>R</mi></msub><annotation encoding="application/x-tex">H_R</annotation></semantics></math>
-items? <code><a href="../reference/sens_urn.html">sens_urn()</a></code> reports the smallest observation-bias
-factor
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ω</mi><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\omega &gt; 1</annotation></semantics></math>
-at which the Bayes factor first drops below a decision threshold (the
-default threshold is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>20</mn><annotation encoding="application/x-tex">20</annotation></semantics></math>,
-the conventional cutoff for “strong” evidence).</p>
+<p>The paper proposes a rule that uses both numbers. The researcher sets
+the rival aside, at least provisionally, when the uniform-weights Bayes
+factor is 20 or more and the worst-case Bayes factor is above 1.</p>
+<p>The first threshold follows Kass and Raftery (1995), who call a Bayes
+factor of 20 or more strong evidence. With even prior odds a Bayes
+factor of 20 puts the posterior probability of the rival at no more than
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mn>21</mn><mo>=</mo><mn>0.048</mn></mrow><annotation encoding="application/x-tex">1/21 = 0.048</annotation></semantics></math>.
+The second condition says that no weights on the rival’s shares make the
+counts more probable under the rival than under the working theory. Nine
+of twelve meets both:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">s_urn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sens_urn.html">sens_urn</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, threshold <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">s_urn</span><span class="op">$</span><span class="va">bf</span></span>
-<span><span class="co">#&gt; [1] 323</span></span>
-<span><span class="va">s_urn</span><span class="op">$</span><span class="va">omega_star</span></span>
-<span><span class="co">#&gt; [1] 2.433984</span></span></code></pre></div>
-<p>The reading:
-pro-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>1</mn></msub><annotation encoding="application/x-tex">H_1</annotation></semantics></math>
-items would have had to be roughly 2.4 times more likely to be noticed
-than
-pro-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>R</mi></msub><annotation encoding="application/x-tex">H_R</annotation></semantics></math>
-items before the urn conclusion reverses.</p>
-</div>
-<div class="section level2">
-<h2 id="sensitivity-to-coding-error">Sensitivity to coding error<a class="anchor" aria-label="anchor" href="#sensitivity-to-coding-error"></a>
-</h2>
-<p>A peer who cannot re-read every document can still ask how many of
-the
-pro-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mn>1</mn></msub><annotation encoding="application/x-tex">H_1</annotation></semantics></math>
-observations would have to be re-coded as
-pro-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>H</mi><mi>R</mi></msub><annotation encoding="application/x-tex">H_R</annotation></semantics></math>
-before the conclusion changes. <code><a href="../reference/sens_coding.html">sens_coding()</a></code> reports that
-tipping point for either model: re-coding
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
-observations moves the counts from
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>y</mi><mi>W</mi></msub><mo>,</mo><msub><mi>y</mi><mi>R</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(y_W, y_R)</annotation></semantics></math>
-to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>y</mi><mi>W</mi></msub><mo>−</mo><mi>x</mi><mo>,</mo><msub><mi>y</mi><mi>R</mi></msub><mo>+</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(y_W - x, y_R + x)</annotation></semantics></math>
-and recomputes the same Bayes factor.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>uniform_weights <span class="op">=</span> <span class="fu"><a href="../reference/bf_uniform_weights.html">bf_uniform_weights</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span>, worst_case <span class="op">=</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; uniform_weights      worst_case </span></span>
+<span><span class="co">#&gt;       20.671958        2.732168</span></span></code></pre></div>
+<p>With fewer than 101 observations, a uniform-weights value of 20 or
+more always comes with a worst-case value above 1, so the second
+condition changes the decision only in larger bodies of evidence. With
+59 observations for the working theory and 42 for the rival it does:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/sens_coding.html">sens_coding</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, model <span class="op">=</span> <span class="st">"binomial"</span>, threshold <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">$</span><span class="va">x_star</span></span>
-<span><span class="co">#&gt; [1] 1</span></span>
-<span><span class="fu"><a href="../reference/sens_coding.html">sens_coding</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, model <span class="op">=</span> <span class="st">"urn"</span>, threshold <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">$</span><span class="va">x_star</span></span>
-<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
-<p>One re-coding overturns the binomial conclusion and two overturn the
-hypergeometric. The binomial tolerates less because its Bayes factor
-(20.67) starts only just above the threshold; the urn starts at 323 and
-so absorbs one more re-coding before crossing.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>uniform_weights <span class="op">=</span> <span class="fu"><a href="../reference/bf_uniform_weights.html">bf_uniform_weights</a></span><span class="op">(</span><span class="fl">59</span>, <span class="fl">42</span><span class="op">)</span>, worst_case <span class="op">=</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fl">59</span>, <span class="fl">42</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; uniform_weights      worst_case </span></span>
+<span><span class="co">#&gt;      20.7775540       0.9804411</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="sensitivity-to-the-prior-on-theta">Sensitivity to the prior on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#sensitivity-to-the-prior-on-theta"></a>
+<h2 id="observations-that-carry-more-weight-than-others">Observations that carry more weight than others<a class="anchor" aria-label="anchor" href="#observations-that-carry-more-weight-than-others"></a>
 </h2>
-<p>For the binomial model, <code><a href="../reference/sens_binomial.html">sens_binomial()</a></code> additionally
-reports the smallest rival-tilted prior at which the conclusion
-reverses. The prior
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">Beta</mtext><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>M</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\text{Beta}(1, M + 1)</annotation></semantics></math>
-posits
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
-pseudo-observations all favoring the rival; <code>M_star</code> is the
-smallest such
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
-that drives the Bayes factor below threshold.</p>
+<p>A researcher who judges one observation, say a secret memo, worth ten
+routine ones enters it as ten observations by summing whole-number
+weights:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">s_binom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sens_binomial.html">sens_binomial</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, threshold <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="va">s_binom</span><span class="op">$</span><span class="va">bf</span></span>
-<span><span class="co">#&gt; [1] 20.67196</span></span>
-<span><span class="va">s_binom</span><span class="op">$</span><span class="va">omega_star</span></span>
-<span><span class="co">#&gt; [1] 1.00981</span></span>
-<span><span class="va">s_binom</span><span class="op">$</span><span class="va">M_star</span></span>
-<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
-<p>At the running example the binomial Bayes factor only just clears the
-threshold, so <code>M_star</code> is 1: a single rival-favoring
-pseudo-observation in the prior drops it below 20. A larger evidence
-base would tolerate more.</p>
-</div>
-<div class="section level2">
-<h2 id="weighted-evidence">Weighted evidence<a class="anchor" aria-label="anchor" href="#weighted-evidence"></a>
-</h2>
-<p>A researcher who believes one observation carries more probative
-weight than the others can sum integer weights and pass the totals:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Eight ordinary pro-H1 items at weight 1 and one "smoking gun" at</span></span>
-<span><span class="co"># weight 10, matching the paper's weighted running example: W = 8 + 10 = 18.</span></span>
+<code class="sourceCode R"><span><span class="co"># Eight routine supporting observations plus the memo at weight ten.</span></span>
 <span><span class="va">w_W</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">w_R</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/bf_binomial.html">bf_binomial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w_W</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w_R</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2336.962</span></span>
-<span><span class="fu"><a href="../reference/bf_urn.html">bf_urn</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w_W</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w_R</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 11475735</span></span></code></pre></div>
-<p>The “+1” rival-favoring construction goes through unchanged. See the
-paper’s discussion of probative weight for the rationale.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>uniform_weights <span class="op">=</span> <span class="fu"><a href="../reference/bf_uniform_weights.html">bf_uniform_weights</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w_W</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w_R</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  worst_case      <span class="op">=</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w_W</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">w_R</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; uniform_weights      worst_case </span></span>
+<span><span class="co">#&gt;       2336.9621        143.2847</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="what-a-reader-would-have-to-grant">What a reader would have to grant<a class="anchor" aria-label="anchor" href="#what-a-reader-would-have-to-grant"></a>
+</h2>
+<p>A critic can press on the coding and on the search. For each, the
+package reports how far the critic’s concern would have to go before a
+researcher following the rule would no longer set the rival aside.</p>
+<div class="section level3">
+<h3 id="coding">Coding<a class="anchor" aria-label="anchor" href="#coding"></a>
+</h3>
+<p>A peer cannot re-read every document, but can ask how many of the
+nine supporting observations would have to be re-coded as supporting the
+rival:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sens_coding.html">sens_coding</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $bf_uniform</span></span>
+<span><span class="co">#&gt; [1] 20.67196</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $bf_worst</span></span>
+<span><span class="co">#&gt; [1] 2.732168</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $x_uniform</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $x_worst</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $x_star</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
+<p>One re-coding takes the uniform-weights value to 6.49, below 20. The
+worst-case value stays above 1 after one re-coding and falls below it
+after two. So <code>x_star</code>, the number at which the decision
+changes, is one. The conclusion tolerates so little re-coding because
+20.67 starts so close to 20.</p>
+</div>
+<div class="section level3">
+<h3 id="the-search">The search<a class="anchor" aria-label="anchor" href="#the-search"></a>
+</h3>
+<p>Write
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ω</mi><annotation encoding="application/x-tex">\omega</annotation></semantics></math>
+for the bias factor: a search with bias
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ω</mi><annotation encoding="application/x-tex">\omega</annotation></semantics></math>
+is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ω</mi><annotation encoding="application/x-tex">\omega</annotation></semantics></math>
+times as likely to find a pro-working-theory observation as a pro-rival
+one. Such a search turns a share
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+of the evidence into a share
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ω</mi><mi>θ</mi><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>ω</mi><mi>θ</mi><mo>+</mo><mn>1</mn><mo>−</mo><mi>θ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\omega\theta / (\omega\theta + 1 - \theta)</annotation></semantics></math>
+among the observations found, and both Bayes factors take an
+<code>omega</code> argument that applies that change.
+<code><a href="../reference/sens_bias.html">sens_bias()</a></code> finds the bias at which each condition of the
+rule fails:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sens_bias.html">sens_bias</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $bf_uniform</span></span>
+<span><span class="co">#&gt; [1] 20.67196</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $bf_worst</span></span>
+<span><span class="co">#&gt; [1] 2.732168</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $omega_uniform</span></span>
+<span><span class="co">#&gt; [1] 1.009794</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $omega_worst</span></span>
+<span><span class="co">#&gt; [1] 1.559262</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $omega_star</span></span>
+<span><span class="co">#&gt; [1] 1.009794</span></span></code></pre></div>
+<p>A search about one percent more likely to find pro-working-theory
+observations would change the decision. With the memo counted as ten
+observations, the search would have to be more than twice as likely:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sens_bias.html">sens_bias</a></span><span class="op">(</span><span class="fl">18</span>, <span class="fl">3</span><span class="op">)</span><span class="op">$</span><span class="va">omega_star</span></span>
+<span><span class="co">#&gt; [1] 2.334075</span></span></code></pre></div>
+<p>Under strong bias the rival’s most favorable share is no longer one
+half. The biased search carries the rival’s shares onto shares found of
+at most
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ω</mi><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\omega / (1 + \omega)</annotation></semantics></math>,
+while nine of twelve is most probable at a share found of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9</mn><mi>/</mi><mn>12</mn></mrow><annotation encoding="application/x-tex">9/12</annotation></semantics></math>.
+Once
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ω</mi><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\omega / (1 + \omega)</annotation></semantics></math>
+passes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9</mn><mi>/</mi><mn>12</mn></mrow><annotation encoding="application/x-tex">9/12</annotation></semantics></math>,
+which happens once
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ω</mi><annotation encoding="application/x-tex">\omega</annotation></semantics></math>
+passes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9</mn><mi>/</mi><mn>3</mn><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">9/3 = 3</annotation></semantics></math>,
+a share below one half fits the counts better, and
+<code><a href="../reference/bf_worst_case.html">bf_worst_case()</a></code> uses it:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tilt</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span>, <span class="va">om</span><span class="op">)</span> <span class="va">om</span> <span class="op">*</span> <span class="va">t</span> <span class="op">/</span> <span class="op">(</span><span class="va">om</span> <span class="op">*</span> <span class="va">t</span> <span class="op">+</span> <span class="fl">1</span> <span class="op">-</span> <span class="va">t</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>prob_at_half <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">dbinom</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">12</span>, <span class="fu">tilt</span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  prob_at_0.375 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">dbinom</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">12</span>, <span class="fu">tilt</span><span class="op">(</span><span class="fl">0.375</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  worst_case <span class="op">=</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, omega <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  prob_at_half prob_at_0.375    worst_case </span></span>
+<span><span class="co">#&gt;     0.1973957     0.2581036     0.2146125</span></span></code></pre></div>
+<p>The tipping points do not depend on this. At the bias where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ω</mi><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\omega / (1 + \omega)</annotation></semantics></math>
+equals
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9</mn><mi>/</mi><mn>12</mn></mrow><annotation encoding="application/x-tex">9/12</annotation></semantics></math>,
+the denominator is the largest probability nine of twelve can have at
+any share, so the worst-case value is already below 1 there. It
+therefore falls to 1 at a smaller bias, where one half is still the
+rival’s most favorable share.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="weights-on-the-shares-other-than-the-uniform">Weights on the shares other than the uniform<a class="anchor" aria-label="anchor" href="#weights-on-the-shares-other-than-the-uniform"></a>
+</h2>
+<p>Giving every share in a range the same weight is a choice, and a
+reader may want a different one. <code><a href="../reference/bf_rescaled.html">bf_rescaled()</a></code> takes a Beta
+distribution rescaled onto each theory’s half, one pair of parameters
+per side; the uniform default is the pair
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(1, 1)</annotation></semantics></math>
+on both sides. Below one the weight collects at both ends of each half,
+including next to one half where the two theories claim nearly the same
+share. Above one it collects in the middle of each half, so the two
+theories claim shares far apart:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>uniform      <span class="op">=</span> <span class="fu"><a href="../reference/bf_rescaled.html">bf_rescaled</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  next_to_half <span class="op">=</span> <span class="fu"><a href="../reference/bf_rescaled.html">bf_rescaled</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  far_apart    <span class="op">=</span> <span class="fu"><a href="../reference/bf_rescaled.html">bf_rescaled</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, <span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      uniform next_to_half    far_apart </span></span>
+<span><span class="co">#&gt;    20.671958     9.526137   252.917211</span></span></code></pre></div>
+<p>The worst-case Bayes factor takes the same pair for the working
+theory’s shares only, because the rival stays at its most favorable
+share whatever weights its proponent might state:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>uniform      <span class="op">=</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  next_to_half <span class="op">=</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, a1 <span class="op">=</span> <span class="fl">0.5</span>, b1 <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  far_apart    <span class="op">=</span> <span class="fu"><a href="../reference/bf_worst_case.html">bf_worst_case</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, a1 <span class="op">=</span> <span class="fl">10</span>, b1 <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      uniform next_to_half    far_apart </span></span>
+<span><span class="co">#&gt;     2.732168     2.070490     4.384581</span></span></code></pre></div>
+<p>The weights on shares are a different thing from the weights on
+observations above: those act as extra observations, these say what each
+theory predicts.</p>
+</div>
+<div class="section level2">
+<h2 id="an-archive-of-known-size">An archive of known size<a class="anchor" aria-label="anchor" href="#an-archive-of-known-size"></a>
+</h2>
+<p>The binomial model treats the observations as independent draws. A
+researcher who reads documents from an archive of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
+documents does not read any document twice.
+<code><a href="../reference/bf_finite.html">bf_uniform_weights_finite()</a></code> and
+<code><a href="../reference/bf_finite.html">bf_worst_case_finite()</a></code> compute both Bayes factors for that
+case:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">100</span>, <span class="fl">1000</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">M</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>M <span class="op">=</span> <span class="va">M</span>,</span>
+<span>    uniform_weights <span class="op">=</span> <span class="fu"><a href="../reference/bf_finite.html">bf_uniform_weights_finite</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, <span class="va">M</span><span class="op">)</span>,</span>
+<span>    worst_case <span class="op">=</span> <span class="fu"><a href="../reference/bf_finite.html">bf_worst_case_finite</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, <span class="va">M</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                      [,1]       [,2]        [,3]</span></span>
+<span><span class="co">#&gt; M                20.00000 100.000000 1000.000000</span></span>
+<span><span class="co">#&gt; uniform_weights 162.88462  25.222782   21.048391</span></span>
+<span><span class="co">#&gt; worst_case       16.84375   3.194593    2.770414</span></span></code></pre></div>
+<p>Both values fall toward the binomial ones, 20.67 and 2.73, as the
+archive grows. In every case the paper’s supplement computed, counts
+whose binomial Bayes factors meet the rule also meet it from an archive
+of any size, so the researcher need not state
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -283,7 +370,7 @@ paper’s discussion of probative weight for the rationale.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

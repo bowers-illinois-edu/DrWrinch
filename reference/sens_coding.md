@@ -1,115 +1,115 @@
-# Sensitivity analysis for coding error
+# Sensitivity to coding
 
-Reports the coding-error tipping point: the smallest number of pro-
-working-theory observations that would have to be re-coded as pro-rival
-before the Bayes factor first drops below `threshold`.
+A peer cannot re-read every document the way the researcher did, so the
+coding of any one observation can be disputed but not settled at a
+distance. What a peer can compute is how many re-codings would change
+the decision. Re-coding `x` observations relabels `x` observations that
+supported the working theory as supporting the rival, moving the counts
+from `(y_W, y_R)` to `(y_W - x, y_R + x)`. The number of observations
+does not change; only the split does.
 
 ## Usage
 
 ``` r
-sens_coding(
-  y_W,
-  y_R,
-  model = c("binomial", "urn"),
-  threshold = 20,
-  theta_cut = 0.5
-)
+sens_coding(y_W, y_R, threshold_uniform = 20, threshold_worst = 1)
 ```
 
 ## Arguments
 
 - y_W:
 
-  Non-negative integer. Observed count favorable to the working theory.
+  Non-negative whole number. Count, or summed weight, of observations
+  supporting the working theory.
 
 - y_R:
 
-  Non-negative integer. Observed count favorable to the rival.
+  Non-negative whole number. Count, or summed weight, of observations
+  supporting the rival.
 
-- model:
+- threshold_uniform:
 
-  Which Bayes factor to recompute after re-coding: `"binomial"`
-  (open-ended evidence) or `"urn"` (bounded archive).
+  Positive number. The uniform-weights Bayes factor must be at least
+  this large for the rule to set the rival aside. Default `20`.
 
-- threshold:
+- threshold_worst:
 
-  Positive numeric. Decision threshold the Bayes factor must remain at
-  or above. Default `20`.
-
-- theta_cut:
-
-  Numeric in (0, 1). Cutpoint for the binomial model; ignored by the urn
-  model. Default `0.5`.
+  Positive number. The worst-case Bayes factor must be above this value
+  for the rule to set the rival aside. Default `1`.
 
 ## Value
 
-A list with elements:
+A list with elements
 
-- `bf`:
+- `bf_uniform`, `bf_worst`:
 
-  Bayes factor at the observed coding (no re-coding).
+  The two Bayes factors at the observed coding.
+
+- `x_uniform`:
+
+  The smallest number of re-codings at which the uniform-weights value
+  falls below `threshold_uniform`.
+
+- `x_worst`:
+
+  The smallest number of re-codings at which the worst-case value falls
+  to `threshold_worst` or below.
 
 - `x_star`:
 
-  Smallest integer `x >= 0` re-codings at which the Bayes factor drops
-  below `threshold`. `0` if `bf < threshold` at baseline; `NA_integer_`
-  if no re-coding in `[0, y_W]` with a defined Bayes factor drops it
-  below `threshold`.
+  The smaller of the two.
+
+A tipping point is `NA` when no re-coding of the `y_W` observations
+makes its condition fail.
 
 ## Details
 
-This is the third sensitivity question in the paper, alongside
-observation bias
-([`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md)
-and
-[`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md)'s
-`omega_star`) and the rival-tilted prior
-([`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md)'s
-`M_star`). A peer cannot re-read every document, but she can ask how
-many pro-\\H_1\\ observations would have to be re-coded for the
-conclusion to change.
+The paper's rule sets the rival aside, at least provisionally, when the
+uniform-weights Bayes factor is 20 or more and the worst-case Bayes
+factor is above 1. This function returns the smallest number of
+re-codings at which each condition fails and the smaller of the two,
+which is the number the supplement reports. At nine observations for the
+working theory and three for the rival, one re-coding takes the
+uniform-weights value from 20.67 to 6.49, below 20, while the worst-case
+value falls to 1 or below only after two (1.10 at eight of twelve, 0.56
+at seven). So one re-coding changes the decision. The conclusion
+tolerates so little re-coding because the uniform-weights value starts
+so close to 20.
 
-Re-coding `x` observations relabels `x` pro-\\H_1\\ items as pro-rival,
-moving the counts from `(y_W, y_R)` to `(y_W - x, y_R + x)`. The total
-number of observations \\n = y_W + y_R\\ does not change; only the split
-does. The same model's Bayes factor is then recomputed at the new
-counts. One function serves both models because the mechanism is the
-relabeling; `model` only selects which Bayes factor to recompute —
-[`bf_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_binomial.md)
-for open-ended evidence,
-[`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md)
-for a bounded archive.
-
-Re-coding moves evidence toward equipoise, so the Bayes factor falls as
-`x` grows. For the urn model, re-coding eventually shrinks the
-rival-favorable urn below the sample size (the swap regime, where
-[`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md)
-is undefined and returns `NA`); these re-codings are skipped rather than
-counted as a crossing. Because the Bayes factor reaches equipoise before
-that point for any `threshold > 1`, the tipping point is found within
-the defined range in ordinary use.
-
-If `bf_<model>(y_W, y_R) < threshold` at baseline, `x_star` is `0` (the
-conclusion fails before any re-coding).
+Re-coding lowers both Bayes factors, so every re-coding past the first
+one at which a condition fails also fails it. A tipping point of `0`
+means the condition already fails at the observed coding.
 
 ## See also
 
-[`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md)
+[`sens_bias()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_bias.md)
+for sensitivity to a biased search;
+[`bf_uniform_weights()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_uniform_weights.md)
 and
-[`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md)
-for observation-bias and prior sensitivity;
-[`bf_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_binomial.md)
-and
-[`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md)
-for the Bayes factors themselves.
+[`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
+for the values recomputed here.
 
 ## Examples
 
 ``` r
-# The paper's running example: one re-coding overturns the binomial
-# conclusion, two overturn the hypergeometric.
-sens_coding(9, 3, model = "binomial")$x_star
+# The paper's running example.
+sens_coding(9, 3)
+#> $bf_uniform
+#> [1] 20.67196
+#> 
+#> $bf_worst
+#> [1] 2.732168
+#> 
+#> $x_uniform
 #> [1] 1
-sens_coding(9, 3, model = "urn")$x_star
+#> 
+#> $x_worst
+#> [1] 2
+#> 
+#> $x_star
+#> [1] 1
+#> 
+
+# Winward's fourteen of seventeen: two re-codings change the decision.
+sens_coding(14, 3)$x_star
 #> [1] 2
 ```

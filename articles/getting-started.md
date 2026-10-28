@@ -7,169 +7,311 @@ library(DrWrinch)
 
 ## The problem
 
-A researcher classifying within-case evidence for a working theory
-($`H_1`$) against a single rival ($`H_R`$) wants to summarize the weight
-of evidence with a Bayes factor. The challenge is that the
-per-observation probabilities a Bayes factor requires are hard to
-motivate without overcommitting. DrWrinch supplies two fully specified
-generative models that produce those probabilities, both tilted against
-$`H_1`$ by construction, so the reported Bayes factor is a lower bound
-on the evidence in favor of the working theory.
+A researcher studying democratic breakdown has read the sources and
+coded each observation as supporting a working theory or a single rival.
+Nine observations support the working theory and three support the
+rival. The researcher wants to say how much more probable those twelve
+observations are if the working theory holds than if the rival does, in
+a way a critic cannot call arithmetic chosen to suit the conclusion.
 
-This vignette works the running example from Lopez, Bowers, and Gajardo
-Cooper (2026): nine pieces of evidence favoring $`H_1`$ and three
-favoring $`H_R`$.
+A Bayes factor is that ratio of probabilities. Getting it takes a
+probability for the counts under each theory, and a theory stated in
+words does not supply one. Lopez, Bowers, and Gajardo Cooper (2026)
+derive both probabilities from one model, which this package implements.
+This vignette works their running example: nine observations for the
+working theory, three for the rival.
 
-## Two models
+## One model
 
-**Binomial model.** Each observation is an independent Bernoulli draw
-from an infinite evidence universe with success probability $`\theta`$.
-$`H_1`$ corresponds to $`\theta > 1/2`$. Under a uniform prior on
-$`\theta`$, the Bayes factor is the ratio of posterior masses on the two
-sides of $`1/2`$. This model fits research designs where the evidence
-universe is open-ended: ongoing interviews, an expanding archive.
+Suppose each observation the researcher might have made supports the
+working theory with probability $`\theta`$. Read $`\theta`$ as the share
+of the available evidence that supports the working theory. The working
+theory claims that share is above one half. The rival claims it is at or
+below one half.
+
+At a given share, the probability of $`k`$ supporting observations out
+of $`N`$ is the binomial probability, so every number below is one a
+reader can recompute.
+
+## Why one model gives two Bayes factors
+
+Each theory names a range of shares, and a range is not a probability
+for the counts. The researcher turns the working theory’s range into a
+probability by averaging the binomial probability over the shares above
+one half, giving each share the same weight. That average is the
+numerator of both Bayes factors.
+
+For the rival there are two answers. The first holds the rival to every
+share in its range equally and averages the same way. The second gives
+the rival the share in its range that makes the counts most probable,
+which is one half when the counts favor the working theory. Both
+denominators, and the numerator they share, are numbers anyone can
+compute:
 
 ``` r
 
-bf_binomial(y_W = 9, y_R = 3)
-#> [1] 20.67196
+n <- 12
+k <- 9
+
+# Averaging over a range half as wide as the interval from 0 to 1 means
+# dividing the integral by one half, which is the factor of 2 below.
+numerator <- 2 * integrate(function(t) dbinom(k, n, t), 0.5, 1)$value
+den_avg   <- 2 * integrate(function(t) dbinom(k, n, t), 0, 0.5)$value
+den_half  <- dbinom(k, n, 0.5)
+
+round(c(numerator = numerator, den_avg = den_avg, den_half = den_half), 5)
+#> numerator   den_avg  den_half 
+#>   0.14675   0.00710   0.05371
 ```
 
-**Hypergeometric urn model (Formulation C).** Evidence is drawn without
-replacement from a finite urn. The Working Theory Favorable (WTF)
-sub-model has urn composition $`(y_W + 1, \max(1, y_R))`$; the Rival
-Theory Favorable (RTF) sub-model has urn composition $`(y_W, y_W + 1)`$.
-The construction adds one unobserved pro-$`H_1`$ item to the working
-theory’s urn and tilts the rival’s urn toward $`H_R`$ by exactly one
-item. This model fits research designs where the evidence base is
-bounded: a closed historical archive, a fixed roster of documents.
+Dividing the shared numerator by each denominator gives the two Bayes
+factors, and the package computes each directly:
 
 ``` r
 
-bf_urn(y_W = 9, y_R = 3)
-#> [1] 323
+c(by_hand = numerator / den_avg, from_package = bf_uniform_weights(9, 3))
+#>      by_hand from_package 
+#>     20.67196     20.67196
+c(by_hand = numerator / den_half, from_package = bf_worst_case(9, 3))
+#>      by_hand from_package 
+#>     2.732168     2.732168
 ```
 
-The hypergeometric BF of 323 has a closed form:
-$`(10/13) / (120/50388) = 323`$.
-
-## When does each model apply?
-
-| Design | Model |
-|----|----|
-| Ongoing interviews, growing archive, open-ended fieldwork | [`bf_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_binomial.md) |
-| Closed historical archive, fixed roster of documents | [`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md) |
-
-When in doubt, compute both. They report different but compatible
-quantities: the binomial conditions on the evidence universe being
-infinite; the urn conditions on it being bounded.
-
-## A property worth knowing
-
-Under symmetric evidence ($`y_W = y_R`$), both Bayes factors are exactly
-$`1`$ – no evidence in either direction.
+The twelve observations give 20.67 under uniform weights and 2.73 in the
+worst case. The numerator cancels from the ratio of the two Bayes
+factors, so that ratio is the ratio of the denominators:
 
 ``` r
 
-bf_binomial(5, 5)
-#> [1] 1
-bf_urn(5, 5)
-#> [1] 1
+round(c(ratio_of_bayes_factors = bf_uniform_weights(9, 3) / bf_worst_case(9, 3),
+        ratio_of_denominators = den_half / den_avg), 2)
+#> ratio_of_bayes_factors  ratio_of_denominators 
+#>                   7.57                   7.57
 ```
 
-For
-[`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md)
-this is the central property distinguishing Formulation C from naive
-constructions: the urn model returns 1 rather than $`\infty`$ or $`0`$
-at the equipoise point.
+Nine of twelve is 7.57 times as probable at a share of exactly one half
+as it is on average across the shares from zero to one half. The average
+includes shares near zero, under which nine of twelve is very
+improbable, and those shares are what lift 2.73 to 20.67.
 
-## Sensitivity to observation bias
+The worst-case value is the smallest Bayes factor any weights on the
+rival’s shares can give, because no share in the rival’s range gives
+nine of twelve a higher probability than one half does. A critic who
+says the researcher chose weights for the rival that flattered the
+working theory can be answered with that number.
 
-A reviewer might ask: how robust is the conclusion to the possibility
-that pro-$`H_1`$ items were more likely to be observed than pro-$`H_R`$
-items?
-[`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md)
-reports the smallest observation-bias factor $`\omega > 1`$ at which the
-Bayes factor first drops below a decision threshold (the default
-threshold is $`20`$, the conventional cutoff for “strong” evidence).
+## The rule for setting the rival aside
+
+The paper proposes a rule that uses both numbers. The researcher sets
+the rival aside, at least provisionally, when the uniform-weights Bayes
+factor is 20 or more and the worst-case Bayes factor is above 1.
+
+The first threshold follows Kass and Raftery (1995), who call a Bayes
+factor of 20 or more strong evidence. With even prior odds a Bayes
+factor of 20 puts the posterior probability of the rival at no more than
+$`1/21 = 0.048`$. The second condition says that no weights on the
+rival’s shares make the counts more probable under the rival than under
+the working theory. Nine of twelve meets both:
 
 ``` r
 
-s_urn <- sens_urn(9, 3, threshold = 20)
-s_urn$bf
-#> [1] 323
-s_urn$omega_star
-#> [1] 2.433984
+c(uniform_weights = bf_uniform_weights(9, 3), worst_case = bf_worst_case(9, 3))
+#> uniform_weights      worst_case 
+#>       20.671958        2.732168
 ```
 
-The reading: pro-$`H_1`$ items would have had to be roughly 2.4 times
-more likely to be noticed than pro-$`H_R`$ items before the urn
-conclusion reverses.
-
-## Sensitivity to coding error
-
-A peer who cannot re-read every document can still ask how many of the
-pro-$`H_1`$ observations would have to be re-coded as pro-$`H_R`$ before
-the conclusion changes.
-[`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md)
-reports that tipping point for either model: re-coding $`x`$
-observations moves the counts from $`(y_W, y_R)`$ to
-$`(y_W - x, y_R + x)`$ and recomputes the same Bayes factor.
+With fewer than 101 observations, a uniform-weights value of 20 or more
+always comes with a worst-case value above 1, so the second condition
+changes the decision only in larger bodies of evidence. With 59
+observations for the working theory and 42 for the rival it does:
 
 ``` r
 
-sens_coding(9, 3, model = "binomial", threshold = 20)$x_star
-#> [1] 1
-sens_coding(9, 3, model = "urn", threshold = 20)$x_star
-#> [1] 2
+c(uniform_weights = bf_uniform_weights(59, 42), worst_case = bf_worst_case(59, 42))
+#> uniform_weights      worst_case 
+#>      20.7775540       0.9804411
 ```
 
-One re-coding overturns the binomial conclusion and two overturn the
-hypergeometric. The binomial tolerates less because its Bayes factor
-(20.67) starts only just above the threshold; the urn starts at 323 and
-so absorbs one more re-coding before crossing.
+## Observations that carry more weight than others
 
-## Sensitivity to the prior on $`\theta`$
-
-For the binomial model,
-[`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md)
-additionally reports the smallest rival-tilted prior at which the
-conclusion reverses. The prior $`\text{Beta}(1, M + 1)`$ posits $`M`$
-pseudo-observations all favoring the rival; `M_star` is the smallest
-such $`M`$ that drives the Bayes factor below threshold.
+A researcher who judges one observation, say a secret memo, worth ten
+routine ones enters it as ten observations by summing whole-number
+weights:
 
 ``` r
 
-s_binom <- sens_binomial(9, 3, threshold = 20)
-s_binom$bf
-#> [1] 20.67196
-s_binom$omega_star
-#> [1] 1.00981
-s_binom$M_star
-#> [1] 1
-```
-
-At the running example the binomial Bayes factor only just clears the
-threshold, so `M_star` is 1: a single rival-favoring pseudo-observation
-in the prior drops it below 20. A larger evidence base would tolerate
-more.
-
-## Weighted evidence
-
-A researcher who believes one observation carries more probative weight
-than the others can sum integer weights and pass the totals:
-
-``` r
-
-# Eight ordinary pro-H1 items at weight 1 and one "smoking gun" at
-# weight 10, matching the paper's weighted running example: W = 8 + 10 = 18.
+# Eight routine supporting observations plus the memo at weight ten.
 w_W <- c(10, rep(1, 8))
 w_R <- rep(1, 3)
-bf_binomial(sum(w_W), sum(w_R))
-#> [1] 2336.962
-bf_urn(sum(w_W), sum(w_R))
-#> [1] 11475735
+c(uniform_weights = bf_uniform_weights(sum(w_W), sum(w_R)),
+  worst_case      = bf_worst_case(sum(w_W), sum(w_R)))
+#> uniform_weights      worst_case 
+#>       2336.9621        143.2847
 ```
 
-The “+1” rival-favoring construction goes through unchanged. See the
-paper’s discussion of probative weight for the rationale.
+## What a reader would have to grant
+
+A critic can press on the coding and on the search. For each, the
+package reports how far the critic’s concern would have to go before a
+researcher following the rule would no longer set the rival aside.
+
+### Coding
+
+A peer cannot re-read every document, but can ask how many of the nine
+supporting observations would have to be re-coded as supporting the
+rival:
+
+``` r
+
+sens_coding(9, 3)
+#> $bf_uniform
+#> [1] 20.67196
+#> 
+#> $bf_worst
+#> [1] 2.732168
+#> 
+#> $x_uniform
+#> [1] 1
+#> 
+#> $x_worst
+#> [1] 2
+#> 
+#> $x_star
+#> [1] 1
+```
+
+One re-coding takes the uniform-weights value to 6.49, below 20. The
+worst-case value stays above 1 after one re-coding and falls below it
+after two. So `x_star`, the number at which the decision changes, is
+one. The conclusion tolerates so little re-coding because 20.67 starts
+so close to 20.
+
+### The search
+
+Write $`\omega`$ for the bias factor: a search with bias $`\omega`$ is
+$`\omega`$ times as likely to find a pro-working-theory observation as a
+pro-rival one. Such a search turns a share $`\theta`$ of the evidence
+into a share $`\omega\theta / (\omega\theta + 1 - \theta)`$ among the
+observations found, and both Bayes factors take an `omega` argument that
+applies that change.
+[`sens_bias()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_bias.md)
+finds the bias at which each condition of the rule fails:
+
+``` r
+
+sens_bias(9, 3)
+#> $bf_uniform
+#> [1] 20.67196
+#> 
+#> $bf_worst
+#> [1] 2.732168
+#> 
+#> $omega_uniform
+#> [1] 1.009794
+#> 
+#> $omega_worst
+#> [1] 1.559262
+#> 
+#> $omega_star
+#> [1] 1.009794
+```
+
+A search about one percent more likely to find pro-working-theory
+observations would change the decision. With the memo counted as ten
+observations, the search would have to be more than twice as likely:
+
+``` r
+
+sens_bias(18, 3)$omega_star
+#> [1] 2.334075
+```
+
+Under strong bias the rival’s most favorable share is no longer one
+half. The biased search carries the rival’s shares onto shares found of
+at most $`\omega / (1 + \omega)`$, while nine of twelve is most probable
+at a share found of $`9/12`$. Once $`\omega / (1 + \omega)`$ passes
+$`9/12`$, which happens once $`\omega`$ passes $`9/3 = 3`$, a share
+below one half fits the counts better, and
+[`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
+uses it:
+
+``` r
+
+tilt <- function(t, om) om * t / (om * t + 1 - t)
+c(prob_at_half = dbinom(9, 12, tilt(0.5, 5)),
+  prob_at_0.375 = dbinom(9, 12, tilt(0.375, 5)),
+  worst_case = bf_worst_case(9, 3, omega = 5))
+#>  prob_at_half prob_at_0.375    worst_case 
+#>     0.1973957     0.2581036     0.2146125
+```
+
+The tipping points do not depend on this. At the bias where
+$`\omega / (1 + \omega)`$ equals $`9/12`$, the denominator is the
+largest probability nine of twelve can have at any share, so the
+worst-case value is already below 1 there. It therefore falls to 1 at a
+smaller bias, where one half is still the rival’s most favorable share.
+
+## Weights on the shares other than the uniform
+
+Giving every share in a range the same weight is a choice, and a reader
+may want a different one.
+[`bf_rescaled()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_rescaled.md)
+takes a Beta distribution rescaled onto each theory’s half, one pair of
+parameters per side; the uniform default is the pair $`(1, 1)`$ on both
+sides. Below one the weight collects at both ends of each half,
+including next to one half where the two theories claim nearly the same
+share. Above one it collects in the middle of each half, so the two
+theories claim shares far apart:
+
+``` r
+
+c(uniform      = bf_rescaled(9, 3),
+  next_to_half = bf_rescaled(9, 3, 0.5, 0.5, 0.5, 0.5),
+  far_apart    = bf_rescaled(9, 3, 10, 10, 10, 10))
+#>      uniform next_to_half    far_apart 
+#>    20.671958     9.526137   252.917211
+```
+
+The worst-case Bayes factor takes the same pair for the working theory’s
+shares only, because the rival stays at its most favorable share
+whatever weights its proponent might state:
+
+``` r
+
+c(uniform      = bf_worst_case(9, 3),
+  next_to_half = bf_worst_case(9, 3, a1 = 0.5, b1 = 0.5),
+  far_apart    = bf_worst_case(9, 3, a1 = 10, b1 = 10))
+#>      uniform next_to_half    far_apart 
+#>     2.732168     2.070490     4.384581
+```
+
+The weights on shares are a different thing from the weights on
+observations above: those act as extra observations, these say what each
+theory predicts.
+
+## An archive of known size
+
+The binomial model treats the observations as independent draws. A
+researcher who reads documents from an archive of $`M`$ documents does
+not read any document twice.
+[`bf_uniform_weights_finite()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_finite.md)
+and
+[`bf_worst_case_finite()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_finite.md)
+compute both Bayes factors for that case:
+
+``` r
+
+sapply(c(20, 100, 1000), function(M)
+  c(M = M,
+    uniform_weights = bf_uniform_weights_finite(9, 3, M),
+    worst_case = bf_worst_case_finite(9, 3, M)))
+#>                      [,1]       [,2]        [,3]
+#> M                20.00000 100.000000 1000.000000
+#> uniform_weights 162.88462  25.222782   21.048391
+#> worst_case       16.84375   3.194593    2.770414
+```
+
+Both values fall toward the binomial ones, 20.67 and 2.73, as the
+archive grows. In every case the paper’s supplement computed, counts
+whose binomial Bayes factors meet the rule also meet it from an archive
+of any size, so the researcher need not state $`M`$.

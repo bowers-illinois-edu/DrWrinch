@@ -1,5 +1,148 @@
 # Changelog
 
+## DrWrinch 0.0.2.1
+
+Under the paper’s rule, a researcher now sets the rival aside, at least
+provisionally, when the uniform-weights Bayes factor is 20 or more and
+the worst-case Bayes factor is above 1. This release follows the rule,
+and it drops every function the paper no longer uses rather than
+deprecating it, since no one else uses the package yet.
+
+- Added
+  [`sens_bias()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_bias.md),
+  which returns the search bias at which each condition of the rule
+  fails and the smaller of the two, the paper’s omega-star: 1.01 at nine
+  observations for the working theory and three for the rival, and 2.33
+  with the smoking-gun memo counted as ten.
+- [`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md)
+  now returns the number of re-codings at which each condition fails and
+  the smaller of the two. Its `model`, `threshold`, and `theta_cut`
+  arguments are gone; `threshold_uniform` and `threshold_worst` replace
+  `threshold`.
+- [`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
+  gains `omega`, for a biased search, and `a1, b1`, for a Beta
+  distribution rescaled onto the working theory’s shares. Under bias the
+  denominator is the largest probability any of the rival’s shares can
+  give the counts. Up to a bias of `y_W / y_R` that is the probability
+  at a share of one half; past it the rival’s most favorable share is
+  below one half, and holding the rival at one half would overstate the
+  worst case (0.28 rather than 0.21 at nine of twelve and a bias of 5).
+- Added
+  [`bf_uniform_weights_finite()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_finite.md)
+  and
+  [`bf_worst_case_finite()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_finite.md),
+  both Bayes factors for documents read without replacement from an
+  archive of known size, from the supplement’s section “Finite evidence
+  without replacement”.
+- [`bf_uniform_weights()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_uniform_weights.md)
+  now rejects counts that are not whole numbers, as
+  [`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
+  already did.
+- Removed `bf_binomial()` (with its whole-interval Beta prior and
+  cutpoint), `sens_binomial()` (with `M_star`), `bf_urn()`,
+  `sens_urn()`, `bf_separated()`, `separation_g()`, and
+  `bf_separated_bias()`. The paper no longer uses any of them.
+  `BiasedUrn`, which only `bf_urn()` needed, is no longer imported.
+- The tests pin Hammoud-Gallego and Freier at their re-coded counts, 11
+  and 2, and every number the paper’s applications table prints.
+- Help pages, README, and vignette describe the rule, and no longer use
+  gendered pronouns for the researcher or the rival.
+
+## DrWrinch 0.0.2.0
+
+- Added
+  [`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md),
+  `bf_separated()`, `separation_g()`, and `bf_separated_bias()` – the
+  second Bayes factor from the paper’s one model, which evaluates the
+  rival’s claim at the single share, one half, that makes the observed
+  counts most probable, plus the version that separates the two
+  theories’ claims by a stated margin and the margin at which a
+  threshold is reached.
+
+- Added
+  [`bf_uniform_weights()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_uniform_weights.md),
+  the documented name for the Bayes factor that averages over the
+  rival’s whole range of shares under uniform weights. `bf_binomial()`
+  returns the same number at its defaults and is kept for one release.
+
+- Added
+  [`bf_rescaled()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_rescaled.md),
+  which computes that same Bayes factor under weights the researcher
+  states within each theory’s range: a Beta(a, b) distribution squeezed
+  onto each half, one pair per side.
+
+- The Shiny app now shows the two Bayes factors from one model side by
+  side, above a picture of the three probabilities they are built from:
+  the numerator they share and the two denominators that separate them.
+  Dividing the first bar by the second gives the uniform-weights value
+  and by the third gives the worst-case value, so a reader can see where
+  each number comes from. The urn panel is gone. The sensitivity tab
+  reports the recoding table for the worst-case Bayes factor beside the
+  tipping point for the uniform-weights one.
+
+- The app’s sidebar no longer offers a cutpoint or a Beta prior on the
+  whole interval. The cutpoint applies to only one of the two Bayes
+  factors, so moving it left the two cards showing numbers that could
+  not be compared; the whole-interval prior made the reported quantity
+  the posterior odds while the card called it a Bayes factor. A reader
+  who wants either calls `bf_binomial()` or
+  [`bf_rescaled()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_rescaled.md)
+  directly.
+
+- The app’s prior-sweep curve and prose now say posterior odds
+  throughout, and the data function behind the curve is renamed
+  `post_odds_M_curve()` with a `post_odds` column.
+
+- README, the package documentation, the DESCRIPTION, and the
+  getting-started vignette describe one model and two Bayes factors. The
+  vignette derives every number it reports rather than asserting it.
+
+- `bf_urn()` and `sens_urn()` are deprecated. The paper began with two
+  probability models and now has one, so the hypergeometric urn model is
+  no longer in it. Neither function is removed and neither returns
+  anything different: the first arXiv version of the paper cites them
+  and its replication code calls them. Each warns once per session,
+  naming the replacement –
+  [`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
+  and
+  [`bf_uniform_weights()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_uniform_weights.md)
+  for the Bayes factors, `bf_separated_bias()` and
+  `sens_coding(model = "worst_case")` for the sensitivity questions
+  `sens_urn()` answered. The notice fires once rather than on every call
+  because `sens_coding(model = "urn")` recomputes the urn Bayes factor
+  at every re-coding.
+
+- [`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md)’s
+  `model` argument now takes `"uniform_weights"` (the default) and
+  `"worst_case"`; `"binomial"` is accepted as the earlier name for the
+  first and returns the same thing, and `"urn"` still works for the
+  superseded model. Under `"worst_case"` the function returns a recoding
+  table rather than a tipping point: one row per re-coding with the
+  recomputed Bayes factor and the separation at which the two-share
+  version reaches the threshold, reproducing the supplement’s table. Its
+  question is different because at counts like nine against three the
+  worst-case Bayes factor was never above 20, so re-coding cannot
+  overturn a conclusion the researcher did not draw.
+
+- `sens_binomial()`’s help now says that `M_star` is a tipping point in
+  the *posterior odds*, not the Bayes factor. As the `Beta(1, M + 1)`
+  prior tilts toward the rival the Bayes factor rises, so the object the
+  old help described did not exist.
+
+- **Documentation correction.** `bf_binomial()`’s help said it returned
+  “the Bayes factor” whatever the prior. It returns the ratio of
+  posterior masses either side of the cut, which is the *posterior
+  odds*. A Beta prior on the whole interval sets how much weight each
+  theory gets as well as how weight is spread within each theory’s
+  range, and the Bayes factor renormalizes the first away while the
+  posterior odds keep it. The two coincide only at the uniform prior; at
+  nine observations against three under Beta(1, 2) the posterior odds
+  are 10.14 while the Bayes factor is 30.41, and they move in opposite
+  directions as the prior tilts further toward the rival. The help page
+  now says so and `test-bf_uniform_weights.R` pins both columns.
+  `sens_binomial()`’s `M_star` is a tipping point in the posterior odds,
+  and its help still needs the same correction.
+
 ## DrWrinch 0.0.1.9001
 
 - Added
@@ -57,18 +200,12 @@
 
 ## DrWrinch 0.0.0.9001
 
-- Implemented
-  [`bf_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_urn.md)
-  (Formulation C of the hypergeometric urn model: WTF =
-  `(y_W + 1, max(1, y_R))`, RTF = `(y_W, y_W + 1)`).
-- Extended
-  [`bf_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_binomial.md)
-  with observation-bias parameter `omega` and general Beta priors.
-- Implemented
-  [`sens_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_binomial.md)
-  and
-  [`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md)
-  (bias and prior tipping points via `uniroot`).
+- Implemented `bf_urn()` (Formulation C of the hypergeometric urn model:
+  WTF = `(y_W + 1, max(1, y_R))`, RTF = `(y_W, y_W + 1)`).
+- Extended `bf_binomial()` with observation-bias parameter `omega` and
+  general Beta priors.
+- Implemented `sens_binomial()` and `sens_urn()` (bias and prior tipping
+  points via `uniroot`).
 - Added `tests/testthat/` covering the substantive properties: BF = 1
   under symmetric evidence, the paper’s analytical value
   `bf_urn(7, 3) = 39`, RTF-degeneracy at `y_R > y_W + 1`,

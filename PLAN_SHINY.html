@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -230,7 +230,7 @@ counts_ok  &lt;- reactive({ validate(...); list(y_W = ..., y_R = ...) })
             +---&gt; output$tipping_text (renderUI: prose summary)</code></pre>
 <p>Key implementation choices:</p>
 <ol style="list-style-type: decimal"><li>
-<strong>Wrap each model call in <code>tryCatch</code></strong> — <code><a href="reference/bf_binomial.html">bf_binomial()</a></code> uses <code><a href="https://rdrr.io/r/stats/integrate.html" class="external-link">stats::integrate()</a></code> which can fail at pathological omega. Catch and render a friendly “computation failed at omega = X; try a narrower range” message rather than letting Shiny show a red error.</li>
+<strong>Wrap each model call in <code>tryCatch</code></strong> — <code>bf_binomial()</code> uses <code><a href="https://rdrr.io/r/stats/integrate.html" class="external-link">stats::integrate()</a></code> which can fail at pathological omega. Catch and render a friendly “computation failed at omega = X; try a narrower range” message rather than letting Shiny show a red error.</li>
 <li>
 <strong>Treat <code>NA_real_</code> (urn undefined) and <code>Inf</code> (rival probability zero) as expected branches</strong>, not errors. The card renders prose explaining each.</li>
 <li>
@@ -292,13 +292,13 @@ counts_ok  &lt;- reactive({ validate(...); list(y_W = ..., y_R = ...) })
 <ol style="list-style-type: decimal"><li>
 <strong>shinyapps.io free tier limits.</strong> 5 active hours/month and concurrency caps. For a paper-demo audience this is usually fine but is worth noting if the paper goes viral. The deploy script can be re-pointed to Posit Connect Cloud or RStudio Connect later with one URL change.</li>
 <li>
-<strong><code><a href="https://rdrr.io/pkg/BiasedUrn/man/BiasedUrn-2-Univariate.html" class="external-link">BiasedUrn::dFNCHypergeo</a></code> on shinyapps.io.</strong> This is on CRAN, so it will install cleanly. No risk.</li>
+<strong><code>BiasedUrn::dFNCHypergeo</code> on shinyapps.io.</strong> This is on CRAN, so it will install cleanly. No risk.</li>
 <li>
 <strong>Cold start time.</strong> shinyapps.io spins down idle apps after ~5 min. First hit after sleep takes 10–20s. Mitigation: a small “scheduled keep-warm” GitHub Action that curls the URL every 4 minutes during business hours. Out of scope for MVP.</li>
 <li>
 <strong>Mobile usability.</strong> Process-tracing scholars at conferences may pull this up on phones. <code><a href="https://rstudio.github.io/bslib/reference/page_sidebar.html" class="external-link">bslib::page_sidebar()</a></code> collapses the sidebar to a drawer on small screens by default; verify on a phone before finalizing.</li>
 <li>
-<strong>Reproducibility of <code>omega_star</code>.</strong> The vignette claims <code>~= 1.3</code> for <code>(7, 3)</code>. The Shiny app must show numbers that exactly match the package, since the vignette and the app share a citation. The server should call <code><a href="reference/sens_urn.html">sens_urn()</a></code> directly rather than recomputing the search itself.</li>
+<strong>Reproducibility of <code>omega_star</code>.</strong> The vignette claims <code>~= 1.3</code> for <code>(7, 3)</code>. The Shiny app must show numbers that exactly match the package, since the vignette and the app share a citation. The server should call <code>sens_urn()</code> directly rather than recomputing the search itself.</li>
 </ol><hr></div>
 <div class="section level2">
 <h2 id="critical-files-for-implementation-paths">Critical files for implementation (paths)<a class="anchor" aria-label="anchor" href="#critical-files-for-implementation-paths"></a></h2>
@@ -324,7 +324,7 @@ counts_ok  &lt;- reactive({ validate(...); list(y_W = ..., y_R = ...) })
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

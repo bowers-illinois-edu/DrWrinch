@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,124 +38,63 @@
 
 <div id="handoff-for-drwrinch" class="section level1">
 
-<p>Last touched: 2026-06-22 (paper-alignment session in <code>~/repos/DrWrinch/</code>). Pick up from here in a fresh Claude session run from <code>~/repos/DrWrinch/</code>.</p>
-<p>2026-06-22 session, in brief: the paper was submitted to APSR (2026-06-15) and posted to arXiv (arXiv:2606.16683) with the running example changed from <code>(y_W = 7, y_R = 3)</code> to <code>(9, 3)</code>. This session: (a) refreshed the running example everywhere in the package to <code>(9, 3)</code> — binomial BF 20.67 (just above 20), urn BF 323; (b) added the exported <code><a href="reference/sens_coding.html">sens_coding()</a></code> for the paper’s third sensitivity question (coding error), surfaced in the Shiny Sensitivity tab; (c) added <code>test-applications.R</code>, real-data regression tests pinning the six published studies’ counts; (d) fixed a shinyapps deploy failure (see Lessons) and verified the live app’s Sensitivity tab in-browser; and (e) integrated <code><a href="reference/sens_coding.html">sens_coding()</a></code> into the paper repo — the appendix demos and lists it, and the running example plus all six application analyses now cross-check every reported Bayes factor against DrWrinch via <code>stopifnot</code>. Version <code>0.0.1.9001</code>; <code>inst/CITATION</code> points to the arXiv preprint; <code>devtools::check()</code> clean; 266 tests pass. All DrWrinch and paper changes are committed and pushed. Nothing left in progress.</p>
+<p>Last touched: 2026-10-27. Read <code>PLAN_decision_rule.md</code> next. It records what changed in the paper between 2026-08-29 and 2026-10-19, the four choices Jake made on 2026-10-27, the tests written before the code, and the edits the paper repository needs once this version is on GitHub.</p>
 <div class="section level2">
 <h2 id="what-drwrinch-is">What DrWrinch is<a class="anchor" aria-label="anchor" href="#what-drwrinch-is"></a></h2>
-<p>The R package implementing Lopez, Bowers, and Gajardo Cooper (2026), “Fully specified Bayes factors for process tracing.” Named after Dorothy Maud Wrinch (1894–1976; joint papers with Harold Jeffreys in the early 1920s developed the framework that later became Jeffreys’s theory of Bayes factors).</p>
-<p>Companion package <code>DrBristol</code> (at <code>~/repos/DrBristol</code>) implements p-value methods for the same class of problems. DrBristol is mature, GitHub-only, named after Muriel Bristol; DrWrinch is its Bayes-factor sibling. Do not merge the two.</p>
-<p>The paper lives at <code>~/repos/fully_specified_bf</code>. Treat the paper as the source of truth for notation and methodology; DrWrinch is the companion code. Integration of DrWrinch into the paper is <strong>appendix-only</strong> — see the project memory at <code>~/.claude/projects/-Users-jwbowers-repos-fully-specified-bf/memory/project_drwrinch_paper_integration.md</code>.</p>
+<p>The R package implementing Lopez, Bowers, and Gajardo Cooper (2026), “Fully specified Bayes factors for process tracing.” The paper is in <code>~/repos/fully_specified_bf</code> and is the source of truth for notation and methods. Named after Dorothy Maud Wrinch (1894–1976), whose joint papers with Harold Jeffreys developed the framework that became Jeffreys’s theory of Bayes factors. The companion package <code>DrBristol</code> (<code>~/repos/DrBristol</code>) implements p-value methods for the same problems; the two stay separate.</p>
 </div>
 <div class="section level2">
-<h2 id="current-public-surface-2026-06-22">Current public surface (2026-06-22)<a class="anchor" aria-label="anchor" href="#current-public-surface-2026-06-22"></a></h2>
+<h2 id="state-of-the-package-2026-10-27">State of the package, 2026-10-27<a class="anchor" aria-label="anchor" href="#state-of-the-package-2026-10-27"></a></h2>
+<p>Version 0.0.2.1, uncommitted. <code>devtools::test()</code> passes 134 tests (1101 expectations) with no warnings, and <code>devtools::check()</code> reports 0 errors, 0 warnings, 0 notes. The local app was run in a browser: both tabs render, and the only console error is the missing favicon.</p>
+<p>The paper’s rule sets the rival aside, at least provisionally, when the uniform-weights Bayes factor is 20 or more and the worst-case Bayes factor is above 1. The exported functions follow it:</p>
 <ul><li>
-<strong>GitHub</strong>: <a href="https://github.com/bowers-illinois-edu/DrWrinch" class="external-link uri">https://github.com/bowers-illinois-edu/DrWrinch</a> (public, in the <code>bowers-illinois-edu</code> org). <code>main</code> is at version <code>0.0.1.9001</code>.</li>
+<code>bf_uniform_weights(y_W, y_R, omega)</code>, in <code>R/bf_uniform_weights.R</code>.</li>
 <li>
-<strong>pkgdown site</strong>: <a href="https://bowers-illinois-edu.github.io/DrWrinch/" class="uri">https://bowers-illinois-edu.github.io/DrWrinch/</a> (built from <code>gh-pages</code> via the pkgdown.yaml workflow on every push to <code>main</code>).</li>
+<code>bf_worst_case(y_W, y_R, omega, a1, b1)</code>, in <code>R/bf_worst_case.R</code>. Under bias it divides by the largest probability any rival share gives the counts, which moves below a share of one half once <code>omega &gt; y_W / y_R</code> (Jake’s decision of 2026-10-27; the paper’s five affected table cells are to be recomputed to match). When <code>y_W &lt; y_R</code> the rival stays at one half, as in the paper’s closed form.</li>
 <li>
-<strong>Shiny app</strong>: <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a> (deployed via <code>deploy.R</code> at the repo root; rsconnect targets <code>appName = "drwrinch"</code> on the <code>jakebowers</code> shinyapps.io account).</li>
+<code><a href="reference/bf_rescaled.html">bf_rescaled()</a></code>, in <code>R/bf_rescaled.R</code>.</li>
 <li>
-<strong>GitHub Actions</strong>: R-CMD-check passes across macOS-release, Windows-release, Ubuntu oldrel-1 / release / devel. The pkgdown workflow auto-deploys on every push to <code>main</code>.</li>
-</ul><p>CRAN is on hold indefinitely (per Decision F of <code>PLAN_SHINY.md</code>); the release path is GitHub plus pkgdown plus shinyapps.io, mirroring DrBristol.</p>
+<code><a href="reference/bf_finite.html">bf_uniform_weights_finite()</a></code> and <code><a href="reference/bf_finite.html">bf_worst_case_finite()</a></code>, in <code>R/bf_finite.R</code>, for an archive of known size.</li>
+<li>
+<code><a href="reference/sens_bias.html">sens_bias()</a></code> and <code><a href="reference/sens_coding.html">sens_coding()</a></code>, in <code>R/sens_bias.R</code> and <code>R/sens_coding.R</code>. Each returns the tipping point for each condition of the rule and the smaller of the two.</li>
+<li>
+<code><a href="reference/run_app.html">run_app()</a></code>, in <code>R/run_app.R</code>.</li>
+</ul><p>Removed in this version, without deprecation because no one else uses the package: <code>bf_binomial()</code>, <code>bf_urn()</code>, <code>sens_urn()</code>, <code>sens_binomial()</code>, <code>bf_separated()</code>, <code>separation_g()</code>, <code>bf_separated_bias()</code>, and the deprecation helper. <code>BiasedUrn</code>, <code>ggplot2</code>, and <code>dplyr</code> left DESCRIPTION.</p>
+<p>The Shiny app (<code>inst/shiny/</code>) takes two thresholds, opens the Result tab with what the rule decides, and on the Sensitivity tab reports the coding and bias tipping points under the rule beside one plot of both Bayes factors against the bias. <code>.dw_needed</code> in <code>inst/shiny/global.R</code> is 0.0.2.1.</p>
 </div>
 <div class="section level2">
-<h2 id="current-state-of-the-package">Current state of the package<a class="anchor" aria-label="anchor" href="#current-state-of-the-package"></a></h2>
-<p>Version <code>0.0.1.9001</code>. <code>devtools::test()</code> passes 266/266 locally and in CI. <code>devtools::check()</code> is clean (0 errors, 0 warnings, 0 notes).</p>
-<p>Exported functions: <code>bf_binomial</code>, <code>bf_urn</code>, <code>sens_binomial</code>, <code>sens_urn</code>, <code>sens_coding</code>, <code>run_app</code>.</p>
-<p>Files of note:</p>
-<ul><li>
-<code>R/bf_binomial.R</code>, <code>R/bf_urn.R</code>, <code>R/sens_binomial.R</code>, <code>R/sens_urn.R</code>, <code>R/sens_coding.R</code>, <code>R/utils.R</code> (internal <code>.find_omega_tipping</code>), <code>R/DrWrinch-package.R</code>, <code>R/run_app.R</code>.</li>
-<li>
-<code>inst/shiny/</code> — the deployed Shiny app: <code>global.R</code>, <code>ui.R</code>, <code>server.R</code>, and <code>R/helpers.R</code> + <code>R/plots.R</code> for the formatter and plotly wrappers. Verdicts use the Kass &amp; Raftery (1995) scale (boundaries <code>1, 3, 20, 150</code>, upper-inclusive).</li>
-<li>
-<code>tests/testthat/test-bf_binomial.R</code>, <code>test-bf_urn.R</code>, <code>test-sens.R</code>, <code>test-app_helpers.R</code> (Layer 1 helpers + curves), <code>test-app_server.R</code> (Layer 2 <code><a href="https://rdrr.io/pkg/shiny/man/testServer.html" class="external-link">shiny::testServer</a></code> for both BF reactives, the urn-undefined branch, and the sensitivity-tab reactives), <code>test-sens_coding.R</code> (coding-error tipping points for both models, pinned to the paper’s running example), <code>test-applications.R</code> (real-data regression tests from the six published studies reanalyzed in the paper: <code>bf_binomial</code>, <code>bf_urn</code>, and <code>sens_coding</code> pinned to each study’s counts).</li>
-<li>
-<code>vignettes/getting-started.Rmd</code> (paper running example).</li>
-<li>
-<code>inst/CITATION</code> (preprint bibentry pointing to arXiv:2606.16683; add the journal DOI on publication).</li>
-<li>
-<code>_pkgdown.yml</code> (Bootstrap 5; reference grouped Bayes factors / Sensitivity / Interactive app).</li>
-<li>
-<code>.github/workflows/R-CMD-check.yaml</code>, <code>.github/workflows/pkgdown.yaml</code>.</li>
-<li>
-<code>cran-comments.md</code> (kept for if/when CRAN comes back into scope).</li>
-<li>
-<code>LICENSE</code>, <code>LICENSE.md</code> (MIT; copyright in paper order).</li>
-<li>
-<code>NEWS.md</code>, <code>README.md</code>.</li>
-<li>
-<code>deploy.R</code> at repo root (in <code>.Rbuildignore</code>). Run from the repo root with <code>source("deploy.R")</code> to redeploy after changes; relies on <code>rsconnect::setAccountInfo(...)</code> having been run once on this machine.</li>
-</ul><p>Authors in DESCRIPTION (paper order): Matias Lopez (aut, cph), Jake Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).</p>
+<h2 id="public-surface">Public surface<a class="anchor" aria-label="anchor" href="#public-surface"></a></h2>
+<ul><li>GitHub: <a href="https://github.com/bowers-illinois-edu/DrWrinch" class="external-link uri">https://github.com/bowers-illinois-edu/DrWrinch</a>, <code>main</code> at 0.0.2.0 until this version is pushed.</li>
+<li>pkgdown site: <a href="https://bowers-illinois-edu.github.io/DrWrinch/" class="uri">https://bowers-illinois-edu.github.io/DrWrinch/</a>, rebuilt by the pkgdown workflow on every push to <code>main</code>. <code>_pkgdown.yml</code> lists the new reference index.</li>
+<li>Shiny app: <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a>, deployed with <code>source("deploy.R")</code> from the repository root. It still runs 0.0.2.0.</li>
+<li>CRAN is on hold indefinitely (Decision F of <code>PLAN_SHINY.md</code>).</li>
+</ul></div>
+<div class="section level2">
+<h2 id="the-paper-repository">The paper repository<a class="anchor" aria-label="anchor" href="#the-paper-repository"></a></h2>
+<p>The paper still sources its own <code>tests/*.R</code>. Two cross-checks in its <code>tests/bf_weighted.R</code> call <code>DrWrinch::bf_binomial()</code> and <code>DrWrinch::bf_urn()</code>, so the paper, the supplement, and the replications will stop with an error as soon as the paper’s renv library installs this version. <code>PLAN_decision_rule.md</code> lists those fixes, the supplement’s reproduction section rewrite, the <code>renv.lock</code> update, and the five worst-case cells. The current arXiv preprint’s reproduction section calls removed functions, so the next arXiv replacement is what brings the preprint and the package back into agreement.</p>
 </div>
 <div class="section level2">
-<h2 id="what-this-session-delivered">What this session delivered<a class="anchor" aria-label="anchor" href="#what-this-session-delivered"></a></h2>
-<ol style="list-style-type: decimal"><li>
-<strong>Phase 1 (commit <code>8e8a6c1</code>)</strong> — MVP Shiny app: <code><a href="reference/run_app.html">run_app()</a></code> launcher, <code>inst/shiny/{global.R, ui.R, server.R}</code>, helpers under <code>inst/shiny/R/helpers.R</code>, Layer 1 tests for <code>format_bf</code> / <code>bf_label</code> / <code>interpret_omega_star</code>, Layer 2 <code>testServer</code> tests for <code>bf_binom</code> / <code>bf_urn_v</code> / the urn-undefined card branch. DESCRIPTION bumped to <code>0.0.1.9000</code>; <code>shiny</code> and <code>bslib</code> added to Suggests.</li>
-<li>
-<strong>Phase 2 (commit <code>b60386a</code>)</strong> — Sensitivity tab with two plotly outputs (<code>plot_omega</code>, <code>plot_M</code>) and the <code>tipping_text</code> renderUI prose. New helpers: <code>interpret_M_star</code>, <code>bf_omega_curve</code>, <code>bf_M_curve</code>. New file <code>inst/shiny/R/plots.R</code> for the plotly wrappers. <code>plotly</code> added to Suggests and to <code><a href="reference/run_app.html">run_app()</a></code>’s <code>requireNamespace</code> guard.</li>
-<li>
-<strong>Phase 3 (commit <code>e582d57</code>)</strong> — Polish: <code>validate_counts</code> now rejects non-integer numeric input via <code>x == round(x)</code>; About tab gained Running-example, Sensitivity-glossary, and Sources sections with citation and GitHub link; <code>inst/shiny/global.R</code> gained an <code>install_github</code> stanza for shinyapps.io cold-start; <code>deploy.R</code> at the repo root; <code>_pkgdown.yml</code> gained an Interactive-app reference section; <code>NEWS.md</code> gained a <code>0.0.1.9000</code> block.</li>
-<li>
-<strong>Phase 4 (this commit)</strong> — Live deployment to <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a>. The deploy initially failed with <code>HTTP 401: Unauthorized</code> while shinyapps.io’s build worker tried to fetch DrWrinch from GitHub — a stale OAuth token cached on Posit’s build infrastructure from a previously-enabled-now-disabled GitHub linkage in Posit’s Authentication settings. The fix was to toggle GitHub auth back on in Posit’s user settings, click through the OAuth flow, then toggle it back off. README.md and NEWS.md updated with the live URL; the orphan <code>drwrinch-v2</code> app from a deploy retry is terminated.</li>
-</ol></div>
-<div class="section level2">
-<h2 id="lessons-worth-keeping">Lessons worth keeping<a class="anchor" aria-label="anchor" href="#lessons-worth-keeping"></a></h2>
+<h2 id="deployment-failures-and-their-fixes">Deployment failures and their fixes<a class="anchor" aria-label="anchor" href="#deployment-failures-and-their-fixes"></a></h2>
 <ul><li>
 <strong>Stale GITHUB_PAT in <code>~/.Renviron</code></strong> (commented out 2026-05-19, with a note pointing to <a href="https://github.com/settings/tokens" class="external-link uri">https://github.com/settings/tokens</a> for a fresh one). If <code>remotes::install_github</code> ever falls back to anonymous unexpectedly, check that this token still works.</li>
 <li>
 <strong>shinyapps.io’s “401 fetching GitHub” failure mode</strong> is almost always a stale OAuth cache, not a missing PAT. The toggle-on / toggle-off cycle in Posit Authentication is the fix.</li>
 <li>
-<strong>shinyapps.io’s “stale DrWrinch / function-not-found” failure mode</strong> (hit and fixed 2026-06-22). shinyapps installs DrWrinch into the read-only system library (<code>/usr/lib/R</code>) at image-build time from its manifest, and that copy can lag GitHub HEAD. A runtime <code>install_github</code> cannot overwrite it (<code>mv ... Permission denied</code>, “cannot remove earlier installation, is it in use?”), so the app silently keeps the old version and errors on any newer function (this session: <code>'sens_coding' is not an exported object</code>). The symptom is a tab-level “An error has occurred” with the plots still rendering, and the real cause is only visible via <code>rsconnect::showLogs()</code>. Fix in <code>inst/shiny/global.R</code>: install the required version into a writable, session-local library (<code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>) placed FIRST on <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths()</a></code>, shadowing the stale system copy. Check the installed version with <code><a href="https://rdrr.io/r/utils/packageDescription.html" class="external-link">packageVersion()</a></code> — NOT <code><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace()</a></code>, which loads the old namespace and then blocks <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> from picking up the reinstall. The GitHub download and build succeed at runtime; only the install <em>location</em> has to be writable. Costs ~30s per cold start. When the required version changes, bump <code>.dw_needed</code> in <code>global.R</code>.</li>
+<strong>shinyapps.io’s “stale DrWrinch / function-not-found” failure mode</strong> (hit and fixed 2026-06-22). shinyapps installs DrWrinch into the read-only system library (<code>/usr/lib/R</code>) at image-build time from its manifest, and that copy can lag GitHub HEAD. A runtime <code>install_github</code> cannot overwrite it (<code>mv ... Permission denied</code>, “cannot remove earlier installation, is it in use?”), so the app silently keeps the old version and errors on any newer function (this session: <code>'sens_coding' is not an exported object</code>). The symptom is a tab-level “An error has occurred” with the plots still rendering, and the real cause is only visible via <code>rsconnect::showLogs()</code>. Fix in <code>inst/shiny/global.R</code>: install the required version into a writable, session-local library (<code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>) placed FIRST on <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths()</a></code>, shadowing the stale system copy. Check the installed version with <code><a href="https://rdrr.io/r/utils/packageDescription.html" class="external-link">packageVersion()</a></code> — NOT <code><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace()</a></code>, which loads the old namespace and then blocks <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> from picking up the reinstall. The GitHub download and build succeed at runtime; only the install <em>location</em> has to be writable. Each cold start spends about 30 seconds on this install. When the required version changes, bump <code>.dw_needed</code> in <code>global.R</code>.</li>
 <li>
 <strong><code>rsconnect</code> refuses to bundle locally-installed packages</strong> that lack <code>RemoteType</code> metadata. Trying to dodge GitHub via a local tarball doesn’t work cleanly; the right workarounds are
 <ol style="list-style-type: lower-alpha"><li>fix the OAuth cache (what worked this session), (b) R-universe.</li>
 </ol></li>
 <li>
-<strong>The Shiny app pulls DrWrinch from GitHub on shinyapps.io cold start</strong> via the <code>install_github</code> stanza in <code>inst/shiny/global.R</code>. ~30s one-time install per cold start; no cost in local dev where <code>devtools::load_all()</code> has already loaded it.</li>
+<strong>The Shiny app pulls DrWrinch from GitHub on shinyapps.io cold start</strong> via the <code>install_github</code> stanza in <code>inst/shiny/global.R</code>, about 30 seconds per cold start. Local development skips it, because <code>devtools::load_all()</code> has already loaded the current version.</li>
 </ul></div>
 <div class="section level2">
-<h2 id="what-is-still-open">What is still open<a class="anchor" aria-label="anchor" href="#what-is-still-open"></a></h2>
+<h2 id="still-open">Still open<a class="anchor" aria-label="anchor" href="#still-open"></a></h2>
 <ul><li>
-<strong>CRAN submission</strong>: held indefinitely per Decision F. If resumed, the work would be: revisit <code>cran-comments.md</code>, ensure <code>R CMD check --as-cran</code> is clean, decide whether <code>\dontrun{}</code> wrapping of <code><a href="reference/run_app.html">run_app()</a></code> is the right discipline for CRAN examples (it is), bump version to <code>0.0.1</code>, submit.</li>
-<li>
-<strong><code>inst/CITATION</code></strong> points to the arXiv preprint (arXiv:2606.16683). Replace <code>howpublished</code> / add a DOI when the journal version is published.</li>
-<li>
-<strong>Layer 3 <code>shinytest2</code> snapshot tests</strong>: skipped this session (heavy, fragile across OSes). Worth adding if the Shiny app’s UI starts drifting visually; the substantive claims are already pinned at Layers 1 and 2.</li>
-<li>
-<strong>Posit GitHub re-link</strong>: GitHub auth is currently disabled in Posit Authentication (you toggled it off again after the OAuth refresh). If you ever want to publish to Posit Cloud, you will need to re-enable it.</li>
+<code>inst/CITATION</code> points to the arXiv preprint (arXiv:2606.16683). Add the journal DOI when the paper is published.</li>
+<li>The app has no <code>shinytest2</code> snapshot tests. The helpers and the reactive graph are tested through <code>testthat</code> and <code><a href="https://rdrr.io/pkg/shiny/man/testServer.html" class="external-link">shiny::testServer()</a></code>.</li>
+<li>GitHub authentication is switched off in Posit’s settings. Publishing to Posit Cloud would need it switched on again.</li>
 </ul></div>
-<div class="section level2">
-<h2 id="how-to-resume">How to resume<a class="anchor" aria-label="anchor" href="#how-to-resume"></a></h2>
-<ol style="list-style-type: decimal"><li>Read this file. If you are about to touch the Shiny app, read <code>PLAN_SHINY.md</code> too.</li>
-<li>Read <code>~/repos/ai_workflow/CLAUDE_CODING.md</code> for the user’s coding rules (tests-before-implementation, pause-for-review at checkpoints, <code>devtools::check()</code> before complete, “why” comments at branch points).</li>
-<li>Read <code>R/*.R</code>, <code>inst/shiny/*.R</code>, <code>inst/shiny/R/*.R</code>, and <code>tests/testthat/*.R</code> to ground yourself.</li>
-<li>The release-path commands are:
-<ul><li>
-<code>devtools::test()</code>, <code>devtools::check()</code>
-</li>
-<li>
-<code>git push origin main</code> (triggers the pkgdown workflow)</li>
-<li>
-<code>source("deploy.R")</code> (redeploys the Shiny app; needs <code>rsconnect::setAccountInfo()</code> once per machine, see <code>deploy.R</code>’s comment block)</li>
-</ul></li>
-</ol></div>
-<div class="section level2">
-<h2 id="constraints-inherited-from-the-paper-repos-claudemd-and-memory">Constraints inherited from the paper repo’s CLAUDE.md and memory<a class="anchor" aria-label="anchor" href="#constraints-inherited-from-the-paper-repos-claudemd-and-memory"></a></h2>
-<ul><li>
-<strong>No unicode.</strong> ASCII only. <code>---</code> for em dash, <code>--</code> for en dash, <code>-&gt;</code> for arrow, <code>"</code> and <code>'</code> straight quotes, <code>...</code> for ellipsis.</li>
-<li>
-<strong>No methodological tribalism.</strong> Bayes factors are a tool. Do not introduce “Bayesian” labels.</li>
-<li>
-<strong>No athletic/defense metaphors for thresholds.</strong> BFs are “above” or “below” thresholds, not “clearing” or “withstanding” them.</li>
-<li>
-<strong>Plain language at branch points.</strong> Avoid “is appropriate,” “is reasonable,” structural metaphors. Name what depends on what.</li>
-<li>
-<strong>R package work follows <code>CLAUDE_CODING.md</code>.</strong> Tests before implementation; <code>check()</code> before complete; “why” comments at branch points.</li>
-</ul></div>
-<div class="section level2">
-<h2 id="drwrinch-and-the-paper-repo">DrWrinch and the paper repo<a class="anchor" aria-label="anchor" href="#drwrinch-and-the-paper-repo"></a></h2>
-<p>The paper repo’s renv currently has DrWrinch installed locally (via <code>renv::install("local::~/repos/DrWrinch")</code>) so the new appendix section renders. The renv lockfile was not snapshotted, so other machines rebuilding the paper would still need to install DrWrinch first. With the GitHub repo published and version <code>0.0.1.9000</code> tagged via the commit log, the appendix’s <code>install_github("bowers-illinois-edu/DrWrinch")</code> line resolves without further action.</p>
-</div>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -167,7 +106,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

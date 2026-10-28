@@ -4,11 +4,51 @@ Fully specified Bayes factors for process tracing.
 
 This package implements the methods of Lopez, Bowers, and Gajardo Cooper
 (2026), “Fully specified Bayes factors for process tracing”
-([arXiv:2606.16683](https://arxiv.org/abs/2606.16683)). Two generative
-models for evidence in favor of a working theory against a single rival
-— a binomial model for open-ended evidence and a hypergeometric urn
-model for bounded archives — each yield a conservative Bayes factor.
-Sensitivity analyses vary coding error, observation bias, and the prior.
+([arXiv:2606.16683](https://arxiv.org/abs/2606.16683)).
+
+A researcher has coded the evidence into two counts: observations
+supporting a working theory and observations supporting a single rival.
+One model underlies everything here. Each observation supports the
+working theory with probability `theta`, the share of the evidence that
+supports it. The working theory claims that share is above one half; the
+rival claims it is at or below one half.
+
+Each claim names a range of shares rather than one share, so neither
+gives a probability for the counts on its own. The package computes two
+Bayes factors. They share a numerator — the probability of the counts
+averaged over the shares above one half, under uniform weights — and
+differ in the denominator.
+
+- [`bf_uniform_weights()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_uniform_weights.md)
+  averages over the rival’s whole range under the same uniform weights.
+  At nine observations supporting the working theory and three
+  supporting the rival it gives 20.67.
+- [`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
+  evaluates the rival at the share that makes the counts most probable,
+  one half at these counts. It gives 2.73, the smallest Bayes factor any
+  weights on the rival’s shares can give.
+
+The paper’s rule sets the rival aside, at least provisionally, when the
+uniform-weights Bayes factor is 20 or more and the worst-case Bayes
+factor is above 1. Nine of twelve meets both conditions.
+
+[`sens_bias()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_bias.md)
+and
+[`sens_coding()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_coding.md)
+report how biased the search, or how many observations re-coded, it
+would take before a researcher following the rule would no longer set
+the rival aside: at nine of twelve, a search about one percent more
+likely to find pro-working-theory evidence, or one re-coded observation.
+[`bf_rescaled()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_rescaled.md)
+computes the uniform-weights Bayes factor under weights on the shares
+other than the uniform, and
+[`bf_worst_case()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_worst_case.md)
+takes the same weights for the working theory’s shares.
+[`bf_uniform_weights_finite()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_finite.md)
+and
+[`bf_worst_case_finite()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_finite.md)
+compute both Bayes factors for documents read without replacement from
+an archive of known size.
 
 The package is named after [Dorothy Maud
 Wrinch](https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch) (1894–1976),
@@ -27,22 +67,26 @@ remotes::install_github("bowers-illinois-edu/DrWrinch")
 
 ## Interactive app
 
-DrWrinch ships with a Shiny app that exposes the Bayes-factor and
-sensitivity functions through a browser UI:
+DrWrinch ships with a Shiny app that shows both Bayes factors and the
+sensitivity analyses through a browser:
 
 ``` r
 
 DrWrinch::run_app()
 ```
 
-A hosted copy lives at <https://jakebowers.shinyapps.io/drwrinch/>.
-Defaults reproduce the paper’s running example
-(`y_W = 9, y_R = 3, threshold = 20`); the Sensitivity tab reports the
-coding-error, observation-bias (omega_star), and prior (M_star) tipping
-points with plotly curves.
+A hosted copy is at <https://jakebowers.shinyapps.io/drwrinch/>. Its
+defaults reproduce the paper’s running example: nine observations for
+the working theory, three for the rival, and thresholds of 20 and 1. The
+Result tab shows the two Bayes factors side by side above a picture of
+the three probabilities they are built from, so a reader can see where
+each number comes from rather than take it on trust. The Sensitivity tab
+reports how biased the search, or how many observations re-coded, it
+would take to change the decision.
 
 ## Status
 
-Under active development alongside the paper. The single-rival case is
-the current focus. Multiple-rival extensions are being developed in a
-companion paper and may live in a separate package.
+The package is under active development alongside the paper, which
+compares a working theory with one rival at a time. The authors are
+developing extensions to several rivals in a companion paper, and those
+may become a separate package.

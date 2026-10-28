@@ -371,10 +371,9 @@ Reactive graph (read top-down, dependencies flow downward):
 
 Key implementation choices:
 
-1.  **Wrap each model call in `tryCatch`** —
-    [`bf_binomial()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_binomial.md)
-    uses [`stats::integrate()`](https://rdrr.io/r/stats/integrate.html)
-    which can fail at pathological omega. Catch and render a friendly
+1.  **Wrap each model call in `tryCatch`** — `bf_binomial()` uses
+    [`stats::integrate()`](https://rdrr.io/r/stats/integrate.html) which
+    can fail at pathological omega. Catch and render a friendly
     “computation failed at omega = X; try a narrower range” message
     rather than letting Shiny show a red error.
 2.  **Treat `NA_real_` (urn undefined) and `Inf` (rival probability
@@ -594,9 +593,8 @@ coding-standards file.
     is worth noting if the paper goes viral. The deploy script can be
     re-pointed to Posit Connect Cloud or RStudio Connect later with one
     URL change.
-2.  **[`BiasedUrn::dFNCHypergeo`](https://rdrr.io/pkg/BiasedUrn/man/BiasedUrn-2-Univariate.html)
-    on shinyapps.io.** This is on CRAN, so it will install cleanly. No
-    risk.
+2.  **`BiasedUrn::dFNCHypergeo` on shinyapps.io.** This is on CRAN, so
+    it will install cleanly. No risk.
 3.  **Cold start time.** shinyapps.io spins down idle apps after ~5 min.
     First hit after sleep takes 10–20s. Mitigation: a small “scheduled
     keep-warm” GitHub Action that curls the URL every 4 minutes during
@@ -609,9 +607,8 @@ coding-standards file.
 5.  **Reproducibility of `omega_star`.** The vignette claims `~= 1.3`
     for `(7, 3)`. The Shiny app must show numbers that exactly match the
     package, since the vignette and the app share a citation. The server
-    should call
-    [`sens_urn()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/sens_urn.md)
-    directly rather than recomputing the search itself.
+    should call `sens_urn()` directly rather than recomputing the search
+    itself.
 
 ------------------------------------------------------------------------
 

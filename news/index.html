@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,35 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.2.1" id="drwrinch-0021">DrWrinch 0.0.2.1<a class="anchor" aria-label="anchor" href="#drwrinch-0021"></a></h2>
+<p>Under the paper’s rule, a researcher now sets the rival aside, at least provisionally, when the uniform-weights Bayes factor is 20 or more and the worst-case Bayes factor is above 1. This release follows the rule, and it drops every function the paper no longer uses rather than deprecating it, since no one else uses the package yet.</p>
+<ul><li>Added <code><a href="../reference/sens_bias.html">sens_bias()</a></code>, which returns the search bias at which each condition of the rule fails and the smaller of the two, the paper’s omega-star: 1.01 at nine observations for the working theory and three for the rival, and 2.33 with the smoking-gun memo counted as ten.</li>
+<li>
+<code><a href="../reference/sens_coding.html">sens_coding()</a></code> now returns the number of re-codings at which each condition fails and the smaller of the two. Its <code>model</code>, <code>threshold</code>, and <code>theta_cut</code> arguments are gone; <code>threshold_uniform</code> and <code>threshold_worst</code> replace <code>threshold</code>.</li>
+<li>
+<code><a href="../reference/bf_worst_case.html">bf_worst_case()</a></code> gains <code>omega</code>, for a biased search, and <code>a1, b1</code>, for a Beta distribution rescaled onto the working theory’s shares. Under bias the denominator is the largest probability any of the rival’s shares can give the counts. Up to a bias of <code>y_W / y_R</code> that is the probability at a share of one half; past it the rival’s most favorable share is below one half, and holding the rival at one half would overstate the worst case (0.28 rather than 0.21 at nine of twelve and a bias of 5).</li>
+<li>Added <code><a href="../reference/bf_finite.html">bf_uniform_weights_finite()</a></code> and <code><a href="../reference/bf_finite.html">bf_worst_case_finite()</a></code>, both Bayes factors for documents read without replacement from an archive of known size, from the supplement’s section “Finite evidence without replacement”.</li>
+<li>
+<code><a href="../reference/bf_uniform_weights.html">bf_uniform_weights()</a></code> now rejects counts that are not whole numbers, as <code><a href="../reference/bf_worst_case.html">bf_worst_case()</a></code> already did.</li>
+<li>Removed <code>bf_binomial()</code> (with its whole-interval Beta prior and cutpoint), <code>sens_binomial()</code> (with <code>M_star</code>), <code>bf_urn()</code>, <code>sens_urn()</code>, <code>bf_separated()</code>, <code>separation_g()</code>, and <code>bf_separated_bias()</code>. The paper no longer uses any of them. <code>BiasedUrn</code>, which only <code>bf_urn()</code> needed, is no longer imported.</li>
+<li>The tests pin Hammoud-Gallego and Freier at their re-coded counts, 11 and 2, and every number the paper’s applications table prints.</li>
+<li>Help pages, README, and vignette describe the rule, and no longer use gendered pronouns for the researcher or the rival.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.2.0" id="drwrinch-0020">DrWrinch 0.0.2.0<a class="anchor" aria-label="anchor" href="#drwrinch-0020"></a></h2>
+<ul><li><p>Added <code><a href="../reference/bf_worst_case.html">bf_worst_case()</a></code>, <code>bf_separated()</code>, <code>separation_g()</code>, and <code>bf_separated_bias()</code> – the second Bayes factor from the paper’s one model, which evaluates the rival’s claim at the single share, one half, that makes the observed counts most probable, plus the version that separates the two theories’ claims by a stated margin and the margin at which a threshold is reached.</p></li>
+<li><p>Added <code><a href="../reference/bf_uniform_weights.html">bf_uniform_weights()</a></code>, the documented name for the Bayes factor that averages over the rival’s whole range of shares under uniform weights. <code>bf_binomial()</code> returns the same number at its defaults and is kept for one release.</p></li>
+<li><p>Added <code><a href="../reference/bf_rescaled.html">bf_rescaled()</a></code>, which computes that same Bayes factor under weights the researcher states within each theory’s range: a Beta(a, b) distribution squeezed onto each half, one pair per side.</p></li>
+<li><p>The Shiny app now shows the two Bayes factors from one model side by side, above a picture of the three probabilities they are built from: the numerator they share and the two denominators that separate them. Dividing the first bar by the second gives the uniform-weights value and by the third gives the worst-case value, so a reader can see where each number comes from. The urn panel is gone. The sensitivity tab reports the recoding table for the worst-case Bayes factor beside the tipping point for the uniform-weights one.</p></li>
+<li><p>The app’s sidebar no longer offers a cutpoint or a Beta prior on the whole interval. The cutpoint applies to only one of the two Bayes factors, so moving it left the two cards showing numbers that could not be compared; the whole-interval prior made the reported quantity the posterior odds while the card called it a Bayes factor. A reader who wants either calls <code>bf_binomial()</code> or <code><a href="../reference/bf_rescaled.html">bf_rescaled()</a></code> directly.</p></li>
+<li><p>The app’s prior-sweep curve and prose now say posterior odds throughout, and the data function behind the curve is renamed <code>post_odds_M_curve()</code> with a <code>post_odds</code> column.</p></li>
+<li><p>README, the package documentation, the DESCRIPTION, and the getting-started vignette describe one model and two Bayes factors. The vignette derives every number it reports rather than asserting it.</p></li>
+<li><p><code>bf_urn()</code> and <code>sens_urn()</code> are deprecated. The paper began with two probability models and now has one, so the hypergeometric urn model is no longer in it. Neither function is removed and neither returns anything different: the first arXiv version of the paper cites them and its replication code calls them. Each warns once per session, naming the replacement – <code><a href="../reference/bf_worst_case.html">bf_worst_case()</a></code> and <code><a href="../reference/bf_uniform_weights.html">bf_uniform_weights()</a></code> for the Bayes factors, <code>bf_separated_bias()</code> and <code>sens_coding(model = "worst_case")</code> for the sensitivity questions <code>sens_urn()</code> answered. The notice fires once rather than on every call because <code>sens_coding(model = "urn")</code> recomputes the urn Bayes factor at every re-coding.</p></li>
+<li><p><code><a href="../reference/sens_coding.html">sens_coding()</a></code>’s <code>model</code> argument now takes <code>"uniform_weights"</code> (the default) and <code>"worst_case"</code>; <code>"binomial"</code> is accepted as the earlier name for the first and returns the same thing, and <code>"urn"</code> still works for the superseded model. Under <code>"worst_case"</code> the function returns a recoding table rather than a tipping point: one row per re-coding with the recomputed Bayes factor and the separation at which the two-share version reaches the threshold, reproducing the supplement’s table. Its question is different because at counts like nine against three the worst-case Bayes factor was never above 20, so re-coding cannot overturn a conclusion the researcher did not draw.</p></li>
+<li><p><code>sens_binomial()</code>’s help now says that <code>M_star</code> is a tipping point in the <em>posterior odds</em>, not the Bayes factor. As the <code>Beta(1, M + 1)</code> prior tilts toward the rival the Bayes factor rises, so the object the old help described did not exist.</p></li>
+<li><p><strong>Documentation correction.</strong> <code>bf_binomial()</code>’s help said it returned “the Bayes factor” whatever the prior. It returns the ratio of posterior masses either side of the cut, which is the <em>posterior odds</em>. A Beta prior on the whole interval sets how much weight each theory gets as well as how weight is spread within each theory’s range, and the Bayes factor renormalizes the first away while the posterior odds keep it. The two coincide only at the uniform prior; at nine observations against three under Beta(1, 2) the posterior odds are 10.14 while the Bayes factor is 30.41, and they move in opposite directions as the prior tilts further toward the rival. The help page now says so and <code>test-bf_uniform_weights.R</code> pins both columns. <code>sens_binomial()</code>’s <code>M_star</code> is a tipping point in the posterior odds, and its help still needs the same correction.</p></li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.1.9001" id="drwrinch-0019001">DrWrinch 0.0.1.9001<a class="anchor" aria-label="anchor" href="#drwrinch-0019001"></a></h2>
 <ul><li>Added <code><a href="../reference/sens_coding.html">sens_coding()</a></code> – the coding-error sensitivity tipping point for both models: the smallest number of pro-working-theory observations that would have to be re-coded as pro-rival before the Bayes factor drops below the threshold. This is the paper’s third sensitivity question, alongside observation bias (<code>omega_star</code>) and the rival-tilted prior (<code>M_star</code>). It is also surfaced in the Shiny app’s Sensitivity tab.</li>
 <li>Refreshed the running example throughout (function examples, vignette, README, Shiny defaults) to the paper’s <code>(y_W = 9, y_R = 3)</code> case, matching the submitted manuscript: the binomial Bayes factor is 20.67 (just above the threshold of 20) and the hypergeometric is 323. The earlier <code>(7, 3)</code> example predated a revision of the paper.</li>
@@ -60,9 +89,9 @@
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9001" id="drwrinch-0009001">DrWrinch 0.0.0.9001<a class="anchor" aria-label="anchor" href="#drwrinch-0009001"></a></h2>
-<ul><li>Implemented <code><a href="../reference/bf_urn.html">bf_urn()</a></code> (Formulation C of the hypergeometric urn model: WTF = <code>(y_W + 1, max(1, y_R))</code>, RTF = <code>(y_W, y_W + 1)</code>).</li>
-<li>Extended <code><a href="../reference/bf_binomial.html">bf_binomial()</a></code> with observation-bias parameter <code>omega</code> and general Beta priors.</li>
-<li>Implemented <code><a href="../reference/sens_binomial.html">sens_binomial()</a></code> and <code><a href="../reference/sens_urn.html">sens_urn()</a></code> (bias and prior tipping points via <code>uniroot</code>).</li>
+<ul><li>Implemented <code>bf_urn()</code> (Formulation C of the hypergeometric urn model: WTF = <code>(y_W + 1, max(1, y_R))</code>, RTF = <code>(y_W, y_W + 1)</code>).</li>
+<li>Extended <code>bf_binomial()</code> with observation-bias parameter <code>omega</code> and general Beta priors.</li>
+<li>Implemented <code>sens_binomial()</code> and <code>sens_urn()</code> (bias and prior tipping points via <code>uniroot</code>).</li>
 <li>Added <code>tests/testthat/</code> covering the substantive properties: BF = 1 under symmetric evidence, the paper’s analytical value <code>bf_urn(7, 3) = 39</code>, RTF-degeneracy at <code>y_R &gt; y_W + 1</code>, pseudo-observation prior equivalence, and parity with the paper’s <code>sens_bias_hyper_separated</code>.</li>
 </ul></div>
     <div class="section level2">
@@ -78,7 +107,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

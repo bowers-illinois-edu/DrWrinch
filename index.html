@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fully Specified Bayes Factors for Process Tracing">
-<meta name="description" content="Computes fully specified Bayes factors for process tracing, as developed in Lopez, Bowers, and Gajardo Cooper (2026). The package implements two generative models for evidence in favor of a working theory against a single rival: a binomial model for open-ended evidence collection, and a hypergeometric urn model for bounded archives. Both models yield Bayes factors that tilt in favor of the rival theory by construction, so the reported Bayes factor is a lower bound on the evidence for the working theory. Sensitivity analyses vary coding error and observation bias to show how the conclusion changes under departures from the baseline assumptions. Named after Dorothy Maud Wrinch (1894--1976, &lt;https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch&gt;), whose joint papers with Harold Jeffreys (1919, 1921, 1923) developed the framework that became Jeffreys's theory of Bayes factors.">
-<meta property="og:description" content="Computes fully specified Bayes factors for process tracing, as developed in Lopez, Bowers, and Gajardo Cooper (2026). The package implements two generative models for evidence in favor of a working theory against a single rival: a binomial model for open-ended evidence collection, and a hypergeometric urn model for bounded archives. Both models yield Bayes factors that tilt in favor of the rival theory by construction, so the reported Bayes factor is a lower bound on the evidence for the working theory. Sensitivity analyses vary coding error and observation bias to show how the conclusion changes under departures from the baseline assumptions. Named after Dorothy Maud Wrinch (1894--1976, &lt;https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch&gt;), whose joint papers with Harold Jeffreys (1919, 1921, 1923) developed the framework that became Jeffreys's theory of Bayes factors.">
+<meta name="description" content="Computes fully specified Bayes factors for process tracing, as developed in Lopez, Bowers, and Gajardo Cooper (2026). One model underlies the package: each observation supports a working theory with probability theta, the share of the evidence that supports it, where the working theory claims theta above one half and a single rival claims theta at or below it. Because each theory claims a range of shares rather than one share, two Bayes factors follow. They share a numerator and differ in how they treat the rivals range: one averages the probability of the counts over the whole range, the other evaluates the rival at its most favorable share, which makes it the smallest Bayes factor any weights on the rivals shares can give. The papers rule sets the rival aside when the first is at least 20 and the second is above 1. Sensitivity analyses report how biased the search, or how many observations re-coded, it would take to change that decision, and finite-archive versions of both Bayes factors cover documents read without replacement. Named after Dorothy Maud Wrinch (1894--1976, &lt;https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch&gt;), whose joint papers with Harold Jeffreys (1919, 1921, 1923) developed the framework that became Jeffreyss theory of Bayes factors.">
+<meta property="og:description" content="Computes fully specified Bayes factors for process tracing, as developed in Lopez, Bowers, and Gajardo Cooper (2026). One model underlies the package: each observation supports a working theory with probability theta, the share of the evidence that supports it, where the working theory claims theta above one half and a single rival claims theta at or below it. Because each theory claims a range of shares rather than one share, two Bayes factors follow. They share a numerator and differ in how they treat the rivals range: one averages the probability of the counts over the whole range, the other evaluates the rival at its most favorable share, which makes it the smallest Bayes factor any weights on the rivals shares can give. The papers rule sets the rival aside when the first is at least 20 and the second is above 1. Sensitivity analyses report how biased the search, or how many observations re-coded, it would take to change that decision, and finite-archive versions of both Bayes factors cover documents read without replacement. Named after Dorothy Maud Wrinch (1894--1976, &lt;https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch&gt;), whose joint papers with Harold Jeffreys (1919, 1921, 1923) developed the framework that became Jeffreyss theory of Bayes factors.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,17 @@
 <div class="page-header"><h1 id="drwrinch">DrWrinch<a class="anchor" aria-label="anchor" href="#drwrinch"></a>
 </h1></div>
 <p>Fully specified Bayes factors for process tracing.</p>
-<p>This package implements the methods of Lopez, Bowers, and Gajardo Cooper (2026), “Fully specified Bayes factors for process tracing” (<a href="https://arxiv.org/abs/2606.16683" class="external-link">arXiv:2606.16683</a>). Two generative models for evidence in favor of a working theory against a single rival — a binomial model for open-ended evidence and a hypergeometric urn model for bounded archives — each yield a conservative Bayes factor. Sensitivity analyses vary coding error, observation bias, and the prior.</p>
+<p>This package implements the methods of Lopez, Bowers, and Gajardo Cooper (2026), “Fully specified Bayes factors for process tracing” (<a href="https://arxiv.org/abs/2606.16683" class="external-link">arXiv:2606.16683</a>).</p>
+<p>A researcher has coded the evidence into two counts: observations supporting a working theory and observations supporting a single rival. One model underlies everything here. Each observation supports the working theory with probability <code>theta</code>, the share of the evidence that supports it. The working theory claims that share is above one half; the rival claims it is at or below one half.</p>
+<p>Each claim names a range of shares rather than one share, so neither gives a probability for the counts on its own. The package computes two Bayes factors. They share a numerator — the probability of the counts averaged over the shares above one half, under uniform weights — and differ in the denominator.</p>
+<ul>
+<li>
+<code><a href="reference/bf_uniform_weights.html">bf_uniform_weights()</a></code> averages over the rival’s whole range under the same uniform weights. At nine observations supporting the working theory and three supporting the rival it gives 20.67.</li>
+<li>
+<code><a href="reference/bf_worst_case.html">bf_worst_case()</a></code> evaluates the rival at the share that makes the counts most probable, one half at these counts. It gives 2.73, the smallest Bayes factor any weights on the rival’s shares can give.</li>
+</ul>
+<p>The paper’s rule sets the rival aside, at least provisionally, when the uniform-weights Bayes factor is 20 or more and the worst-case Bayes factor is above 1. Nine of twelve meets both conditions.</p>
+<p><code><a href="reference/sens_bias.html">sens_bias()</a></code> and <code><a href="reference/sens_coding.html">sens_coding()</a></code> report how biased the search, or how many observations re-coded, it would take before a researcher following the rule would no longer set the rival aside: at nine of twelve, a search about one percent more likely to find pro-working-theory evidence, or one re-coded observation. <code><a href="reference/bf_rescaled.html">bf_rescaled()</a></code> computes the uniform-weights Bayes factor under weights on the shares other than the uniform, and <code><a href="reference/bf_worst_case.html">bf_worst_case()</a></code> takes the same weights for the working theory’s shares. <code><a href="reference/bf_finite.html">bf_uniform_weights_finite()</a></code> and <code><a href="reference/bf_finite.html">bf_worst_case_finite()</a></code> compute both Bayes factors for documents read without replacement from an archive of known size.</p>
 <p>The package is named after <a href="https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch" class="external-link">Dorothy Maud Wrinch</a> (1894–1976), the mathematician whose joint papers with Harold Jeffreys (1919, 1921, 1923) developed the framework that became Jeffreys’s theory of Bayes factors. A companion package, <a href="https://github.com/bowers-illinois-edu/DrBristol" class="external-link">DrBristol</a>, implements p-value methods for the same class of problems.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -67,15 +77,15 @@
 <div class="section level2">
 <h2 id="interactive-app">Interactive app<a class="anchor" aria-label="anchor" href="#interactive-app"></a>
 </h2>
-<p>DrWrinch ships with a Shiny app that exposes the Bayes-factor and sensitivity functions through a browser UI:</p>
+<p>DrWrinch ships with a Shiny app that shows both Bayes factors and the sensitivity analyses through a browser:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DrWrinch</span><span class="fu">::</span><span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>A hosted copy lives at <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a>. Defaults reproduce the paper’s running example (<code>y_W = 9, y_R = 3, threshold = 20</code>); the Sensitivity tab reports the coding-error, observation-bias (omega_star), and prior (M_star) tipping points with plotly curves.</p>
+<p>A hosted copy is at <a href="https://jakebowers.shinyapps.io/drwrinch/" class="external-link uri">https://jakebowers.shinyapps.io/drwrinch/</a>. Its defaults reproduce the paper’s running example: nine observations for the working theory, three for the rival, and thresholds of 20 and 1. The Result tab shows the two Bayes factors side by side above a picture of the three probabilities they are built from, so a reader can see where each number comes from rather than take it on trust. The Sensitivity tab reports how biased the search, or how many observations re-coded, it would take to change the decision.</p>
 </div>
 <div class="section level2">
 <h2 id="status">Status<a class="anchor" aria-label="anchor" href="#status"></a>
 </h2>
-<p>Under active development alongside the paper. The single-rival case is the current focus. Multiple-rival extensions are being developed in a companion paper and may live in a separate package.</p>
+<p>The package is under active development alongside the paper, which compares a working theory with one rival at a time. The authors are developing extensions to several rivals in a companion paper, and those may become a separate package.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -122,7 +132,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DrWrinch</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
     <div class="section level2">
       <h2 id="bayes-factors">Bayes factors<a class="anchor" aria-label="anchor" href="#bayes-factors"></a></h2>
 
-      <div class="section-desc"><p>Compute Bayes factors under the binomial and hypergeometric urn models.</p></div>
+      <div class="section-desc"><p>The two Bayes factors from one model, under uniform or stated weights on the shares, and for an archive of known size.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -47,21 +47,35 @@
 
       <dl><dt>
 
-          <code><a href="bf_binomial.html">bf_binomial()</a></code>
+          <code><a href="bf_uniform_weights.html">bf_uniform_weights()</a></code>
 
         </dt>
-        <dd>Bayes factor under the binomial model</dd>
+        <dd>The uniform-weights Bayes factor</dd>
 
         <dt>
 
-          <code><a href="bf_urn.html">bf_urn()</a></code>
+          <code><a href="bf_worst_case.html">bf_worst_case()</a></code>
 
         </dt>
-        <dd>Bayes factor under the hypergeometric urn model</dd>
+        <dd>Worst-case Bayes factor: the rival at its most favorable share</dd>
+
+        <dt>
+
+          <code><a href="bf_rescaled.html">bf_rescaled()</a></code>
+
+        </dt>
+        <dd>The uniform-weights Bayes factor under weights the researcher states</dd>
+
+        <dt>
+
+          <code><a href="bf_finite.html">bf_uniform_weights_finite()</a></code> <code><a href="bf_finite.html">bf_worst_case_finite()</a></code>
+
+        </dt>
+        <dd>Both Bayes factors for documents read from an archive of known size</dd>
       </dl></div><div class="section level2">
       <h2 id="sensitivity-analysis">Sensitivity analysis<a class="anchor" aria-label="anchor" href="#sensitivity-analysis"></a></h2>
 
-      <div class="section-desc"><p>Locate the smallest perturbations of coding, observation bias, and prior that flip the conclusion.</p></div>
+      <div class="section-desc"><p>How biased the search, or how many observations re-coded, it would take before the paper’s rule stops setting the rival aside.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -70,28 +84,21 @@
 
       <dl><dt>
 
-          <code><a href="sens_binomial.html">sens_binomial()</a></code>
+          <code><a href="sens_bias.html">sens_bias()</a></code>
 
         </dt>
-        <dd>Sensitivity analysis for the binomial Bayes factor</dd>
-
-        <dt>
-
-          <code><a href="sens_urn.html">sens_urn()</a></code>
-
-        </dt>
-        <dd>Sensitivity analysis for the urn Bayes factor</dd>
+        <dd>Sensitivity to a biased search</dd>
 
         <dt>
 
           <code><a href="sens_coding.html">sens_coding()</a></code>
 
         </dt>
-        <dd>Sensitivity analysis for coding error</dd>
+        <dd>Sensitivity to coding</dd>
       </dl></div><div class="section level2">
       <h2 id="interactive-app">Interactive app<a class="anchor" aria-label="anchor" href="#interactive-app"></a></h2>
 
-      <div class="section-desc"><p>Launch a Shiny app that exposes the Bayes-factor and sensitivity functions through a browser UI.</p></div>
+      <div class="section-desc"><p>A Shiny app that shows both Bayes factors and the sensitivity analyses in a browser.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -114,7 +121,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
