@@ -18,10 +18,13 @@ the two stay separate.
 
 ## State of the package, 2026-10-27
 
-Version 0.0.2.1, uncommitted. `devtools::test()` passes 134 tests (1101
-expectations) with no warnings, and `devtools::check()` reports 0
-errors, 0 warnings, 0 notes. The local app was run in a browser: both
-tabs render, and the only console error is the missing favicon.
+Version 0.0.2.1, commit `f3c04a8`, pushed to `main` on 2026-10-27. All
+134 tests (1101 expectations) succeed with no warnings, and
+`devtools::check()` reports 0 errors, 0 warnings, 0 notes. The pkgdown
+workflow rebuilt the site from that commit; its previous run, on
+2026-08-30, had failed. The hosted app runs 0.0.2.1: both tabs render
+the running example, with the rule set aside at 20.67 and 2.73, one
+re-coding, and a bias of 1.01.
 
 The paper’s rule sets the rival aside, at least provisionally, when the
 uniform-weights Bayes factor is 20 or more and the worst-case Bayes
@@ -63,12 +66,12 @@ Bayes factors against the bias. `.dw_needed` in `inst/shiny/global.R` is
 ## Public surface
 
 - GitHub: <https://github.com/bowers-illinois-edu/DrWrinch>, `main` at
-  0.0.2.0 until this version is pushed.
+  0.0.2.1.
 - pkgdown site: <https://bowers-illinois-edu.github.io/DrWrinch/>,
   rebuilt by the pkgdown workflow on every push to `main`.
   `_pkgdown.yml` lists the new reference index.
 - Shiny app: <https://jakebowers.shinyapps.io/drwrinch/>, deployed with
-  `source("deploy.R")` from the repository root. It still runs 0.0.2.0.
+  `source("deploy.R")` from the repository root. It runs 0.0.2.1.
 - CRAN is on hold indefinitely (Decision F of `PLAN_SHINY.md`).
 
 ## The paper repository
@@ -85,13 +88,27 @@ brings the preprint and the package back into agreement.
 
 ## Deployment failures and their fixes
 
+- **Install DrWrinch from GitHub on this machine before deploying**
+  (2026-10-27). `rsconnect` records the locally installed DrWrinch in
+  the manifest, and shinyapps.io builds the image from that record. With
+  an older local copy (0.0.1.9000 then), the image held the old version,
+  `global.R` fell back to `install_github()` at start-up, and that
+  anonymous call failed with GitHub’s API rate limit (HTTP 403, 60
+  requests an hour shared by every app on the server’s address), so the
+  app failed to start. After
+  `remotes::install_github( "bowers-illinois-edu/DrWrinch")` here and a
+  second deploy, the image held 0.0.2.1 and the app started without
+  contacting GitHub.
+
 - **Stale GITHUB_PAT in `~/.Renviron`** (commented out 2026-05-19, with
   a note pointing to <https://github.com/settings/tokens> for a fresh
   one). If `remotes::install_github` ever falls back to anonymous
   unexpectedly, check that this token still works.
+
 - **shinyapps.io’s “401 fetching GitHub” failure mode** is almost always
   a stale OAuth cache, not a missing PAT. The toggle-on / toggle-off
   cycle in Posit Authentication is the fix.
+
 - **shinyapps.io’s “stale DrWrinch / function-not-found” failure mode**
   (hit and fixed 2026-06-22). shinyapps installs DrWrinch into the
   read-only system library (`/usr/lib/R`) at image-build time from its
@@ -115,10 +132,13 @@ brings the preprint and the package back into agreement.
   install *location* has to be writable. Each cold start spends about 30
   seconds on this install. When the required version changes, bump
   `.dw_needed` in `global.R`.
+
 - **`rsconnect` refuses to bundle locally-installed packages** that lack
   `RemoteType` metadata. Trying to dodge GitHub via a local tarball
   doesn’t work cleanly; the right workarounds are
+
   1.  fix the OAuth cache (what worked this session), (b) R-universe.
+
 - **The Shiny app pulls DrWrinch from GitHub on shinyapps.io cold
   start** via the `install_github` stanza in `inst/shiny/global.R`,
   about 30 seconds per cold start. Local development skips it, because
