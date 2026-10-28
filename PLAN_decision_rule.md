@@ -4,7 +4,8 @@ Written 2026-10-27 by Claude for Jake, in this repository.
 
 Status at the end of 2026-10-27: the package changes below are made, in
 DrWrinch 0.0.2.1 (commit `f3c04a8`), which is on GitHub and on
-shinyapps.io. The edits to the paper repository are not made. The sections
+shinyapps.io. The edits to the paper repository were made on 2026-10-27
+(see that repository's HANDOFF.md). The sections
 from "What changed in the paper" through "Decisions" describe the package
 as it stood before the update.
 

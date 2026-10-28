@@ -1,5 +1,5 @@
 ---
-next: In a session started in ~/repos/fully_specified_bf, make the paper-repository edits listed in ~/repos/DrWrinch/PLAN_decision_rule.md before Matias Lopez submits by 2026-10-30, as Jake decided on 2026-10-27. Start with the two cross-checks in the paper's tests/bf_weighted.R that call functions DrWrinch no longer has.
+next: Nothing is pending in the package. The paper-repository edits listed in PLAN_decision_rule.md were made on 2026-10-27 in ~/repos/fully_specified_bf (see its HANDOFF.md); they were uncommitted at the end of that session.
 kind: code
 project_kind: R package
 milestone: the paper and its appendix built on DrWrinch 0.0.2.1 from GitHub
