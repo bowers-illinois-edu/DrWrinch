@@ -1,5 +1,5 @@
 ---
-next: In ~/repos/fully_specified_bf, make the edits listed in ~/repos/DrWrinch/PLAN_decision_rule.md under "What the paper repository has to change once DrWrinch 0.0.2.1 is on GitHub", starting with the two DrWrinch:: cross-checks in tests/bf_weighted.R, which stop the paper's render once its renv library installs 0.0.2.1.
+next: In ~/repos/fully_specified_bf, make the edits listed in ~/repos/DrWrinch/PLAN_decision_rule.md under "What the paper repository has to change once DrWrinch 0.0.2.1 is on GitHub", starting with the two cross-checks in tests/bf_weighted.R that call bf_binomial() and bf_urn() through the package, which stop the paper's render once its renv library installs 0.0.2.1.
 kind: code
 project_kind: R package
 milestone: the paper and its appendix built on DrWrinch 0.0.2.1 from GitHub
