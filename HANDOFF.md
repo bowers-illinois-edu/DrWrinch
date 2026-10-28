@@ -1,9 +1,9 @@
 ---
-next: Jake decides whether to commit, push, and redeploy DrWrinch 0.0.2.1 (everything is uncommitted; devtools::check() reports 0 errors, 0 warnings, 0 notes; push before redeploying, because the app installs DrWrinch from GitHub). Then make the paper edits listed in PLAN_decision_rule.md under "What the paper repository has to change once DrWrinch 0.0.2.1 is on GitHub".
+next: In ~/repos/fully_specified_bf, make the edits listed in ~/repos/DrWrinch/PLAN_decision_rule.md under "What the paper repository has to change once DrWrinch 0.0.2.1 is on GitHub", starting with the two DrWrinch:: cross-checks in tests/bf_weighted.R, which stop the paper's render once its renv library installs 0.0.2.1.
 kind: code
 project_kind: R package
 milestone: the paper and its appendix built on DrWrinch 0.0.2.1 from GitHub
-sessions_to_milestone: 2
+sessions_to_milestone: 1
 blocked_on:
 estimated_by: backfill 2026-10-25
 ---
@@ -27,10 +27,13 @@ implements p-value methods for the same problems; the two stay separate.
 
 ## State of the package, 2026-10-27
 
-Version 0.0.2.1, uncommitted. `devtools::test()` passes 134 tests (1101
-expectations) with no warnings, and `devtools::check()` reports 0 errors,
-0 warnings, 0 notes. The local app was run in a browser: both tabs render,
-and the only console error is the missing favicon.
+Version 0.0.2.1, commit `f3c04a8`, pushed to `main` on 2026-10-27. All
+134 tests (1101 expectations) succeed with no warnings, and
+`devtools::check()` reports 0 errors, 0 warnings, 0 notes. The pkgdown
+workflow rebuilt the site from that commit; its previous run, on
+2026-08-30, had failed. The hosted app runs 0.0.2.1: both tabs render the
+running example, with the rule set aside at 20.67 and 2.73, one re-coding,
+and a bias of 1.01.
 
 The paper's rule sets the rival aside, at least provisionally, when the
 uniform-weights Bayes factor is 20 or more and the worst-case Bayes factor
@@ -65,12 +68,12 @@ factors against the bias. `.dw_needed` in `inst/shiny/global.R` is
 ## Public surface
 
 - GitHub: https://github.com/bowers-illinois-edu/DrWrinch, `main` at
-  0.0.2.0 until this version is pushed.
+  0.0.2.1.
 - pkgdown site: https://bowers-illinois-edu.github.io/DrWrinch/, rebuilt
   by the pkgdown workflow on every push to `main`. `_pkgdown.yml` lists
   the new reference index.
 - Shiny app: https://jakebowers.shinyapps.io/drwrinch/, deployed with
-  `source("deploy.R")` from the repository root. It still runs 0.0.2.0.
+  `source("deploy.R")` from the repository root. It runs 0.0.2.1.
 - CRAN is on hold indefinitely (Decision F of `PLAN_SHINY.md`).
 
 ## The paper repository
@@ -86,6 +89,17 @@ removed functions, so the next arXiv replacement is what brings the
 preprint and the package back into agreement.
 
 ## Deployment failures and their fixes
+
+- **Install DrWrinch from GitHub on this machine before deploying**
+  (2026-10-27). `rsconnect` records the locally installed DrWrinch in the
+  manifest, and shinyapps.io builds the image from that record. With an
+  older local copy (0.0.1.9000 then), the image held the old version,
+  `global.R` fell back to `install_github()` at start-up, and that
+  anonymous call failed with GitHub's API rate limit (HTTP 403, 60
+  requests an hour shared by every app on the server's address), so the
+  app failed to start. After `remotes::install_github(
+  "bowers-illinois-edu/DrWrinch")` here and a second deploy, the image held
+  0.0.2.1 and the app started without contacting GitHub.
 
 - **Stale GITHUB_PAT in `~/.Renviron`** (commented out 2026-05-19,
   with a note pointing to https://github.com/settings/tokens for a
