@@ -84,38 +84,129 @@ format_bf <- function(bf) {
 }
 
 
-# interpret_omega_star() turns the numeric tipping point from
-# sens_urn()/sens_binomial() into a sentence a non-statistician can
-# read. The three branches map to the three values
-# .find_omega_tipping() can return: 0, NA_real_, or a positive number.
-interpret_omega_star <- function(om, threshold = 20) {
-  # om = 0: baseline BF was already at or below threshold, so no
-  # tilt toward pro-rival observation is needed for the conclusion
-  # to fail.
+# The paper's rule sets the rival aside, at least provisionally, when
+# the uniform-weights Bayes factor is at least threshold_uniform (20)
+# and the worst-case Bayes factor is above threshold_worst (1). The
+# three helpers below turn the package's numbers into the sentences the
+# app shows, and each says which of the two conditions decides, because
+# that tells the reader which number to look at next.
+
+# interpret_rule() says which way the rule goes at the reader's counts.
+# The uniform-weights condition is met at its threshold and the
+# worst-case condition is not, as in the paper.
+interpret_rule <- function(bf_uniform, bf_worst,
+                           threshold_uniform = 20, threshold_worst = 1) {
+  uniform_fails <- bf_uniform < threshold_uniform
+  worst_fails <- bf_worst <= threshold_worst
+  if (!uniform_fails && !worst_fails) {
+    return(paste0(
+      "A researcher following the rule sets the rival aside, at least ",
+      "provisionally: the uniform-weights Bayes factor is at least ",
+      threshold_uniform, " and the worst-case Bayes factor is above ",
+      threshold_worst, "."
+    ))
+  }
+  reasons <- c(
+    if (uniform_fails) paste0("the uniform-weights Bayes factor is below ",
+                              threshold_uniform),
+    if (worst_fails) paste0("the worst-case Bayes factor is ",
+                            threshold_worst, " or below")
+  )
+  paste0("A researcher following the rule keeps the rival, because ",
+         paste(reasons, collapse = " and "), ".")
+}
+
+
+# How much more likely a search with bias om is to find a
+# pro-working-theory observation, in words. Below a bias of two a
+# percentage reads naturally ("about 1 percent more likely"); from two
+# on a multiple does ("2.33 times as likely" rather than "133 percent
+# more likely").
+describe_bias <- function(om) {
+  if (om < 2) {
+    paste0("about ", round((om - 1) * 100), " percent more likely")
+  } else {
+    paste0(formatC(om, format = "f", digits = 2), " times as likely")
+  }
+}
+
+
+# interpret_bias() turns the list sens_bias() returns into a sentence.
+# omega_star is 0 when the rule already keeps the rival at an unbiased
+# search, Inf for a condition no bias makes fail, and NA when the
+# package's search found no crossing.
+interpret_bias <- function(sb, threshold_uniform = 20, threshold_worst = 1) {
+  om <- sb$omega_star
   if (!is.na(om) && om == 0) {
     return(paste0(
-      "The Bayes factor sits below threshold ", threshold,
-      " at baseline. The conclusion fails without any observation bias."
+      "The rule keeps the rival even with an unbiased search, so there is ",
+      "no decision for bias to change."
     ))
   }
-  # NA_real_ means the doubling search reached its cap without the
-  # BF crossing threshold. The conclusion is robust to any plausible
-  # observation bias.
-  if (is.na(om)) {
+  if (is.na(om) || is.infinite(om)) {
     return(paste0(
-      "The Bayes factor stays above threshold ", threshold,
-      " across the range of observation bias the search considered. ",
-      "The conclusion is robust to any realistic observation bias."
+      "No bias the search tried changes the decision: neither Bayes ",
+      "factor falls to its threshold."
     ))
   }
-  # Positive omega_star: report the bias as a percentage above 1.
-  # round() to whole percent reads more naturally than the raw float;
-  # the underlying numeric remains available to the plot.
-  pct <- round((om - 1) * 100)
+  uniform_first <- isTRUE(sb$omega_uniform <= sb$omega_worst) ||
+    is.na(sb$omega_worst)
+  first <- if (uniform_first) {
+    paste0("the uniform-weights Bayes factor falls to ", threshold_uniform)
+  } else {
+    paste0("the worst-case Bayes factor falls to ", threshold_worst)
+  }
+  other_om <- if (uniform_first) sb$omega_worst else sb$omega_uniform
+  other <- if (is.infinite(other_om)) {
+    if (uniform_first) {
+      paste0(" No bias makes the worst-case Bayes factor fall to ",
+             threshold_worst, ".")
+    } else {
+      paste0(" No bias makes the uniform-weights Bayes factor fall to ",
+             threshold_uniform, ".")
+    }
+  } else if (is.na(other_om)) {
+    ""
+  } else {
+    paste0(" The other condition fails only at a bias of ",
+           formatC(other_om, format = "f", digits = 2), ".")
+  }
   paste0(
-    "Pro-working-theory items would need to be about ", pct,
-    "% more likely to be observed than pro-rival items for the ",
-    "Bayes factor to drop to threshold ", threshold, "."
+    "A search ", describe_bias(om), " to find a pro-working-theory ",
+    "observation than a pro-rival one would change the decision: at a ",
+    "bias of ", formatC(om, format = "f", digits = 2), ", ", first, ".",
+    other
+  )
+}
+
+
+# interpret_coding() turns the list sens_coding() returns into a
+# sentence. x_star is 0 when the rule already keeps the rival as coded
+# and NA when no re-coding of the supporting observations makes either
+# condition fail.
+interpret_coding <- function(sc, threshold_uniform = 20, threshold_worst = 1) {
+  x <- sc$x_star
+  if (!is.na(x) && x == 0L) {
+    return("The rule keeps the rival as coded, so no re-coding is needed.")
+  }
+  if (is.na(x)) {
+    return(paste0(
+      "No re-coding of the observations supporting the working theory ",
+      "changes the decision."
+    ))
+  }
+  uniform_first <- !is.na(sc$x_uniform) && sc$x_uniform == x
+  which_cond <- if (uniform_first) {
+    paste0("takes the uniform-weights Bayes factor below ", threshold_uniform)
+  } else {
+    paste0("takes the worst-case Bayes factor to ", threshold_worst,
+           " or below")
+  }
+  paste0(
+    x, " re-coded observation", if (x == 1L) " " else "s ",
+    "(relabeling ", if (x == 1L) "an observation" else paste(x, "observations"),
+    " that supported the working theory as supporting the rival) ",
+    which_cond, " and changes the decision."
   )
 }
 
@@ -146,101 +237,5 @@ validate_counts <- function(y_W, y_R) {
       y_W + y_R > 0,
       "y_W and y_R cannot both be zero -- there is no evidence to evaluate."
     )
-  )
-}
-
-
-# interpret_M_star() turns the prior-sweep tipping point from
-# sens_binomial() into a sentence. Same three-branch pattern as
-# interpret_omega_star(): 0 (already below threshold at baseline),
-# NA_integer_ (the sweep never crosses), positive integer (the number
-# of background cases favoring the rival that would be needed).
-#
-# The sentences say "posterior odds" and never "Bayes factor". A
-# Beta(1, M + 1) prior on the whole interval sets how much weight each
-# theory gets as well as how weight is spread inside each theory's
-# range. The Bayes factor renormalizes the first away and rises as M
-# grows; the posterior odds keep it and fall. Prose naming the Bayes
-# factor here would tell the reader the opposite of what happens.
-interpret_M_star <- function(m, threshold = 20) {
-  if (!is.na(m) && m == 0L) {
-    return(paste0(
-      "The posterior odds sit below threshold ", threshold,
-      " at baseline. No background cases favoring the rival are ",
-      "needed for the conclusion to fail."
-    ))
-  }
-  if (is.na(m)) {
-    return(paste0(
-      "The posterior odds stay above threshold ", threshold,
-      " across the prior sweep the search considered. The conclusion ",
-      "is robust to any realistic rival-tilted prior."
-    ))
-  }
-  paste0(
-    "Granting M = ", m, " background case",
-    if (m == 1L) "" else "s",
-    " favoring the rival (a Beta(1, M + 1) prior) drops the posterior ",
-    "odds below threshold ", threshold, "."
-  )
-}
-
-
-# interpret_x_star() turns the coding-error tipping point from
-# sens_coding() into a sentence. Same three-branch pattern as
-# interpret_omega_star()/interpret_M_star(): 0 (baseline already fails),
-# NA_integer_ (no re-coding within the observed counts overturns it),
-# positive integer (number of pro-H_1 observations that must be re-coded
-# as pro-rival).
-interpret_x_star <- function(x, threshold = 20) {
-  if (!is.na(x) && x == 0L) {
-    return(paste0(
-      "The Bayes factor sits below threshold ", threshold,
-      " at baseline. No re-coding is needed for the conclusion to fail."
-    ))
-  }
-  if (is.na(x)) {
-    return(paste0(
-      "Re-coding pro-working-theory observations as pro-rival does not ",
-      "drop the Bayes factor below threshold ", threshold,
-      " within the observed counts. The conclusion does not turn on the ",
-      "coding of individual observations."
-    ))
-  }
-  paste0(
-    "Re-coding ", x, " pro-working-theory observation",
-    if (x == 1L) "" else "s",
-    " as pro-rival drops the Bayes factor below threshold ", threshold, "."
-  )
-}
-
-
-# interpret_separation() turns the separation from separation_g() into a
-# sentence. When the worst-case Bayes factor is below the researcher's
-# threshold she reports the separation instead: how far apart the two
-# theories' claims would have to be before her counts reach it. The
-# sentence gives both shares as percentages, because "the working theory
-# claims at least 62.3 percent of the evidence" is what a reader can
-# argue with, while "g = 0.123" is not.
-#
-# separation_g() returns NA when the counts do not favor the working
-# theory, since then no separation reaches a threshold above one. That
-# branch gets its own sentence rather than a printed NA.
-interpret_separation <- function(g, threshold = 20) {
-  if (is.na(g)) {
-    return(paste0(
-      "At these counts no separation between the two theories brings ",
-      "the Bayes factor to ", threshold,
-      ": the evidence does not favor the working theory, so moving the ",
-      "two claims apart cannot lift the value above one."
-    ))
-  }
-  paste0(
-    "Reaching a Bayes factor of ", threshold,
-    " would take a working theory claiming at least ",
-    format(round(100 * (0.5 + g), 1), nsmall = 1),
-    " percent of the evidence and a rival claiming at most ",
-    format(round(100 * (0.5 - g), 1), nsmall = 1),
-    " percent, a separation of ", g, " on each side of an even split."
   )
 }

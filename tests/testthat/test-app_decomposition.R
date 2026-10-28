@@ -1,16 +1,13 @@
-# Tests for the app helpers that serve the worst-case Bayes factor and
-# the picture of where both Bayes factors come from.
+# Tests for bf_decomposition(), the data behind the Result tab's picture
+# of where both Bayes factors come from.
 #
-# The app now shows two Bayes factors computed from one model. They
-# share a numerator, the probability of the counts averaged over the
-# shares above one half, and they differ in the denominator: one
-# averages over the rival's whole range of shares, the other takes her
-# best single share, one half. bf_decomposition() computes all three
-# probabilities at every count the researcher might have reported, which
-# is what lets the app draw the two divisions rather than assert them.
-#
-# These live in their own file because test-app_helpers.R is at the
-# 300-line mark.
+# The app shows two Bayes factors computed from one model. They share a
+# numerator, the probability of the counts averaged over the shares
+# above one half, and they differ in the denominator: one averages over
+# the rival's whole range of shares, the other evaluates the rival at a
+# share of one half. bf_decomposition() computes all three probabilities
+# at every count the researcher might have reported, which is what lets
+# the app draw the two divisions rather than assert them.
 
 helpers_path <- system.file("shiny/R/helpers.R", package = "DrWrinch")
 if (!nzchar(helpers_path) || !file.exists(helpers_path)) {
@@ -70,44 +67,10 @@ test_that("the two averaged probabilities partition the shares", {
 })
 
 test_that("the half-share column is the binomial distribution at one half", {
-  # The dark bars are one probability distribution over the counts, so
-  # they sum to one. The other two columns do not: they are averages of
-  # a probability, not probabilities of the counts.
+  # The dark bars are the probabilities of the counts when the share is
+  # exactly one half, the Binomial(N, 1/2) distribution, so they sum to
+  # one.
   df <- bf_decomposition(9, 3)
   expect_equal(sum(df$den_half), 1, tolerance = 1e-12)
   expect_equal(df$den_half, stats::dbinom(0:12, 12, 0.5), tolerance = 1e-12)
-})
-
-
-# ---- interpret_separation ----------------------------------------------
-#
-# When the worst-case Bayes factor is below the researcher's threshold,
-# what she reports beside it is the separation: how far apart the two
-# theories' claims would have to be before her counts reach that
-# threshold. separation_g() returns NA when the counts do not favor the
-# working theory, because then no separation reaches a threshold above
-# one, and the prose has to say so rather than print NA.
-
-test_that("interpret_separation names both shares and the threshold", {
-  out <- interpret_separation(0.123, threshold = 20)
-  expect_type(out, "character")
-  # 0.5 + g and 0.5 - g, as percentages, which is how the paper reads
-  # the separation aloud.
-  expect_match(out, "62.3", fixed = TRUE)
-  expect_match(out, "37.7", fixed = TRUE)
-  expect_match(out, "20", fixed = TRUE)
-})
-
-test_that("interpret_separation reports the threshold it was given", {
-  out <- interpret_separation(0.2, threshold = 100)
-  expect_match(out, "100", fixed = TRUE)
-  expect_match(out, "70", fixed = TRUE)
-  expect_match(out, "30", fixed = TRUE)
-})
-
-test_that("interpret_separation says plainly when there is no separation", {
-  out <- interpret_separation(NA_real_, threshold = 20)
-  expect_type(out, "character")
-  expect_match(out, "no separation", ignore.case = TRUE)
-  expect_false(grepl("NA", out, fixed = TRUE))
 })

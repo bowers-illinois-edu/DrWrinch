@@ -2,9 +2,9 @@
 # computed under weights the researcher states instead of the uniform
 # default. Ported from the paper repository's tests/test_bf_rescaled.R.
 #
-# The researcher has to say how she spreads her weight over the shares
-# inside each theory's range, because a range of shares is not a
-# probability for her counts. The paper's default gives every share in a
+# A range of shares is not a probability for the counts, so before
+# coding the researcher says how each theory spreads its weight over the
+# shares inside its range. The paper's default gives every share in a
 # range the same weight. The alternative it offers takes a Beta(a, b)
 # distribution, which lives on the interval from zero to one, and
 # squeezes it onto each theory's half:
@@ -16,7 +16,7 @@
 # rescaled densities comes from. Setting a = b = 1 on both sides
 # recovers the uniform default.
 #
-# The parameters mean something the researcher can argue about. With
+# The parameters mean something a researcher can argue about. With
 # a = b above one the weight piles up in the middle of each half, so the
 # working theory predicts a share near three quarters and the rival a
 # share near one quarter, and the two theories predict more different
@@ -24,9 +24,9 @@
 # half, including right next to one half, where the two theories predict
 # nearly the same thing.
 #
-# Sources: Paper/evalues.qmd (sec-two-bfs) and Paper/appendix.qmd
-# (sec-choosing-distributions), and the applications tables in both,
-# which print the Beta(1/2, 1/2) column beside the uniform default.
+# Sources: Paper/evalues.qmd (sec-decide, the paragraph on other
+# weights) and Paper/appendix.qmd (sec-choosing-distributions and
+# tbl-sens-distributions), and the applications tables in both.
 
 test_that("each rescaled density is a distribution on its own half", {
   # A density that did not integrate to one over the half it lives on
@@ -104,8 +104,8 @@ test_that("the applications table's Beta(1/2, 1/2) column reproduces", {
          jeffreys = 6219.2),
     list(name = "Winward (2020)",                  y_W = 14, y_R = 3,
          jeffreys = 91.6),
-    list(name = "Hammoud-Gallego & Freier (2022)", y_W = 10, y_R = 3,
-         jeffreys = 14.4),
+    list(name = "Hammoud-Gallego & Freier (2022)", y_W = 11, y_R = 2,
+         jeffreys = 60.3),
     list(name = "Mor (2022)",                      y_W =  8, y_R = 2,
          jeffreys = 13.7),
     list(name = "Andersen (2023)",                 y_W =  9, y_R = 3,
@@ -117,27 +117,60 @@ test_that("the applications table's Beta(1/2, 1/2) column reproduces", {
     expect_equal(round(bf_rescaled(s$y_W, s$y_R, 0.5, 0.5, 0.5, 0.5), 1),
                  s$jeffreys, info = s$name)
   }
-  # Which studies clear a threshold of 20 is the substantive reading of
-  # the column: only Steinsson and Winward do, so for the other four the
-  # conclusion at 20 was carried by the uniform weights rather than by
-  # the counts alone.
+  # Three of the six are 20 or more under these weights: Steinsson and
+  # Winward, whose worst-case values are above 20 as well, and
+  # Hammoud-Gallego and Freier, whose eleven of thirteen stay above 20
+  # under both weightings and fall below 20 only when the rival is
+  # evaluated at an even split.
   jeff <- vapply(studies,
                  function(s) bf_rescaled(s$y_W, s$y_R, 0.5, 0.5, 0.5, 0.5),
                  numeric(1))
-  expect_equal(jeff >= 20, c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE))
+  expect_equal(jeff >= 20, c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
 })
 
-test_that("the two sides can be weighted differently", {
-  # The supplement's two examples. A researcher who thinks that under
-  # either theory she would still find evidence for the other one puts
-  # both densities next to one half, which weakens what her counts can
-  # show. A researcher who thinks each theory would leave almost no
-  # evidence for the other pushes both densities to the far ends, which
-  # strengthens it.
+test_that("the two researchers of the main paper reach opposite decisions", {
+  # The main paper's sec-decide. One researcher expects evidence for
+  # both theories under either and puts about 71 percent of each
+  # theory's weight on the quarter of its range next to one half:
+  # Beta(1/2, 1) rescaled for the working theory, Beta(1, 1/2) for the
+  # rival. Another expects almost no evidence for the other theory and
+  # reverses the two pairs. At nine of twelve the first gets 7.35, below
+  # 20, and keeps the rival; the second gets 28.08.
   toward_half <- bf_rescaled(9, 3, a1 = 0.5, b1 = 1, aR = 1, bR = 0.5)
   toward_ends <- bf_rescaled(9, 3, a1 = 1, b1 = 0.5, aR = 0.5, bR = 1)
-  expect_lt(toward_half, bf_rescaled(9, 3))
-  expect_gt(toward_ends, bf_rescaled(9, 3))
+  expect_equal(round(toward_half, 2), 7.35)
+  expect_equal(round(toward_ends, 2), 28.08)
+  expect_equal(round(stats::pbeta(0.5, 0.5, 1), 2), 0.71)
+  expect_equal(round(1 - stats::pbeta(0.5, 1, 0.5), 2), 0.71)
+})
+
+test_that("the supplement's five weightings reproduce in order", {
+  # tbl-sens-distributions: two of the five give a value below 20, which
+  # is the main paper's reason for reporting the worst-case value beside
+  # the uniform-weights one.
+  five <- c(bf_rescaled(9, 3, 0.5, 1, 1, 0.5),
+            bf_rescaled(9, 3, 0.5, 0.5, 0.5, 0.5),
+            bf_rescaled(9, 3),
+            bf_rescaled(9, 3, 1, 0.5, 0.5, 1),
+            bf_rescaled(9, 3, 10, 10, 10, 10))
+  expect_false(is.unsorted(five))
+  expect_equal(round(five, 2), c(7.35, 9.53, 20.67, 28.08, 252.92))
+  expect_equal(sum(five < 20), 2)
+})
+
+test_that("under weights at the far ends both averages fall", {
+  # Expecting almost no cross-evidence does not make nine of twelve fit
+  # the working theory better: its weight sits near shares of one, where
+  # nine of twelve is unlikely, so the numerator falls. The value rises
+  # because the rival's weight sits near zero, where nine of twelve is
+  # less likely still, so the denominator falls by more.
+  num <- function(a, b) stats::integrate(
+    function(t) stats::dbinom(9, 12, t) * .d_rescaled_W(t, a, b), 0.5, 1)$value
+  den <- function(a, b) stats::integrate(
+    function(t) stats::dbinom(9, 12, t) * .d_rescaled_R(t, a, b), 0, 0.5)$value
+  expect_lt(num(1, 0.5), num(1, 1))
+  expect_lt(den(0.5, 1), den(1, 1))
+  expect_lt(den(0.5, 1) / den(1, 1), num(1, 0.5) / num(1, 1))
 })
 
 test_that("input validation rejects nonsense", {

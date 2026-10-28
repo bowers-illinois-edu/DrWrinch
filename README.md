@@ -6,38 +6,40 @@ This package implements the methods of Lopez, Bowers, and Gajardo Cooper
 (2026), "Fully specified Bayes factors for process tracing"
 ([arXiv:2606.16683](https://arxiv.org/abs/2606.16683)).
 
-A researcher has coded her evidence into two counts: observations
-supporting her working theory and observations supporting a single
-rival. One model underlies everything here. Each observation supports
-the working theory with probability `theta`, the share of the evidence
-that supports it. The working theory claims that share is above one
-half; the rival claims it is at or below one half.
+A researcher has coded the evidence into two counts: observations
+supporting a working theory and observations supporting a single rival.
+One model underlies everything here. Each observation supports the
+working theory with probability `theta`, the share of the evidence that
+supports it. The working theory claims that share is above one half; the
+rival claims it is at or below one half.
 
-The rival's claim names a range of shares rather than one share, so it
-gives no probability for the counts on its own, and turning the range
-into one number takes a rule. Two rules are available that a reader can
-neither call arbitrary nor call self-serving, so the package computes
-two Bayes factors. They share a numerator --- the probability of the
-counts averaged over the shares above one half, under uniform weights
---- and differ only in the denominator.
+Each claim names a range of shares rather than one share, so neither
+gives a probability for the counts on its own. The package computes two
+Bayes factors. They share a numerator --- the probability of the counts
+averaged over the shares above one half, under uniform weights --- and
+differ in the denominator.
 
-- `bf_uniform_weights()` averages over the rival's whole range under
-  the same uniform weights. At nine observations supporting the working
-  theory against three supporting the rival it gives 20.67.
-- `bf_worst_case()` evaluates the rival's claim at the single share, one
-  half, that makes the observed counts most probable. At the same counts
-  it gives 2.73. No weighting of her range stated before coding would
-  make the evidence against her look weaker, so this value is a lower
-  bound, and it carries an error rate: a researcher who sets the rival
-  aside at 20 is misled at most one time in twenty when the rival is
-  right, whatever the size of the body of evidence she drew from.
+- `bf_uniform_weights()` averages over the rival's whole range under the
+  same uniform weights. At nine observations supporting the working
+  theory and three supporting the rival it gives 20.67.
+- `bf_worst_case()` evaluates the rival at the share that makes the
+  counts most probable, one half at these counts. It gives 2.73, the
+  smallest Bayes factor any weights on the rival's shares can give.
 
-`bf_rescaled()` computes the first under weights the researcher states
-instead of the uniform default. `separation_g()` reports how far apart
-the two theories' claims would have to be before the counts reach a
-threshold. `sens_coding()` and `sens_binomial()` ask what a reader would
-have to grant --- re-coded observations, a biased search, or background
-cases favoring the rival --- before the report would change.
+The paper's rule sets the rival aside, at least provisionally, when the
+uniform-weights Bayes factor is 20 or more and the worst-case Bayes
+factor is above 1. Nine of twelve meets both conditions.
+
+`sens_bias()` and `sens_coding()` report how biased the search, or how
+many observations re-coded, it would take before a researcher following
+the rule would no longer set the rival aside: at nine of twelve, a search
+about one percent more likely to find pro-working-theory evidence, or one
+re-coded observation. `bf_rescaled()` computes the uniform-weights Bayes
+factor under weights on the shares other than the uniform, and
+`bf_worst_case()` takes the same weights for the working theory's shares.
+`bf_uniform_weights_finite()` and `bf_worst_case_finite()` compute both
+Bayes factors for documents read without replacement from an archive of
+known size.
 
 The package is named after [Dorothy Maud
 Wrinch](https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch) (1894--1976),
@@ -61,16 +63,17 @@ sensitivity analyses through a browser:
 DrWrinch::run_app()
 ```
 
-A hosted copy lives at <https://jakebowers.shinyapps.io/drwrinch/>.
-Defaults reproduce the paper's running example (`y_W = 9, y_R = 3,
-threshold = 20`). The Result tab shows the two Bayes factors side by
+A hosted copy is at <https://jakebowers.shinyapps.io/drwrinch/>. Its
+defaults reproduce the paper's running example: nine observations for
+the working theory, three for the rival, and thresholds of 20 and 1. The Result tab shows the two Bayes factors side by
 side above a picture of the three probabilities they are built from, so
 a reader can see where each number comes from rather than take it on
-trust. The Sensitivity tab reports what would have to be granted for
-the report to change.
+trust. The Sensitivity tab reports how biased the search, or how many
+observations re-coded, it would take to change the decision.
 
 ## Status
 
-Under active development alongside the paper. The single-rival case is
-the current focus. Multiple-rival extensions are being developed in a
-companion paper and may live in a separate package.
+The package is under active development alongside the paper, which
+compares a working theory with one rival at a time. The authors are
+developing extensions to several rivals in a companion paper, and those
+may become a separate package.

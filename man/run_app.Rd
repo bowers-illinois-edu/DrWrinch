@@ -24,8 +24,8 @@ probabilities they are built from: the numerator they share and the
 two denominators that separate them. A Sensitivity tab reports what a
 reader would have to grant before the researcher's report would
 change. Every function the app calls (\code{\link[=bf_uniform_weights]{bf_uniform_weights()}},
-\code{\link[=bf_worst_case]{bf_worst_case()}}, \code{\link[=separation_g]{separation_g()}}, \code{\link[=sens_coding]{sens_coding()}},
-\code{\link[=sens_binomial]{sens_binomial()}}) works from the command line without it.
+\code{\link[=bf_worst_case]{bf_worst_case()}}, \code{\link[=sens_bias]{sens_bias()}}, \code{\link[=sens_coding]{sens_coding()}}) works from the
+command line without it.
 }
 \details{
 The Shiny stack (shiny, bslib) is in \code{Suggests}, not \code{Imports}, so
@@ -41,6 +41,6 @@ run_app()
 }
 \seealso{
 \code{\link[=bf_uniform_weights]{bf_uniform_weights()}} and \code{\link[=bf_worst_case]{bf_worst_case()}}, the two Bayes
-factors the app shows; \code{\link[=sens_coding]{sens_coding()}} and \code{\link[=sens_binomial]{sens_binomial()}} for the
+factors the app shows; \code{\link[=sens_bias]{sens_bias()}} and \code{\link[=sens_coding]{sens_coding()}} for the
 sensitivity tab.
 }

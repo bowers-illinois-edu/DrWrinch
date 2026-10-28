@@ -92,16 +92,15 @@ plot_bf_decomposition <- function(y_W, y_R) {
 }
 
 
-# plot_bf_vs_omega: the uniform-weights Bayes factor as the assumed
-# search bias grows, with the threshold as a dashed line and the
-# tipping point as a dotted vertical one.
-plot_bf_vs_omega <- function(y_W, y_R, threshold,
-                             theta_cut = 0.5,
+# plot_bf_vs_omega: both Bayes factors as the assumed search bias grows,
+# each with its own threshold from the paper's rule as a dashed line,
+# and the bias at which the rule stops setting the rival aside as a
+# dotted vertical one. The two curves share the solid hue of the
+# decomposition picture's worst-case bar and its lighter tint, so the
+# same Bayes factor has the same colour on both tabs.
+plot_bf_vs_omega <- function(y_W, y_R, threshold_uniform, threshold_worst,
                              omega_star = NULL) {
-  df <- bf_omega_curve(y_W, y_R, threshold, theta_cut)
-  # A quadrature failure at an extreme omega leaves a gap rather than
-  # letting the log axis truncate the curve silently.
-  df <- df[is.finite(df$bf), , drop = FALSE]
+  df <- bf_omega_curve(y_W, y_R)
 
   # Doublings spanning the data: 0.25, 0.5, 1, 2, 4, 8 at the defaults.
   omega_ticks <- 2^(seq(
@@ -109,22 +108,35 @@ plot_bf_vs_omega <- function(y_W, y_R, threshold,
     ceiling(log2(max(df$omega)))
   ))
 
-  # One tick per decade on the Bayes-factor axis. plotly labelled its
-  # minor ticks with their mantissa and abbreviated the large values
-  # with SI prefixes, so the axis read "2 / 10k / 5 / 2 / 1000 / 5".
-  bf_ticks <- decade_ticks(c(df$bf, threshold))
+  # One tick per decade on the Bayes-factor axis, spanning both curves
+  # and both thresholds. plotly labelled its minor ticks with their
+  # mantissa and abbreviated large values with SI prefixes, so the axis
+  # read "2 / 10k / 5 / 2 / 1000 / 5".
+  bf_ticks <- decade_ticks(c(df$bf_uniform, df$bf_worst,
+                             threshold_uniform, threshold_worst))
 
   p <- plotly::plot_ly(
-    data = df, x = ~omega, y = ~bf,
+    data = df, x = ~omega, y = ~bf_uniform,
     type = "scatter", mode = "lines",
     name = "uniform-weights Bayes factor",
-    line = list(color = HALF_COL)
+    line = list(color = AVG_COL, width = 3)
+  )
+  p <- plotly::add_lines(
+    p, y = ~bf_worst, name = "worst-case Bayes factor",
+    line = list(color = HALF_COL, width = 3)
   )
   p <- plotly::add_lines(
     p,
-    x = range(df$omega), y = c(threshold, threshold),
-    name = paste0("threshold = ", threshold),
-    line = list(dash = "dash", color = LINE_COL),
+    x = range(df$omega), y = c(threshold_uniform, threshold_uniform),
+    name = paste0("uniform-weights threshold = ", threshold_uniform),
+    line = list(dash = "dash", color = AVG_COL),
+    inherit = FALSE
+  )
+  p <- plotly::add_lines(
+    p,
+    x = range(df$omega), y = c(threshold_worst, threshold_worst),
+    name = paste0("worst-case threshold = ", threshold_worst),
+    line = list(dash = "dash", color = HALF_COL),
     inherit = FALSE
   )
   shapes <- if (!is.null(omega_star) && is.finite(omega_star) &&
@@ -143,8 +155,7 @@ plot_bf_vs_omega <- function(y_W, y_R, threshold,
     # turned the range from 0.25 to 8 into "3 4 5 6 7 8 9 1 2 3 4 5 6 7
     # 8". The middle "1" was a search bias of one, the point at which the
     # search favours neither theory, and nothing on the axis said so.
-    # The ticks below are the doublings either side of that point, taken
-    # from the data so they still fit if omega_range is widened.
+    # The ticks below are the doublings either side of that point.
     xaxis = list(
       type = "log",
       title = "assumed search bias toward the working theory",
@@ -159,57 +170,9 @@ plot_bf_vs_omega <- function(y_W, y_R, threshold,
       tickvals = bf_ticks,
       exponentformat = "power"
     ),
+    legend = list(orientation = "h", y = -0.25, yanchor = "top"),
+    margin = list(b = 110),
     hovermode = "x unified",
-    shapes = shapes
-  )
-}
-
-
-# plot_post_odds_vs_M: the posterior odds as background cases favoring
-# the rival are granted. The y axis says posterior odds, not Bayes
-# factor: under these priors the Bayes factor rises while the posterior
-# odds fall, so labeling the axis wrongly would reverse the reading.
-plot_post_odds_vs_M <- function(y_W, y_R, threshold,
-                                theta_cut = 0.5,
-                                M_max = 50L,
-                                M_star = NULL) {
-  df <- post_odds_M_curve(y_W, y_R, theta_cut, M_max, threshold)
-
-  # The odds fall through eight decades, which plotly wrote as
-  # "1 / 0.01 / 100u / 1u / 10n" using SI prefixes for micro and nano.
-  odds_ticks <- decade_ticks(c(df$post_odds, threshold))
-
-  p <- plotly::plot_ly(
-    data = df, x = ~M, y = ~post_odds,
-    type = "bar", marker = list(color = HALF_COL),
-    name = "posterior odds"
-  )
-  p <- plotly::add_lines(
-    p,
-    x = c(0, M_max), y = c(threshold, threshold),
-    name = paste0("threshold = ", threshold),
-    line = list(dash = "dash", color = LINE_COL),
-    inherit = FALSE
-  )
-  shapes <- if (!is.null(M_star) && !is.na(M_star) && M_star > 0L) {
-    list(list(
-      type = "line", x0 = M_star, x1 = M_star,
-      yref = "paper", y0 = 0, y1 = 1,
-      line = list(dash = "dot", color = MARK_COL, width = 1)
-    ))
-  } else {
-    list()
-  }
-  plotly::layout(
-    p,
-    xaxis = list(title = "background cases favoring the rival (M)"),
-    yaxis = list(
-      type = "log",
-      title = "posterior odds",
-      tickmode = "array",
-      tickvals = odds_ticks,
-      exponentformat = "power"
-    ),
     shapes = shapes
   )
 }

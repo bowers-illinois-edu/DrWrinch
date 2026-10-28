@@ -6,38 +6,34 @@
 \alias{DrWrinch-package}
 \title{DrWrinch: Fully Specified Bayes Factors for Process Tracing}
 \description{
-A researcher has coded her evidence into two counts: observations
-supporting her working theory and observations supporting a single
+A researcher has coded the evidence into two counts: observations
+supporting the working theory and observations supporting a single
 rival. One model underlies everything this package computes. Each
-observation supports the working theory with probability
-\eqn{\theta}, the share of the evidence that supports it. The working
-theory claims \eqn{\theta > 1/2} and the rival claims
-\eqn{\theta \le 1/2}.
+observation supports the working theory with probability \eqn{\theta},
+the share of the evidence that supports it. The working theory claims
+\eqn{\theta > 1/2} and the rival claims \eqn{\theta \le 1/2}.
 }
 \details{
-The rival's claim is a range of shares rather than one share, so it
-does not by itself give a probability for the counts, and turning the
-range into one number takes a rule. The package computes the two
-Bayes factors that follow from the two rules a reader can neither
-call arbitrary nor call self-serving. They share a numerator, the
-probability of the counts averaged over the shares above one half
-under uniform weights, and differ only in the denominator.
-\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} averages over the rival's whole range under
-the same uniform weights. \code{\link[=bf_worst_case]{bf_worst_case()}} evaluates her claim at
-the single share, one half, that makes the observed counts most
-probable, which makes its value a lower bound and gives it an error
-rate: a researcher who sets the rival aside at 20 is misled at most
-one time in twenty when the rival is right, whatever the size of the
-body of evidence.
+Each claim is a range of shares rather than one share, so neither gives
+a probability for the counts on its own. The package computes the two
+Bayes factors of Lopez, Bowers, and Gajardo Cooper (2026). They share a
+numerator, the probability of the counts averaged over the shares above
+one half under uniform weights, and differ in the denominator.
+\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} averages over the rival's shares under the same
+uniform weights. \code{\link[=bf_worst_case]{bf_worst_case()}} evaluates the rival at its most
+favorable share, one half when the counts favor the working theory,
+which makes its value the smallest any weights on the rival's shares
+can give. The paper's rule sets the rival aside, at least
+provisionally, when the first is 20 or more and the second is above 1.
 
-\code{\link[=bf_rescaled]{bf_rescaled()}} computes the first of those two under weights the
-researcher states instead of the uniform default, and \code{\link[=bf_separated]{bf_separated()}}
-and \code{\link[=separation_g]{separation_g()}} report how far apart the two theories' claims
-would have to be before the counts reach a threshold. The sensitivity
-functions \code{\link[=sens_coding]{sens_coding()}} and \code{\link[=sens_binomial]{sens_binomial()}} ask what a reader
-would have to grant --- re-coded observations, a biased search, or
-background cases favoring the rival --- before the researcher's report
-would change.
+\code{\link[=bf_rescaled]{bf_rescaled()}} computes the uniform-weights Bayes factor under other
+weights on the shares, and \code{bf_worst_case()} takes the same weights on
+the working theory's side. \code{\link[=bf_uniform_weights_finite]{bf_uniform_weights_finite()}} and
+\code{\link[=bf_worst_case_finite]{bf_worst_case_finite()}} compute both Bayes factors for documents read
+without replacement from an archive of known size. \code{\link[=sens_bias]{sens_bias()}} and
+\code{\link[=sens_coding]{sens_coding()}} report how biased the search, or how many observations
+re-coded, it would take before a researcher following the rule would no
+longer set the rival aside.
 
 The package is named after Dorothy Maud Wrinch (1894--1976), whose
 joint papers with Harold Jeffreys (1919, 1921, 1923) developed the

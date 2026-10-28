@@ -101,26 +101,25 @@ test_that("the legend sits clear of the horizontal axis title", {
 })
 
 
-# ---- the two sensitivity pictures ---------------------------------------
+# ---- the search-bias picture --------------------------------------------
+#
+# The Sensitivity tab draws both Bayes factors against the assumed search
+# bias, each with its own threshold from the paper's rule: 20 for the
+# uniform-weights value and 1 for the worst-case value.
 
-test_that("the sensitivity pictures build with every series named", {
-  # Same defect class, checked on the other two figures so it cannot
-  # reappear there unnoticed.
-  omega_plot <- plotly::plotly_build(
-    plot_bf_vs_omega(Y_W, Y_R, threshold = 20)
+test_that("the search-bias picture draws two curves and two thresholds, all named", {
+  built <- plotly::plotly_build(
+    plot_bf_vs_omega(Y_W, Y_R, threshold_uniform = 20, threshold_worst = 1)
   )
-  m_plot <- plotly::plotly_build(
-    plot_post_odds_vs_M(Y_W, Y_R, threshold = 20, M_max = 10L)
-  )
-
-  for (built in list(omega_plot, m_plot)) {
-    named <- vapply(
-      built$x$data,
-      function(tr) !is.null(tr$name) && nzchar(tr$name),
-      logical(1)
-    )
-    expect_true(all(named))
-  }
+  names <- vapply(built$x$data, function(tr) {
+    if (is.null(tr$name)) "" else tr$name
+  }, character(1))
+  expect_length(names, 4)
+  expect_true(all(nzchar(names)))
+  expect_true(any(grepl("uniform-weights", names)))
+  expect_true(any(grepl("worst-case", names)))
+  expect_true(any(grepl("20", names)))
+  expect_true(any(grepl("1$", names)))
 })
 
 
@@ -131,7 +130,7 @@ test_that("the search-bias axis is labelled with search-bias values", {
   # favoured neither theory, and nothing on the axis said so. Explicit
   # ticks name the doublings a reader can argue about instead.
   layout <- plotly::plotly_build(
-    plot_bf_vs_omega(Y_W, Y_R, threshold = 20)
+    plot_bf_vs_omega(Y_W, Y_R, threshold_uniform = 20, threshold_worst = 1)
   )$x$layout
   expect_equal(layout$xaxis$ticktext, c("0.25", "0.5", "1", "2", "4", "8"))
   expect_length(layout$xaxis$tickvals, 6)
@@ -139,25 +138,18 @@ test_that("the search-bias axis is labelled with search-bias values", {
 })
 
 
-test_that("both sensitivity y axes carry one tick per decade", {
-  # plotly labelled these log axes with mantissas and SI prefixes. The
-  # Bayes-factor axis read "2 / 10k / 5 / 2 / 1000 / 5" and the
-  # posterior-odds axis read "1 / 0.01 / 100u / 1u / 10n", where u and n
-  # were micro and nano. A reader could not tell which gridline was
-  # which. One tick per decade, written as a power of ten, can only be
-  # read one way.
-  built <- list(
-    plotly::plotly_build(plot_bf_vs_omega(Y_W, Y_R, threshold = 20)),
-    plotly::plotly_build(
-      plot_post_odds_vs_M(Y_W, Y_R, threshold = 20, M_max = 10L)
-    )
-  )
-  for (b in built) {
-    y <- b$x$layout$yaxis
-    expect_equal(y$tickmode, "array")
-    expect_equal(y$exponentformat, "power")
-    expect_gt(length(y$tickvals), 1)
-    # Every tick value is a whole power of ten.
-    expect_equal(log10(y$tickvals), round(log10(y$tickvals)))
-  }
+test_that("the Bayes-factor axis carries one tick per decade", {
+  # plotly labelled this log axis with mantissas and SI prefixes, so it
+  # read "2 / 10k / 5 / 2 / 1000 / 5". One tick per decade, written as a
+  # power of ten, can only be read one way. Both curves and both
+  # thresholds share the axis, so the ticks have to span all four.
+  y <- plotly::plotly_build(
+    plot_bf_vs_omega(Y_W, Y_R, threshold_uniform = 20, threshold_worst = 1)
+  )$x$layout$yaxis
+  expect_equal(y$tickmode, "array")
+  expect_equal(y$exponentformat, "power")
+  expect_gt(length(y$tickvals), 1)
+  expect_equal(log10(y$tickvals), round(log10(y$tickvals)))
+  expect_lte(min(y$tickvals), 1)
+  expect_gte(max(y$tickvals), 20)
 })

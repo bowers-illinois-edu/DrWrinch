@@ -1,6 +1,6 @@
 Package: DrWrinch
 Title: Fully Specified Bayes Factors for Process Tracing
-Version: 0.0.2.0
+Version: 0.0.2.1
 Authors@R: c(
     person("Matias", "Lopez", role = c("aut", "cph"),
            email = "matiaslopez.uy@gmail.com",
@@ -15,16 +15,18 @@ Description: Computes fully specified Bayes factors for process tracing,
     underlies the package: each observation supports a working theory
     with probability theta, the share of the evidence that supports it,
     where the working theory claims theta above one half and a single
-    rival claims theta at or below it. Because the rival claims a range
-    of shares rather than one share, two Bayes factors follow, sharing a
-    numerator and differing in how they treat that range: one averages
-    the probability of the counts over the whole range, the other
-    evaluates the rival at the single share that makes the counts most
-    probable. The second is a lower bound and carries an error rate of at
-    most one in twenty at a threshold of 20. Sensitivity analyses vary
-    coding error, search bias, and the weight given the rival to show
-    what a reader would have to grant for the conclusion to change.
-    Named after Dorothy Maud Wrinch (1894--1976,
+    rival claims theta at or below it. Because each theory claims a range
+    of shares rather than one share, two Bayes factors follow. They share
+    a numerator and differ in how they treat the rival's range: one
+    averages the probability of the counts over the whole range, the
+    other evaluates the rival at its most favorable share, which makes it
+    the smallest Bayes factor any weights on the rival's shares can give.
+    The paper's rule sets the rival aside when the first is at least 20
+    and the second is above 1. Sensitivity analyses report how biased the
+    search, or how many observations re-coded, it would take to change
+    that decision, and finite-archive versions of both Bayes factors
+    cover documents read without replacement. Named after Dorothy Maud
+    Wrinch (1894--1976,
     <https://en.wikipedia.org/wiki/Dorothy_Maud_Wrinch>), whose joint
     papers with Harold Jeffreys (1919, 1921, 1923) developed the
     framework that became Jeffreys's theory of Bayes factors.
@@ -37,11 +39,8 @@ BugReports: https://github.com/bowers-illinois-edu/DrWrinch/issues
 Depends:
     R (>= 4.0.0)
 Imports:
-    stats,
-    BiasedUrn
+    stats
 Suggests:
-    ggplot2,
-    dplyr,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
@@ -50,4 +49,4 @@ Suggests:
     plotly (>= 4.10.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

@@ -6,8 +6,8 @@
 #' two denominators that separate them. A Sensitivity tab reports what a
 #' reader would have to grant before the researcher's report would
 #' change. Every function the app calls ([bf_uniform_weights()],
-#' [bf_worst_case()], [separation_g()], [sens_coding()],
-#' [sens_binomial()]) works from the command line without it.
+#' [bf_worst_case()], [sens_bias()], [sens_coding()]) works from the
+#' command line without it.
 #'
 #' The Shiny stack (shiny, bslib) is in `Suggests`, not `Imports`, so
 #' users who only want the core Bayes factor functions do not have to
@@ -28,7 +28,7 @@
 #' }
 #'
 #' @seealso [bf_uniform_weights()] and [bf_worst_case()], the two Bayes
-#'   factors the app shows; [sens_coding()] and [sens_binomial()] for the
+#'   factors the app shows; [sens_bias()] and [sens_coding()] for the
 #'   sensitivity tab.
 #' @export
 run_app <- function(launch_browser = interactive(), ...) {

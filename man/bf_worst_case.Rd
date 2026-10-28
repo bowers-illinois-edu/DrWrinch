@@ -2,63 +2,97 @@
 % Please edit documentation in R/bf_worst_case.R
 \name{bf_worst_case}
 \alias{bf_worst_case}
-\title{Worst-case Bayes factor: the rival evaluated at her best single share}
+\title{Worst-case Bayes factor: the rival at its most favorable share}
 \usage{
-bf_worst_case(y_W, y_R)
+bf_worst_case(y_W, y_R, omega = 1, a1 = 1, b1 = 1)
 }
 \arguments{
-\item{y_W}{Non-negative integer. Count (or summed integer weight) of
-evidence favorable to the working theory.}
+\item{y_W}{Non-negative whole number. Count, or summed weight, of
+observations supporting the working theory.}
 
-\item{y_R}{Non-negative integer. Count (or summed integer weight) of
-evidence favorable to the rival.}
+\item{y_R}{Non-negative whole number. Count, or summed weight, of
+observations supporting the rival.}
+
+\item{omega}{Positive number. The bias factor: how many times as likely
+the search was to find a pro-working-theory observation as a
+pro-rival one. Default \code{1}, an unbiased search.}
+
+\item{a1, b1}{Positive numbers. The Beta pair rescaled onto the working
+theory's shares. Default \code{1} and \code{1}, uniform weights.}
 }
 \value{
 A length-1 numeric: the Bayes factor in favor of the working
-theory, evaluating the rival at a share of one half.
+theory with the rival at its most favorable share.
 }
 \description{
-A researcher has coded her evidence into two counts: \code{y_W} observations
-support her working theory and \code{y_R} support a single rival. One model
+A researcher has coded the evidence into two counts: \code{y_W} observations
+support the working theory and \code{y_R} support a single rival. One model
 underlies both Bayes factors in this package. Each observation supports
 the working theory with probability \eqn{\theta}, the share of the
 evidence that supports it. The working theory claims
 \eqn{\theta > 1/2} and the rival claims \eqn{\theta \le 1/2}.
 }
 \details{
-The rival's claim is a range of shares, not one share, so it does not
-by itself give a probability for the counts. Turning the range into
-one number takes a rule, and this function uses the rule most generous
-to the rival: evaluate her claim at the single share, one half, that
-makes the observed counts most probable. Because no other share in her
-range fits the counts better, no weighting of her range that the
-researcher could have stated before coding would make the evidence
-against the rival look weaker. The reported value is therefore a lower
-bound, and a critic cannot say the researcher chose the rival's model
-to suit herself.
+The numerator is the one \code{\link[=bf_uniform_weights]{bf_uniform_weights()}} uses: the binomial
+probability of the counts averaged over the shares above one half. The
+denominator is the largest probability any weights on the rival's
+shares can give the counts. When at least as many observations support
+the working theory as the rival, the probability of the counts rises on
+the whole of the rival's range, so that largest probability is the one
+at a share of one half. The value is therefore the smallest Bayes
+factor a critic can produce by changing only the weights on the rival's
+shares (supplement, prp-bound). At nine observations for the working
+theory and three for the rival it is 7814 / 2860 = 2.73.
 
-The numerator is the same one \code{\link[=bf_uniform_weights]{bf_uniform_weights()}} uses: the
-probability of the counts averaged over the shares above one half
-under uniform weights. The two functions come from the same model and
-differ only in the denominator. \code{\link[=bf_uniform_weights]{bf_uniform_weights()}} averages over
-the rival's whole range; this function takes her best point in it.
+The paper's rule sets the rival aside, at least provisionally, when the
+uniform-weights value is 20 or more and this value is above 1. A value
+above 1 means that no weights on the rival's shares make the counts
+more probable under the rival than under the working theory.
 }
 \section{Closed form}{
 
-With \eqn{N = y_W + y_R}, the ratio equals
-\deqn{\frac{\sum_{j=0}^{y_W} \binom{N+1}{j}}{(N+1)\binom{N}{y_W}},}
-which is what this function computes. The value is defined at every
-pair of counts, including counts that favor the rival, where it falls
-below one.
+With \eqn{N = y_W + y_R}, uniform weights on the working theory's
+shares, and no bias, the value is
+\deqn{\frac{\sum_{j=0}^{y_W} \binom{N+1}{j}}{(N+1)\binom{N}{y_W}}}
+(supplement, thm-closed-form). The paper evaluates the rival at one
+half at every count, and so does this function when \code{y_W < y_R};
+at those counts the value is below 1 and the rule keeps the rival
+whichever share the rival is held at.
 }
 
-\section{Error rate}{
+\section{Stated weights on the working theory's shares}{
 
-In a world where the rival's claim holds, a researcher who treats 20
-as the value at which she sets the rival aside is misled at most one
-time in twenty. The guarantee holds for independent draws and for
-draws without replacement from a collection of any size, so she never
-has to state how large the body of evidence is.
+\code{a1} and \code{b1} replace the uniform weights in the numerator with a
+Beta\eqn{(a_1, b_1)} distribution rescaled onto the shares above one
+half: if \eqn{X} has that distribution, \eqn{\theta = 1/2 + X/2}. Only
+the working theory's weights enter, because the rival is evaluated at
+its most favorable share whatever weights its proponent might state. At
+nine of twelve, Beta(1/2, 1/2) gives 2.07 and Beta(10, 10) gives 4.38.
+No weights give more than 4.81, the value with all the weight on a
+share of nine twelfths.
+}
+
+\section{A biased search}{
+
+A search \code{omega} times as likely to find a pro-working-theory
+observation as a pro-rival one turns a share \eqn{\theta} of the
+evidence into a share
+\eqn{q = \omega\theta / (\omega\theta + 1 - \theta)} among the
+observations found. The numerator averages the probability of the
+counts at \eqn{q} over the working theory's shares. The rival's shares
+become shares found of at most \eqn{\omega / (1 + \omega)}, and the
+counts are most probable at a share found of \eqn{y_W / N}, so the
+denominator is the probability at whichever of the two is smaller.
+
+Up to \eqn{\omega = y_W / y_R} that is the probability at a share of
+one half, which is the value the paper's code computed. Past it the
+rival's most favorable share is below one half. At nine of twelve and
+\eqn{\omega = 5}, one half becomes 5/6 found, where nine of twelve has
+probability 0.197, while a share of 0.375 becomes 0.75 found, where it
+has probability 0.258; the numerator is 0.0554, so the value is
+0.0554 / 0.258 = 0.21 rather than 0.0554 / 0.197 = 0.28. The bias at
+which the value falls to 1 always comes before \eqn{y_W / y_R}, so
+\code{\link[=sens_bias]{sens_bias()}} gives the same tipping point under either reading.
 }
 
 \examples{
@@ -66,14 +100,23 @@ has to state how large the body of evidence is.
 # theory, three support the rival.
 bf_worst_case(9, 3)
 
-# Seven of twelve falls below one. A rival who may claim an evenly
+# Seven of twelve falls below one: a rival who may claim an evenly
 # split body of evidence is not embarrassed by those counts.
 bf_worst_case(7, 5)
 
+# The smoking-gun memo counted as ten observations.
+bf_worst_case(18, 3)
+
+# Weights on the working theory's shares concentrated near 3/4.
+bf_worst_case(9, 3, a1 = 10, b1 = 10)
+
+# A search twice as likely to find pro-working-theory evidence.
+bf_worst_case(9, 3, omega = 2)
+
 }
 \seealso{
-\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} for the other Bayes factor from the
-same model, which averages over the rival's whole range;
-\code{\link[=bf_separated]{bf_separated()}} and \code{\link[=separation_g]{separation_g()}} for the version that separates
-the two theories by a stated margin.
+\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} for the Bayes factor that averages over
+the rival's whole range; \code{\link[=bf_worst_case_finite]{bf_worst_case_finite()}} for documents read
+from an archive of known size; \code{\link[=sens_bias]{sens_bias()}} and \code{\link[=sens_coding]{sens_coding()}} for
+the sensitivity analyses.
 }

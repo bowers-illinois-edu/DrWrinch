@@ -3,17 +3,18 @@ template:
   bootstrap: 5
 reference:
 - title: Bayes factors
-  desc: Compute Bayes factors under the binomial and hypergeometric urn models.
+  desc: The two Bayes factors from one model, under uniform or stated weights on the shares, and for an archive of known size.
   contents:
-  - bf_binomial
-  - bf_urn
+  - bf_uniform_weights
+  - bf_worst_case
+  - bf_rescaled
+  - bf_finite
 - title: Sensitivity analysis
-  desc: Locate the smallest perturbations of coding, observation bias, and prior that flip the conclusion.
+  desc: How biased the search, or how many observations re-coded, it would take before the paper's rule stops setting the rival aside.
   contents:
-  - sens_binomial
-  - sens_urn
+  - sens_bias
   - sens_coding
 - title: Interactive app
-  desc: Launch a Shiny app that exposes the Bayes-factor and sensitivity functions through a browser UI.
+  desc: A Shiny app that shows both Bayes factors and the sensitivity analyses in a browser.
   contents:
   - run_app

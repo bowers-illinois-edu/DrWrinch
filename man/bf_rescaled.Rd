@@ -26,11 +26,11 @@ theory under the stated weights.
 }
 \description{
 A range of shares is not a probability for the counts, so before
-coding the researcher says how she spreads her weight over the shares
-inside each theory's range. \code{\link[=bf_uniform_weights]{bf_uniform_weights()}} uses the default,
+coding the researcher states how each theory spreads its weight over
+the shares inside its range. \code{\link[=bf_uniform_weights]{bf_uniform_weights()}} uses the default,
 which gives every share in a range the same weight. This function
 takes the alternative the paper offers, so that a reader who would
-have weighted the shares differently can see what his weights do to
+have weighted the shares differently can see what those weights do to
 the reported number.
 }
 \details{
@@ -68,12 +68,14 @@ its range, so the working theory predicts a share near three quarters
 and the rival a share near one quarter, the two predict more different
 things, and the value rises to 252.92.
 
-The pairs need not match. A researcher who thinks that under either
-theory she would still turn up evidence for the other one puts both
+The pairs need not match. A researcher who expects that under either
+theory the search would still turn up evidence for the other puts both
 densities next to one half, with \verb{a1 = 0.5, b1 = 1} for the working
-theory and \verb{aR = 1, bR = 0.5} for the rival. A researcher who thinks
-each theory would leave almost no evidence for the other pushes both
-densities to the far ends, reversing those two pairs.
+theory and \verb{aR = 1, bR = 0.5} for the rival, and gets 7.35 at nine of
+twelve. A researcher who expects each theory to leave almost no
+evidence for the other pushes both densities to the far ends,
+reversing those two pairs, and gets 28.08. The first value is below
+the paper's threshold of 20 and the second is above it.
 }
 
 \section{Weights on shares are not weights on observations}{
@@ -81,8 +83,8 @@ densities to the far ends, reversing those two pairs.
 The weights here are weights on \eqn{\theta}, the share of the
 evidence supporting the working theory. They are a different object
 from a weight on an observation, which acts as replication: a document
-the researcher weights at ten enters as ten observations, and she
-passes that by summing the weights into \code{y_W} and \code{y_R}.
+the researcher weights at ten enters as ten observations, and the
+researcher passes that by summing the weights into \code{y_W} and \code{y_R}.
 }
 
 \examples{
@@ -100,8 +102,7 @@ bf_rescaled(9, 3, 10, 10, 10, 10)
 }
 \seealso{
 \code{\link[=bf_uniform_weights]{bf_uniform_weights()}} for the uniform default;
-\code{\link[=bf_worst_case]{bf_worst_case()}} for the Bayes factor that evaluates the rival at
-her best single share instead of averaging over her range;
-\code{\link[=bf_binomial]{bf_binomial()}} for a Beta prior on the whole interval, which also
-moves weight between the theories.
+\code{\link[=bf_worst_case]{bf_worst_case()}}, whose \verb{a1, b1} take the same rescaled pair for the
+working theory's shares while the rival is evaluated at its most
+favorable share.
 }

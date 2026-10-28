@@ -22,7 +22,7 @@
 dir.create(.dw_lib, showWarnings = FALSE, recursive = TRUE)
 .libPaths(c(.dw_lib, .libPaths()))
 
-.dw_needed <- "0.0.2.0"
+.dw_needed <- "0.0.2.1"
 .dw_have <- tryCatch(
   as.character(utils::packageVersion("DrWrinch")),
   error = function(e) NA_character_

@@ -2,129 +2,74 @@
 % Please edit documentation in R/sens_coding.R
 \name{sens_coding}
 \alias{sens_coding}
-\title{Sensitivity analysis for coding error}
+\title{Sensitivity to coding}
 \usage{
-sens_coding(
-  y_W,
-  y_R,
-  model = c("uniform_weights", "worst_case", "binomial", "urn"),
-  threshold = 20,
-  theta_cut = 0.5
-)
+sens_coding(y_W, y_R, threshold_uniform = 20, threshold_worst = 1)
 }
 \arguments{
-\item{y_W}{Non-negative integer. Observed count favorable to the
-working theory.}
+\item{y_W}{Non-negative whole number. Count, or summed weight, of
+observations supporting the working theory.}
 
-\item{y_R}{Non-negative integer. Observed count favorable to the
-rival.}
+\item{y_R}{Non-negative whole number. Count, or summed weight, of
+observations supporting the rival.}
 
-\item{model}{Which Bayes factor to recompute after re-coding.
-\code{"uniform_weights"} (the default) averages over the rival's whole
-range; \code{"worst_case"} evaluates her at one half; \code{"binomial"} is the
-earlier name for \code{"uniform_weights"} and returns the same thing;
-\code{"urn"} is the superseded bounded-archive model.}
+\item{threshold_uniform}{Positive number. The uniform-weights Bayes
+factor must be at least this large for the rule to set the rival
+aside. Default \code{20}.}
 
-\item{threshold}{Positive numeric. The value at which the researcher
-would set the rival aside. Default \code{20}. Under \code{"worst_case"} this
-is the threshold the reported separations answer at.}
-
-\item{theta_cut}{Numeric in (0, 1). Cutpoint for the uniform-weights
-model; ignored by \code{"worst_case"} and \code{"urn"}, whose cut is fixed at
-one half by construction. Default \code{0.5}.}
+\item{threshold_worst}{Positive number. The worst-case Bayes factor must
+be above this value for the rule to set the rival aside. Default \code{1}.}
 }
 \value{
-For \code{"uniform_weights"}, \code{"binomial"}, and \code{"urn"}, a list
-with elements:
+A list with elements
 \describe{
-\item{\code{bf}}{Bayes factor at the observed coding.}
-\item{\code{x_star}}{Smallest integer \code{x >= 0} re-codings at which the
-Bayes factor drops below \code{threshold}. \code{0} if it is already below
-\code{threshold} at the observed coding; \code{NA_integer_} if no
-re-coding in \verb{[0, y_W]} with a defined Bayes factor drops it
-below \code{threshold}.}
+\item{\code{bf_uniform}, \code{bf_worst}}{The two Bayes factors at the
+observed coding.}
+\item{\code{x_uniform}}{The smallest number of re-codings at which the
+uniform-weights value falls below \code{threshold_uniform}.}
+\item{\code{x_worst}}{The smallest number of re-codings at which the
+worst-case value falls to \code{threshold_worst} or below.}
+\item{\code{x_star}}{The smaller of the two.}
 }
-For \code{"worst_case"}, a list with elements:
-\describe{
-\item{\code{bf}}{Worst-case Bayes factor at the observed coding.}
-\item{\code{recoding}}{A data frame with one row per re-coding and
-columns \code{x} (re-codings), \code{y_W} and \code{y_R} (the counts after
-them), \code{bf} (the worst-case Bayes factor there), and \code{g_star}
-(the separation at which the two-share version reaches
-\code{threshold}, \code{NA} once the counts no longer favor the working
-theory).}
-}
+A tipping point is \code{NA} when no re-coding of the \code{y_W} observations
+makes its condition fail.
 }
 \description{
-A peer cannot re-read every document the way the original researcher
-did, so the coding of any one piece of evidence can be disputed but
-not settled at a distance. What can be computed is how much re-coding
-it would take to change what the researcher reports. Re-coding \code{x}
-observations relabels \code{x} items that supported the working theory as
-supporting the rival, moving the counts from \verb{(y_W, y_R)} to
-\verb{(y_W - x, y_R + x)}. The number of observations does not change; only
-the split does.
+A peer cannot re-read every document the way the researcher did, so the
+coding of any one observation can be disputed but not settled at a
+distance. What a peer can compute is how many re-codings would change
+the decision. Re-coding \code{x} observations relabels \code{x} observations that
+supported the working theory as supporting the rival, moving the counts
+from \verb{(y_W, y_R)} to \verb{(y_W - x, y_R + x)}. The number of observations
+does not change; only the split does.
 }
 \details{
-The two Bayes factors in this package answer that question
-differently, so this function returns different things for them.
+The paper's rule sets the rival aside, at least provisionally, when the
+uniform-weights Bayes factor is 20 or more and the worst-case Bayes
+factor is above 1. This function returns the smallest number of
+re-codings at which each condition fails and the smaller of the two,
+which is the number the supplement reports. At nine observations for
+the working theory and three for the rival, one re-coding takes the
+uniform-weights value from 20.67 to 6.49, below 20, while the worst-case
+value falls to 1 or below only after two (1.10 at eight of twelve, 0.56
+at seven). So one re-coding changes the decision. The conclusion
+tolerates so little re-coding because the uniform-weights value starts
+so close to 20.
+
+Re-coding lowers both Bayes factors, so every re-coding past the first
+one at which a condition fails also fails it. A tipping point of \code{0}
+means the condition already fails at the observed coding.
 }
-\section{What re-coding does to the uniform-weights Bayes factor}{
-
-\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} averages over the rival's whole range of
-shares, and at the running example it sits at 20.67, just above a
-threshold of 20. So the question a peer asks has an answer in whole
-re-codings: how many would it take to bring the value below the
-threshold? The function returns that number as \code{x_star}. At nine
-observations against three it is one, and the conclusion tolerates so
-little re-coding precisely because the value started so close to the
-threshold. If the value is already below the threshold at the observed
-coding, \code{x_star} is \code{0}.
-}
-
-\section{What re-coding does to the worst-case Bayes factor}{
-
-\code{\link[=bf_worst_case]{bf_worst_case()}} hands the rival her best single share, so at the
-same counts it reports 2.73, which was never above 20. Re-coding
-cannot overturn a conclusion the researcher did not draw. What it
-moves is the separation she reports beside the value: how far apart
-the two theories' claims would have to be before her counts reach her
-threshold (\code{\link[=separation_g]{separation_g()}}). Each re-coding narrows the margin
-between the counts by two, so the required separation grows quickly.
-The function returns one row per re-coding rather than a tipping
-point. At nine observations against three the separation runs from
-0.123 at the agreed coding to 0.179 after one re-coding and 0.318
-after two, and after three the counts are even and no separation
-reaches a threshold above one.
-
-Rows run from the observed coding up to the first re-coding at which
-the counts stop favoring the working theory, because past that point
-the coding error a peer would be proposing has changed direction.
-}
-
-\section{The superseded urn model}{
-
-\code{model = "urn"} recomputes \code{\link[=bf_urn]{bf_urn()}} and returns a tipping point in
-the same shape as the uniform-weights branch. The paper no longer uses
-that model; the option is kept because the first arXiv version cites
-it. Re-coding eventually shrinks the rival-favorable urn below the
-sample size, where \code{\link[=bf_urn]{bf_urn()}} is undefined and returns \code{NA}; those
-re-codings are skipped rather than counted as a crossing, so an
-undefined value never masquerades as a tipping point.
-}
-
 \examples{
-# The paper's running example. One re-coding takes the uniform-weights
-# Bayes factor below 20.
-sens_coding(9, 3)$x_star
+# The paper's running example.
+sens_coding(9, 3)
 
-# The same counts under the worst-case Bayes factor, which was never
-# above 20: what re-coding moves is the separation she reports.
-sens_coding(9, 3, model = "worst_case")$recoding
+# Winward's fourteen of seventeen: two re-codings change the decision.
+sens_coding(14, 3)$x_star
 
 }
 \seealso{
-\code{\link[=sens_binomial]{sens_binomial()}} for observation-bias and prior
-sensitivity; \code{\link[=bf_uniform_weights]{bf_uniform_weights()}}, \code{\link[=bf_worst_case]{bf_worst_case()}}, and
-\code{\link[=separation_g]{separation_g()}} for the quantities recomputed here.
+\code{\link[=sens_bias]{sens_bias()}} for sensitivity to a biased search;
+\code{\link[=bf_uniform_weights]{bf_uniform_weights()}} and \code{\link[=bf_worst_case]{bf_worst_case()}} for the values recomputed
+here.
 }

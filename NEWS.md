@@ -1,3 +1,43 @@
+# DrWrinch 0.0.2.1
+
+Under the paper's rule, a researcher now sets the rival aside, at least
+provisionally, when the uniform-weights Bayes factor is 20 or more and
+the worst-case Bayes factor is above 1. This release follows the rule,
+and it drops every function the paper no longer uses rather than
+deprecating it, since no one else uses the package yet.
+
+* Added `sens_bias()`, which returns the search bias at which each
+  condition of the rule fails and the smaller of the two, the paper's
+  omega-star: 1.01 at nine observations for the working theory and three
+  for the rival, and 2.33 with the smoking-gun memo counted as ten.
+* `sens_coding()` now returns the number of re-codings at which each
+  condition fails and the smaller of the two. Its `model`, `threshold`,
+  and `theta_cut` arguments are gone; `threshold_uniform` and
+  `threshold_worst` replace `threshold`.
+* `bf_worst_case()` gains `omega`, for a biased search, and `a1, b1`, for
+  a Beta distribution rescaled onto the working theory's shares. Under
+  bias the denominator is the largest probability any of the rival's
+  shares can give the counts. Up to a bias of `y_W / y_R` that is the
+  probability at a share of one half; past it the rival's most favorable
+  share is below one half, and holding the rival at one half would
+  overstate the worst case (0.28 rather than 0.21 at nine of twelve and a
+  bias of 5).
+* Added `bf_uniform_weights_finite()` and `bf_worst_case_finite()`, both
+  Bayes factors for documents read without replacement from an archive of
+  known size, from the supplement's section "Finite evidence without
+  replacement".
+* `bf_uniform_weights()` now rejects counts that are not whole numbers,
+  as `bf_worst_case()` already did.
+* Removed `bf_binomial()` (with its whole-interval Beta prior and
+  cutpoint), `sens_binomial()` (with `M_star`), `bf_urn()`, `sens_urn()`,
+  `bf_separated()`, `separation_g()`, and `bf_separated_bias()`. The paper
+  no longer uses any of them. `BiasedUrn`, which only `bf_urn()` needed,
+  is no longer imported.
+* The tests pin Hammoud-Gallego and Freier at their re-coded counts, 11
+  and 2, and every number the paper's applications table prints.
+* Help pages, README, and vignette describe the rule, and no longer use
+  gendered pronouns for the researcher or the rival.
+
 # DrWrinch 0.0.2.0
 
 * Added `bf_worst_case()`, `bf_separated()`, `separation_g()`, and

@@ -1,17 +1,14 @@
-# ui.R -- one model, two Bayes factors.
+# ui.R -- one model, two Bayes factors, and the paper's rule.
 #
-# The Result tab puts the two Bayes factors side by side rather than in
-# separate tabs, because the point of the paper is that they come from
-# the same model and differ only in how they treat the rival's range of
-# shares. Under them sits the picture that shows where both come from.
+# The Result tab opens with what the paper's rule decides at the
+# reader's counts: the rival is set aside, at least provisionally, when
+# the uniform-weights Bayes factor is at least 20 and the worst-case
+# Bayes factor is above 1. Under that sit the two Bayes factors side by
+# side, because they come from the same model and differ only in how
+# they treat the rival's range of shares, and under them the picture
+# that shows where both come from.
 #
-# The sidebar carries only the two counts and the threshold. Earlier
-# versions offered a cutpoint and a Beta prior on the whole interval;
-# both are gone. The cutpoint applies to only one of the two Bayes
-# factors, so moving it would leave the two cards showing numbers that
-# cannot be compared, and the whole-interval prior makes the reported
-# quantity the posterior odds rather than a Bayes factor. A reader who
-# wants either can call bf_binomial() or bf_rescaled() directly.
+# The sidebar carries the two counts and the rule's two thresholds.
 
 bslib::page_sidebar(
   title = "DrWrinch: Bayes factors for process tracing",
@@ -40,16 +37,27 @@ bslib::page_sidebar(
       value = 3, min = 0, step = 1
     ),
     numericInput(
-      "threshold",
-      "The value at which you would set the rival aside",
-      value = 20, min = 1e-6, step = 1
+      "threshold_uniform",
+      "Smallest uniform-weights Bayes factor at which to set the rival aside",
+      # min = 0 rather than a tiny positive number: the browser counts a
+      # value valid only if it is min plus a whole number of steps, so a
+      # min of 1e-6 marked the default of 20 as invalid. The server
+      # rejects zero itself.
+      value = 20, min = 0, step = 1
+    ),
+    numericInput(
+      "threshold_worst",
+      "Value the worst-case Bayes factor must be above",
+      value = 1, min = 0, step = 0.5
     ),
     tags$p(
       class = "text-muted small",
       "Both Bayes factors come from one model: each observation ",
       "supports the working theory with probability theta, the share ",
       "of the evidence that supports it. The working theory claims a ",
-      "share above one half and the rival a share at or below it."
+      "share above one half and the rival a share at or below it. The ",
+      "paper's rule sets the rival aside when the uniform-weights Bayes ",
+      "factor is at least 20 and the worst-case Bayes factor is above 1."
     )
   ),
 
@@ -67,6 +75,10 @@ bslib::page_sidebar(
 
     bslib::nav_panel(
       title = "Result",
+      bslib::card(
+        bslib::card_header("The paper's rule"),
+        uiOutput("rule_text")
+      ),
       bslib::layout_columns(
         col_widths = c(6, 6),
         bslib::card(
@@ -74,7 +86,7 @@ bslib::page_sidebar(
           uiOutput("result_uniform")
         ),
         bslib::card(
-          bslib::card_header("Granting the rival her best single share"),
+          bslib::card_header("The rival at its most favorable share"),
           uiOutput("result_worst_case")
         )
       ),
@@ -88,8 +100,7 @@ bslib::page_sidebar(
     bslib::nav_panel(
       title = "Sensitivity",
       uiOutput("tipping_text"),
-      plotly::plotlyOutput("plot_omega", height = "360px"),
-      plotly::plotlyOutput("plot_M", height = "320px")
+      plotly::plotlyOutput("plot_omega", height = "420px")
     ),
 
     bslib::nav_panel(

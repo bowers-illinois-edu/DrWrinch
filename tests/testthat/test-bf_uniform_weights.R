@@ -1,153 +1,158 @@
-# Substantive tests for bf_uniform_weights, and for what bf_binomial
-# keeps that the new name does not.
+# Substantive tests for bf_uniform_weights().
 #
 # One model underlies both Bayes factors in this package: each
 # observation supports the working theory with probability theta, the
 # share of the evidence that supports it; the working theory claims
 # theta > 1/2 and the rival claims theta <= 1/2. Both Bayes factors
 # share a numerator, the binomial probability of the counts averaged
-# over the shares above one half. bf_uniform_weights() spreads the
-# rival's claim evenly over every share at or below one half;
-# bf_worst_case() instead hands her the single share, one half, that
-# fits the counts best.
+# over the shares above one half under uniform weights.
+# bf_uniform_weights() also averages over the rival's whole range under
+# uniform weights; bf_worst_case() instead evaluates the rival at the
+# single share, one half, that fits the counts best.
 #
-# bf_binomial() is the earlier name for the same number. It survives
-# because it carries something bf_uniform_weights() deliberately does
-# not: a Beta prior on the whole interval from zero to one. That path
-# is what sens_binomial()'s M_star analysis uses, and the last block of
-# this file pins the reason the two cannot be merged.
-
-test_that("bf_uniform_weights and bf_binomial return the same number", {
-  # The rename adds no mathematics. Pinning the equality over a grid is
-  # what lets test-applications.R keep testing the published values
-  # through the old name without duplicating them here.
-  for (y_W in c(0, 1, 7, 9, 12, 14, 18)) {
-    for (y_R in c(0, 2, 3, 4, 5)) {
-      expect_equal(bf_uniform_weights(y_W, y_R), bf_binomial(y_W, y_R),
-                   tolerance = 1e-12,
-                   info = sprintf("y_W = %d, y_R = %d", y_W, y_R))
-    }
-  }
-})
-
-test_that("the equality survives a biased search", {
-  # omega is the odds by which the search favored surfacing evidence for
-  # the working theory. Both functions route it the same way, including
-  # through the numerical-integration branch that omega != 1 triggers.
-  for (om in c(0.5, 0.8, 1, 1.5, 3)) {
-    expect_equal(bf_uniform_weights(9, 3, omega = om),
-                 bf_binomial(9, 3, omega = om),
-                 tolerance = 1e-10, info = sprintf("omega = %g", om))
-  }
-})
+# Sources: Paper/evalues.qmd (sec-two-bfs, sec-decide and its
+# avg-error footnote, sec-sensitivity) and Paper/appendix.qmd
+# (thm-closed-form, sec-sens-bias).
 
 test_that("the running example gives 20.67", {
   # Nine observations support the working theory and three the rival.
-  # Under uniform weights on each side the value has a closed form: the
-  # posterior mass above one half against the mass at or below it, under
-  # a uniform prior, which is a Beta(y_W + 1, y_R + 1) posterior.
+  # Under uniform weights the ratio of the two averages equals the
+  # posterior mass above one half over the mass at or below it under a
+  # Beta(y_W + 1, y_R + 1) posterior, because the equal weights on the
+  # two equally wide halves cancel.
   p_below <- stats::pbeta(0.5, 9 + 1, 3 + 1)
   expect_equal(bf_uniform_weights(9, 3), (1 - p_below) / p_below,
                tolerance = 1e-12)
   expect_equal(round(bf_uniform_weights(9, 3), 2), 20.67)
 })
 
-test_that("weighting Pavone's letter reproduces the paper's weighted counts", {
-  # Weights on observations act as replication: a document the
-  # researcher weights at ten enters as ten observations. Pavone and
-  # Stiansen's agreed counts (7, 4) do not reach 20, and the paper
-  # reports what weighting the smoking-gun letter does to that.
-  expect_equal(round(bf_uniform_weights(18, 3), 0), 2337)
+test_that("the value equals the ratio of the two averaged probabilities", {
+  # The definition the paper prints: the binomial probability of the
+  # counts averaged over (1/2, 1] divided by the same probability
+  # averaged over [0, 1/2]. The two numbers the main paper quotes at
+  # nine of twelve are the two averages themselves.
+  for (n in c(1, 5, 12, 21)) {
+    for (k in 0:n) {
+      num <- 2 * stats::integrate(function(t) stats::dbinom(k, n, t),
+                                  0.5, 1)$value
+      den <- 2 * stats::integrate(function(t) stats::dbinom(k, n, t),
+                                  0, 0.5)$value
+      expect_equal(bf_uniform_weights(k, n - k), num / den, tolerance = 1e-8,
+                   info = sprintf("y_W = %d, N = %d", k, n))
+    }
+  }
+  num_9 <- 2 * stats::integrate(function(t) stats::dbinom(9, 12, t),
+                                0.5, 1)$value
+  den_9 <- 2 * stats::integrate(function(t) stats::dbinom(9, 12, t),
+                                0, 0.5)$value
+  expect_equal(round(num_9, 5), 0.14675)
+  expect_equal(round(den_9, 5), 0.00710)
 })
 
-test_that("a biased search lowers the value and an unbiased one is the default", {
-  # Granting that the search was more likely to surface evidence for the
-  # working theory concedes that part of the counts' dominance came from
-  # how the researcher looked, so the value falls.
-  expect_lt(bf_uniform_weights(9, 3, omega = 2), bf_uniform_weights(9, 3))
-  expect_gt(bf_uniform_weights(9, 3, omega = 0.5), bf_uniform_weights(9, 3))
-  expect_equal(bf_uniform_weights(9, 3, omega = 1), bf_uniform_weights(9, 3),
-               tolerance = 1e-6)
+test_that("the closed form of the supplement holds at every count", {
+  # The supplement's thm-closed-form lets a reader compute the value by
+  # hand from whole numbers: with S the sum of choose(N + 1, j) for j
+  # from 0 to k, the uniform-weights Bayes factor is S / (2^(N+1) - S).
+  for (n in c(1, 4, 12, 17)) {
+    for (k in 0:n) {
+      S <- sum(choose(n + 1, 0:k))
+      expect_equal(bf_uniform_weights(k, n - k), S / (2^(n + 1) - S),
+                   tolerance = 1e-10, info = sprintf("y_W = %d, N = %d", k, n))
+    }
+  }
+})
+
+test_that("equal counts give exactly one", {
+  # With as many observations on each side, the probability of the
+  # counts at a share theta equals its probability at 1 - theta, so the
+  # two averages are equal and the counts favor neither theory.
+  for (n in c(1, 3, 6, 20)) {
+    expect_equal(bf_uniform_weights(n, n), 1, tolerance = 1e-12)
+  }
+})
+
+test_that("weighting the memo at ten gives 2,337", {
+  # Weights on observations act as replication: the memo weighted at ten
+  # enters as ten observations, so the weighted counts are 8 + 10 = 18
+  # and 3.
+  expect_equal(round(bf_uniform_weights(18, 3)), 2337)
+})
+
+test_that("the value averages exactly one when the rival's uniform weights hold", {
+  # The avg-error footnote of the main paper. If every share from zero
+  # to one half is equally likely, the probability of a count is the
+  # denominator of the Bayes factor at that count, so in the average of
+  # the Bayes factor over counts each weight cancels its denominator and
+  # what remains is the sum of the numerators, which is one. A
+  # nonnegative quantity that averages one reaches 20 at most one time
+  # in twenty.
+  p_rival <- vapply(0:12, function(k) 2 * stats::integrate(
+    function(t) stats::dbinom(k, 12, t), 0, 0.5)$value, numeric(1))
+  bf <- vapply(0:12, function(k) bf_uniform_weights(k, 12 - k), numeric(1))
+  expect_equal(sum(p_rival * bf), 1, tolerance = 1e-8)
+  # With twelve observations the value is 20 or more exactly at nine or
+  # more, and under those weights that happens with probability 0.009.
+  expect_equal(bf >= 20, 0:12 >= 9)
+  expect_equal(round(sum(p_rival[10:13]), 3), 0.009)
+  # At a share of exactly one half the same rule fires with probability
+  # 299 / 4096 = 0.073, so the limit holds on average over the shares,
+  # not at every share.
+  expect_equal(round(sum(stats::dbinom(9:12, 12, 0.5)), 3), 0.073)
+})
+
+test_that("a biased search tilts the share and lowers the value", {
+  # A search omega times as likely to find a pro-working-theory
+  # observation turns a share theta into q = omega theta / (omega theta
+  # + 1 - theta) among the observations found. The supplement's formula
+  # replaces theta by q inside the binomial probability and keeps the
+  # uniform weights on theta.
+  tilt <- function(t, om) om * t / (om * t + 1 - t)
+  for (om in c(0.5, 1.5, 2, 5)) {
+    num <- stats::integrate(function(t) stats::dbinom(9, 12, tilt(t, om)),
+                            0.5, 1)$value
+    den <- stats::integrate(function(t) stats::dbinom(9, 12, tilt(t, om)),
+                            0, 0.5)$value
+    expect_equal(bf_uniform_weights(9, 3, omega = om), num / den,
+                 tolerance = 1e-8, info = sprintf("omega = %g", om))
+  }
+  # Conceding that the search favored the working theory concedes that
+  # part of the counts' dominance came from how the researcher looked.
+  oms <- c(0.5, 1, 1.5, 2, 3, 5)
+  vals <- vapply(oms, function(o) bf_uniform_weights(9, 3, omega = o),
+                 numeric(1))
+  expect_true(all(diff(vals) < 0))
+  # The value the replications' sensitivity tables print at omega = 2.
+  expect_equal(bf_uniform_weights(9, 3, omega = 2), 2.85481299,
+               tolerance = 1e-7)
+})
+
+test_that("the closed form and the integral agree at omega = 1", {
+  # omega = 1 takes the closed-form branch; any other value integrates.
+  # A value of omega next to one must give nearly the same number, or
+  # the two branches compute different things.
+  for (y in list(c(2, 1), c(9, 3), c(14, 3), c(18, 3))) {
+    expect_equal(bf_uniform_weights(y[1], y[2], omega = 1 + 1e-9),
+                 bf_uniform_weights(y[1], y[2]), tolerance = 1e-6)
+  }
+})
+
+test_that("the function offers no weights on theta and no cutpoint", {
+  # The uniform-weights Bayes factor has nothing to set but the bias.
+  # Weights stated within each range go through bf_rescaled(). A single
+  # Beta density over the whole interval would also set the prior odds
+  # on the two theories, so its ratio of posterior masses is posterior
+  # odds and not a Bayes factor; the paper uses only rescaled pairs.
+  expect_identical(names(formals(bf_uniform_weights)),
+                   c("y_W", "y_R", "omega"))
 })
 
 test_that("input validation rejects nonsense", {
+  # Weights are whole numbers in the paper, so counts are too. A
+  # fractional count would otherwise return a number for a coding no
+  # researcher could have made.
   expect_error(bf_uniform_weights(-1, 3))
   expect_error(bf_uniform_weights(3, -1))
+  expect_error(bf_uniform_weights(9.5, 3))
+  expect_error(bf_uniform_weights(c(9, 10), 3))
   expect_error(bf_uniform_weights(9, 3, omega = 0))
-})
-
-test_that("bf_binomial with a tilted prior returns posterior odds, not a Bayes factor", {
-  # This is why bf_binomial() survives the rename rather than becoming a
-  # plain alias, and it is the distinction the supplement's
-  # prior-sensitivity table is built to show.
-  #
-  # Put a Beta(alpha, beta) prior on the whole interval from zero to
-  # one. It does two things at once. It says how the researcher spreads
-  # her weight within each theory's range, and it also says how much
-  # weight she gives each theory: the mass above one half, call it pi_1,
-  # sets the prior odds pi_1 / (1 - pi_1). The Bayes factor divides the
-  # averaged likelihood under each theory after renormalizing the prior
-  # to that theory's range, so the prior odds cancel out of it. The
-  # posterior odds are the prior odds times the Bayes factor. Under the
-  # uniform prior the mass is split evenly, the prior odds are one, and
-  # the two objects coincide --- which is a fact about that prior, not a
-  # definition.
-  #
-  # A Beta(1, M + 1) prior reads as M background cases all favoring the
-  # rival. bf_binomial() returns the posterior odds under it. The two
-  # columns move in opposite directions as M grows: tilting toward the
-  # rival commits her to shares near zero, under which nine of twelve is
-  # more surprising still, so the Bayes factor rises; but the same tilt
-  # lowers the prior odds by more, so the posterior odds fall.
-  three_objects <- function(alpha, beta, y_W = 9, y_R = 3) {
-    n <- y_W + y_R
-    lik <- function(t) stats::dbinom(y_W, n, t)
-    num <- stats::integrate(
-      function(t) lik(t) * stats::dbeta(t, alpha, beta), 0.5, 1)$value
-    den <- stats::integrate(
-      function(t) lik(t) * stats::dbeta(t, alpha, beta), 0, 0.5)$value
-    pi_1 <- 1 - stats::pbeta(0.5, alpha, beta)
-    c(prior_odds = pi_1 / (1 - pi_1),
-      bayes_factor = (num / pi_1) / (den / (1 - pi_1)),
-      posterior_odds = num / den)
-  }
-  tab <- t(vapply(0:4, function(M) three_objects(1, M + 1), numeric(3)))
-
-  # The identity that ties the three columns together.
-  expect_equal(unname(tab[, "posterior_odds"]),
-               unname(tab[, "prior_odds"] * tab[, "bayes_factor"]),
-               tolerance = 1e-9)
-  # bf_binomial()'s prior path reproduces the posterior-odds column at
-  # every M, and NOT the Bayes-factor column.
-  from_package <- vapply(0:4,
-                         function(M) bf_binomial(9, 3, prior_a = 1,
-                                                 prior_b = M + 1),
-                         numeric(1))
-  expect_equal(from_package, unname(tab[, "posterior_odds"]),
-               tolerance = 1e-8)
-  # The two rows the supplement's prose quotes: one background case
-  # against the working theory sends the posterior odds to 10.14, below
-  # 20, while raising the Bayes factor to 30.41.
-  expect_equal(round(from_package[2], 2), 10.14)
-  expect_equal(round(unname(tab[2, "bayes_factor"]), 2), 30.41)
-  # They separate everywhere except at the uniform prior.
-  expect_equal(from_package[1], unname(tab[1, "bayes_factor"]),
-               tolerance = 1e-8)
-  expect_true(all(from_package[-1] < tab[-1, "bayes_factor"]))
-  # And they move in opposite directions as the prior tilts.
-  expect_true(all(diff(from_package) < 0))
-  expect_true(all(diff(tab[, "bayes_factor"]) > 0))
-})
-
-test_that("bf_uniform_weights offers no whole-interval prior arguments", {
-  # The headline function is the paper's object: uniform weight within
-  # each theory's range, nothing to set. A reader who wants other
-  # weights states them within each range through bf_rescaled(); a
-  # reader who wants the whole-interval prior of the sensitivity table
-  # calls bf_binomial(). Keeping the arguments apart keeps the two
-  # families from being mistaken for one, since they agree only at the
-  # uniform.
-  expect_false(any(c("prior_a", "prior_b") %in%
-                     names(formals(bf_uniform_weights))))
-  expect_error(bf_uniform_weights(9, 3, prior_a = 1, prior_b = 2))
 })

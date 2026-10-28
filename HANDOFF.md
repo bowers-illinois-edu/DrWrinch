@@ -1,178 +1,91 @@
+---
+next: Jake decides whether to commit, push, and redeploy DrWrinch 0.0.2.1 (everything is uncommitted; devtools::check() reports 0 errors, 0 warnings, 0 notes; push before redeploying, because the app installs DrWrinch from GitHub). Then make the paper edits listed in PLAN_decision_rule.md under "What the paper repository has to change once DrWrinch 0.0.2.1 is on GitHub".
+kind: code
+project_kind: R package
+milestone: the paper and its appendix built on DrWrinch 0.0.2.1 from GitHub
+sessions_to_milestone: 2
+blocked_on:
+estimated_by: backfill 2026-10-25
+---
+
 # HANDOFF for DrWrinch
 
-Last touched: 2026-08-29 (one-model rewrite, tasks 1-7 of
-`PLAN_one_model_two_bfs.md`). Pick up from here in a fresh Claude session
-run from `~/repos/DrWrinch/`, and read `PLAN_one_model_two_bfs.md` next:
-only task 8 is still open, and it belongs to a session in the paper repository.
-
-2026-08-29 session, in brief: the paper dropped the hypergeometric urn
-and now has one model with two Bayes factors computed from it, so this
-session added the second one. New: `bf_worst_case()`, `bf_separated()`,
-`separation_g()`, `bf_separated_bias()` (`R/bf_worst_case.R`);
-`bf_uniform_weights()` beside `bf_binomial()` in `R/bf_binomial.R`; and
-`bf_rescaled()` (`R/bf_rescaled.R`) for weights the researcher states
-within each theory's range. `sens_coding()` now takes
-`model = "uniform_weights"` or `"worst_case"` and returns the
-supplement's recoding table for the second; `bf_urn()` and `sens_urn()`
-are deprecated but unchanged, warning once per session through
-`.deprecate_once()` in `R/deprecated.R`. The Shiny app shows the two
-Bayes factors side by side over the three-bar picture of where they come
-from and no longer offers the urn, a cutpoint, or a whole-interval Beta
-prior; its data functions moved to `inst/shiny/R/curves.R`. README, the
-package roxygen, DESCRIPTION, and the vignette are rewritten for one
-model. Version bumped to `0.0.2.0`; `devtools::check()` clean; 1391
-tests pass. Nothing is committed. Version left at `0.0.1.9001`, to be bumped
-before the next push.
-
-Two things a later session must not have to remember on its own. First,
-`bf_binomial()` returns posterior odds, not a Bayes factor, under any
-prior but the uniform, and its roxygen used to say otherwise; the fix is
-in the help page, in `NEWS.md`, and pinned by
-`tests/testthat/test-bf_uniform_weights.R`, but `sens_binomial()`'s
-`M_star` roxygen now carries the same correction. Second, the name
-collision between the package's `bf_rescaled()` and the paper's own is
-already resolved: the paper repository renamed its local one to
-`bf_count_rescaled()` in commit `1dd4ec1`. Task 8 is now just the switch
-from `source(here::here("tests/..."))` to `library(DrWrinch)` in
-`Paper/evalues.qmd` and `Paper/appendix.qmd`, plus `renv.lock`. Third, `vignettes/getting-started.Rmd` still teaches two
-probability models and calls the deprecated urn functions, so task 7 has
-to rewrite it as well as the README.
-
-2026-06-22 session, in brief: the paper was submitted to APSR
-(2026-06-15) and posted to arXiv (arXiv:2606.16683) with the running
-example changed from `(y_W = 7, y_R = 3)` to `(9, 3)`. This session:
-(a) refreshed the running example everywhere in the package to `(9, 3)`
---- binomial BF 20.67 (just above 20), urn BF 323; (b) added the
-exported `sens_coding()` for the paper's third sensitivity question
-(coding error), surfaced in the Shiny Sensitivity tab; (c) added
-`test-applications.R`, real-data regression tests pinning the six
-published studies' counts; (d) fixed a shinyapps deploy failure (see
-Lessons) and verified the live app's Sensitivity tab in-browser; and
-(e) integrated `sens_coding()` into the paper repo --- the appendix
-demos and lists it, and the running example plus all six application
-analyses now cross-check every reported Bayes factor against DrWrinch
-via `stopifnot`. Version `0.0.1.9001`; `inst/CITATION` points to the
-arXiv preprint; `devtools::check()` clean; 266 tests pass. All DrWrinch
-and paper changes are committed and pushed. Nothing left in progress.
+Last touched: 2026-10-27. Read `PLAN_decision_rule.md` next. It records
+what changed in the paper between 2026-08-29 and 2026-10-19, the four
+choices Jake made on 2026-10-27, the tests written before the code, and
+the edits the paper repository needs once this version is on GitHub.
 
 ## What DrWrinch is
 
 The R package implementing Lopez, Bowers, and Gajardo Cooper (2026),
-"Fully specified Bayes factors for process tracing." Named after
-Dorothy Maud Wrinch (1894--1976; joint papers with Harold Jeffreys
-in the early 1920s developed the framework that later became
-Jeffreys's theory of Bayes factors).
+"Fully specified Bayes factors for process tracing." The paper is in
+`~/repos/fully_specified_bf` and is the source of truth for notation and
+methods. Named after Dorothy Maud Wrinch (1894--1976), whose joint papers
+with Harold Jeffreys developed the framework that became Jeffreys's theory
+of Bayes factors. The companion package `DrBristol` (`~/repos/DrBristol`)
+implements p-value methods for the same problems; the two stay separate.
 
-Companion package `DrBristol` (at `~/repos/DrBristol`) implements
-p-value methods for the same class of problems. DrBristol is mature,
-GitHub-only, named after Muriel Bristol; DrWrinch is its
-Bayes-factor sibling. Do not merge the two.
+## State of the package, 2026-10-27
 
-The paper lives at `~/repos/fully_specified_bf`. Treat the paper as
-the source of truth for notation and methodology; DrWrinch is the
-companion code. Integration of DrWrinch into the paper is
-**appendix-only** --- see the project memory at
-`~/.claude/projects/-Users-jwbowers-repos-fully-specified-bf/memory/project_drwrinch_paper_integration.md`.
+Version 0.0.2.1, uncommitted. `devtools::test()` passes 134 tests (1101
+expectations) with no warnings, and `devtools::check()` reports 0 errors,
+0 warnings, 0 notes. The local app was run in a browser: both tabs render,
+and the only console error is the missing favicon.
 
-## Current public surface (2026-06-22)
+The paper's rule sets the rival aside, at least provisionally, when the
+uniform-weights Bayes factor is 20 or more and the worst-case Bayes factor
+is above 1. The exported functions follow it:
 
-- **GitHub**: https://github.com/bowers-illinois-edu/DrWrinch
-  (public, in the `bowers-illinois-edu` org). `main` is at version
-  `0.0.1.9001`.
-- **pkgdown site**: https://bowers-illinois-edu.github.io/DrWrinch/
-  (built from `gh-pages` via the pkgdown.yaml workflow on every push
-  to `main`).
-- **Shiny app**: https://jakebowers.shinyapps.io/drwrinch/ (deployed
-  via `deploy.R` at the repo root; rsconnect targets `appName =
-  "drwrinch"` on the `jakebowers` shinyapps.io account).
-- **GitHub Actions**: R-CMD-check passes across macOS-release,
-  Windows-release, Ubuntu oldrel-1 / release / devel. The pkgdown
-  workflow auto-deploys on every push to `main`.
+- `bf_uniform_weights(y_W, y_R, omega)`, in `R/bf_uniform_weights.R`.
+- `bf_worst_case(y_W, y_R, omega, a1, b1)`, in `R/bf_worst_case.R`. Under
+  bias it divides by the largest probability any rival share gives the
+  counts, which moves below a share of one half once `omega > y_W / y_R`
+  (Jake's decision of 2026-10-27; the paper's five affected table cells
+  are to be recomputed to match). When `y_W < y_R` the rival stays at one
+  half, as in the paper's closed form.
+- `bf_rescaled()`, in `R/bf_rescaled.R`.
+- `bf_uniform_weights_finite()` and `bf_worst_case_finite()`, in
+  `R/bf_finite.R`, for an archive of known size.
+- `sens_bias()` and `sens_coding()`, in `R/sens_bias.R` and
+  `R/sens_coding.R`. Each returns the tipping point for each condition of
+  the rule and the smaller of the two.
+- `run_app()`, in `R/run_app.R`.
 
-CRAN is on hold indefinitely (per Decision F of `PLAN_SHINY.md`); the
-release path is GitHub plus pkgdown plus shinyapps.io, mirroring
-DrBristol.
+Removed in this version, without deprecation because no one else uses the
+package: `bf_binomial()`, `bf_urn()`, `sens_urn()`, `sens_binomial()`,
+`bf_separated()`, `separation_g()`, `bf_separated_bias()`, and the
+deprecation helper. `BiasedUrn`, `ggplot2`, and `dplyr` left DESCRIPTION.
 
-## Current state of the package
+The Shiny app (`inst/shiny/`) takes two thresholds, opens the Result tab
+with what the rule decides, and on the Sensitivity tab reports the coding
+and bias tipping points under the rule beside one plot of both Bayes
+factors against the bias. `.dw_needed` in `inst/shiny/global.R` is
+0.0.2.1.
 
-Version `0.0.1.9001`. `devtools::test()` passes 266/266 locally and
-in CI. `devtools::check()` is clean (0 errors, 0 warnings, 0 notes).
+## Public surface
 
-Exported functions: `bf_binomial`, `bf_urn`, `sens_binomial`,
-`sens_urn`, `sens_coding`, `run_app`.
+- GitHub: https://github.com/bowers-illinois-edu/DrWrinch, `main` at
+  0.0.2.0 until this version is pushed.
+- pkgdown site: https://bowers-illinois-edu.github.io/DrWrinch/, rebuilt
+  by the pkgdown workflow on every push to `main`. `_pkgdown.yml` lists
+  the new reference index.
+- Shiny app: https://jakebowers.shinyapps.io/drwrinch/, deployed with
+  `source("deploy.R")` from the repository root. It still runs 0.0.2.0.
+- CRAN is on hold indefinitely (Decision F of `PLAN_SHINY.md`).
 
-Files of note:
+## The paper repository
 
-- `R/bf_binomial.R`, `R/bf_urn.R`, `R/sens_binomial.R`,
-  `R/sens_urn.R`, `R/sens_coding.R`, `R/utils.R` (internal
-  `.find_omega_tipping`), `R/DrWrinch-package.R`, `R/run_app.R`.
-- `inst/shiny/` --- the deployed Shiny app: `global.R`, `ui.R`,
-  `server.R`, and `R/helpers.R` + `R/plots.R` for the formatter and
-  plotly wrappers. Verdicts use the Kass & Raftery (1995) scale
-  (boundaries `1, 3, 20, 150`, upper-inclusive).
-- `tests/testthat/test-bf_binomial.R`, `test-bf_urn.R`,
-  `test-sens.R`, `test-app_helpers.R` (Layer 1 helpers + curves),
-  `test-app_server.R` (Layer 2 `shiny::testServer` for both BF
-  reactives, the urn-undefined branch, and the sensitivity-tab
-  reactives), `test-sens_coding.R` (coding-error tipping points for
-  both models, pinned to the paper's running example),
-  `test-applications.R` (real-data regression tests from the six
-  published studies reanalyzed in the paper: `bf_binomial`, `bf_urn`,
-  and `sens_coding` pinned to each study's counts).
-- `vignettes/getting-started.Rmd` (paper running example).
-- `inst/CITATION` (preprint bibentry pointing to arXiv:2606.16683;
-  add the journal DOI on publication).
-- `_pkgdown.yml` (Bootstrap 5; reference grouped Bayes factors /
-  Sensitivity / Interactive app).
-- `.github/workflows/R-CMD-check.yaml`,
-  `.github/workflows/pkgdown.yaml`.
-- `cran-comments.md` (kept for if/when CRAN comes back into scope).
-- `LICENSE`, `LICENSE.md` (MIT; copyright in paper order).
-- `NEWS.md`, `README.md`.
-- `deploy.R` at repo root (in `.Rbuildignore`). Run from the repo
-  root with `source("deploy.R")` to redeploy after changes; relies
-  on `rsconnect::setAccountInfo(...)` having been run once on this
-  machine.
+The paper still sources its own `tests/*.R`. Two cross-checks in its
+`tests/bf_weighted.R` call `DrWrinch::bf_binomial()` and
+`DrWrinch::bf_urn()`, so the paper, the supplement, and the replications
+will stop with an error as soon as the paper's renv library installs this
+version. `PLAN_decision_rule.md` lists those fixes, the supplement's
+reproduction section rewrite, the `renv.lock` update, and the five
+worst-case cells. The current arXiv preprint's reproduction section calls
+removed functions, so the next arXiv replacement is what brings the
+preprint and the package back into agreement.
 
-Authors in DESCRIPTION (paper order): Matias Lopez (aut, cph), Jake
-Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).
-
-## What this session delivered
-
-1. **Phase 1 (commit `8e8a6c1`)** --- MVP Shiny app: `run_app()`
-   launcher, `inst/shiny/{global.R, ui.R, server.R}`, helpers under
-   `inst/shiny/R/helpers.R`, Layer 1 tests for `format_bf` /
-   `bf_label` / `interpret_omega_star`, Layer 2 `testServer` tests
-   for `bf_binom` / `bf_urn_v` / the urn-undefined card branch.
-   DESCRIPTION bumped to `0.0.1.9000`; `shiny` and `bslib` added to
-   Suggests.
-2. **Phase 2 (commit `b60386a`)** --- Sensitivity tab with two
-   plotly outputs (`plot_omega`, `plot_M`) and the `tipping_text`
-   renderUI prose. New helpers: `interpret_M_star`,
-   `bf_omega_curve`, `bf_M_curve`. New file `inst/shiny/R/plots.R`
-   for the plotly wrappers. `plotly` added to Suggests and to
-   `run_app()`'s `requireNamespace` guard.
-3. **Phase 3 (commit `e582d57`)** --- Polish: `validate_counts` now
-   rejects non-integer numeric input via `x == round(x)`; About tab
-   gained Running-example, Sensitivity-glossary, and Sources
-   sections with citation and GitHub link;
-   `inst/shiny/global.R` gained an `install_github` stanza for
-   shinyapps.io cold-start; `deploy.R` at the repo root;
-   `_pkgdown.yml` gained an Interactive-app reference section;
-   `NEWS.md` gained a `0.0.1.9000` block.
-4. **Phase 4 (this commit)** --- Live deployment to
-   https://jakebowers.shinyapps.io/drwrinch/. The deploy initially
-   failed with `HTTP 401: Unauthorized` while shinyapps.io's
-   build worker tried to fetch DrWrinch from GitHub --- a stale
-   OAuth token cached on Posit's build infrastructure from a
-   previously-enabled-now-disabled GitHub linkage in Posit's
-   Authentication settings. The fix was to toggle GitHub auth back
-   on in Posit's user settings, click through the OAuth flow,
-   then toggle it back off. README.md and NEWS.md updated with the
-   live URL; the orphan `drwrinch-v2` app from a deploy retry is
-   terminated.
-
-## Lessons worth keeping
+## Deployment failures and their fixes
 
 - **Stale GITHUB_PAT in `~/.Renviron`** (commented out 2026-05-19,
   with a note pointing to https://github.com/settings/tokens for a
@@ -197,7 +110,8 @@ Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).
   `packageVersion()` --- NOT `requireNamespace()`, which loads the old
   namespace and then blocks `library()` from picking up the reinstall.
   The GitHub download and build succeed at runtime; only the install
-  *location* has to be writable. Costs ~30s per cold start. When the
+  *location* has to be writable. Each cold start spends about 30 seconds
+  on this install. When the
   required version changes, bump `.dw_needed` in `global.R`.
 - **`rsconnect` refuses to bundle locally-installed packages** that
   lack `RemoteType` metadata. Trying to dodge GitHub via a local
@@ -206,68 +120,15 @@ Bowers (cre, aut, cph), Daniel Gajardo Cooper (aut, cph).
   R-universe.
 - **The Shiny app pulls DrWrinch from GitHub on shinyapps.io cold
   start** via the `install_github` stanza in
-  `inst/shiny/global.R`. ~30s one-time install per cold start; no
-  cost in local dev where `devtools::load_all()` has already loaded
-  it.
+  `inst/shiny/global.R`, about 30 seconds per cold start. Local
+  development skips it, because `devtools::load_all()` has already
+  loaded the current version.
 
-## What is still open
+## Still open
 
-- **CRAN submission**: held indefinitely per Decision F. If
-  resumed, the work would be: revisit `cran-comments.md`, ensure
-  `R CMD check --as-cran` is clean, decide whether `\dontrun{}`
-  wrapping of `run_app()` is the right discipline for CRAN
-  examples (it is), bump version to `0.0.1`, submit.
-- **`inst/CITATION`** points to the arXiv preprint
-  (arXiv:2606.16683). Replace `howpublished` / add a DOI when the
-  journal version is published.
-- **Layer 3 `shinytest2` snapshot tests**: skipped this session
-  (heavy, fragile across OSes). Worth adding if the Shiny app's
-  UI starts drifting visually; the substantive claims are already
-  pinned at Layers 1 and 2.
-- **Posit GitHub re-link**: GitHub auth is currently disabled in
-  Posit Authentication (you toggled it off again after the OAuth
-  refresh). If you ever want to publish to Posit Cloud, you will
-  need to re-enable it.
-
-## How to resume
-
-1. Read this file. If you are about to touch the Shiny app, read
-   `PLAN_SHINY.md` too.
-2. Read `~/repos/ai_workflow/CLAUDE_CODING.md` for the user's
-   coding rules (tests-before-implementation, pause-for-review at
-   checkpoints, `devtools::check()` before complete, "why"
-   comments at branch points).
-3. Read `R/*.R`, `inst/shiny/*.R`, `inst/shiny/R/*.R`, and
-   `tests/testthat/*.R` to ground yourself.
-4. The release-path commands are:
-   - `devtools::test()`, `devtools::check()`
-   - `git push origin main` (triggers the pkgdown workflow)
-   - `source("deploy.R")` (redeploys the Shiny app; needs
-     `rsconnect::setAccountInfo()` once per machine, see
-     `deploy.R`'s comment block)
-
-## Constraints inherited from the paper repo's CLAUDE.md and memory
-
-- **No unicode.** ASCII only. `---` for em dash, `--` for en dash,
-  `->` for arrow, `"` and `'` straight quotes, `...` for ellipsis.
-- **No methodological tribalism.** Bayes factors are a tool. Do
-  not introduce "Bayesian" labels.
-- **No athletic/defense metaphors for thresholds.** BFs are
-  "above" or "below" thresholds, not "clearing" or "withstanding"
-  them.
-- **Plain language at branch points.** Avoid "is appropriate," "is
-  reasonable," structural metaphors. Name what depends on what.
-- **R package work follows `CLAUDE_CODING.md`.** Tests before
-  implementation; `check()` before complete; "why" comments at
-  branch points.
-
-## DrWrinch and the paper repo
-
-The paper repo's renv currently has DrWrinch installed locally
-(via `renv::install("local::~/repos/DrWrinch")`) so the new
-appendix section renders. The renv lockfile was not snapshotted,
-so other machines rebuilding the paper would still need to install
-DrWrinch first. With the GitHub repo published and version
-`0.0.1.9000` tagged via the commit log, the appendix's
-`install_github("bowers-illinois-edu/DrWrinch")` line resolves
-without further action.
+- `inst/CITATION` points to the arXiv preprint (arXiv:2606.16683). Add
+  the journal DOI when the paper is published.
+- The app has no `shinytest2` snapshot tests. The helpers and the reactive
+  graph are tested through `testthat` and `shiny::testServer()`.
+- GitHub authentication is switched off in Posit's settings. Publishing to
+  Posit Cloud would need it switched on again.

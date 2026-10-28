@@ -7,6 +7,12 @@
 # namespace. We source them from the install/dev path so testthat can
 # reach them whether the package is loaded by devtools::load_all() or
 # installed by R CMD check.
+#
+# The helpers turn the package's numbers into the sentences the app
+# shows. The paper's rule sets the rival aside, at least provisionally,
+# when the uniform-weights Bayes factor is 20 or more and the worst-case
+# Bayes factor is above 1, so the sentences have to say which of the two
+# conditions decides.
 
 helpers_path <- system.file("shiny/R/helpers.R", package = "DrWrinch")
 if (!nzchar(helpers_path) || !file.exists(helpers_path)) {
@@ -84,179 +90,139 @@ test_that("bf_label is symmetric across BF = 1", {
 })
 
 
-# ---- interpret_omega_star ----------------------------------------------
-
-test_that("interpret_omega_star(0) reports failure at baseline", {
-  out <- interpret_omega_star(0, threshold = 20)
-  expect_type(out, "character")
-  expect_match(out, "below threshold|already|baseline", ignore.case = TRUE)
-})
-
-test_that("interpret_omega_star(NA_real_) reports robust-to-any-bias", {
-  out <- interpret_omega_star(NA_real_, threshold = 20)
-  expect_type(out, "character")
-  expect_match(out, "robust|any.*bias", ignore.case = TRUE)
-})
-
-test_that("interpret_omega_star(1.304) yields a ~30% interpretation", {
-  out <- interpret_omega_star(1.304, threshold = 20)
-  expect_type(out, "character")
-  expect_match(out, "30", fixed = TRUE)
-  expect_match(out, "%", fixed = TRUE)
-})
-
-test_that("interpret_omega_star(1.5) yields a 50% interpretation", {
-  out <- interpret_omega_star(1.5, threshold = 20)
-  expect_match(out, "50", fixed = TRUE)
-  expect_match(out, "%", fixed = TRUE)
-})
-
-test_that("interpret_omega_star mentions the threshold it was given", {
-  out <- interpret_omega_star(1.3, threshold = 20)
-  expect_match(out, "20", fixed = TRUE)
-})
-
-
-# ---- interpret_M_star --------------------------------------------------
+# ---- interpret_rule -----------------------------------------------------
 #
-# Same three-branch pattern as interpret_omega_star, but for the
-# prior-sweep tipping point M_star from sens_binomial(). Values:
-#   0           -- baseline already below threshold (the conclusion fails
-#                  without any rival-favoring pseudo-observations).
-#   NA_integer_ -- the BF stays above threshold across the searched
-#                  prior sweep [0, M_max].
-#   positive    -- the smallest integer M at which the Beta(1, M + 1)
-#                  prior drops the BF below threshold.
+# The paper's rule sets the rival aside, at least provisionally, when the
+# uniform-weights Bayes factor is 20 or more and the worst-case Bayes
+# factor is above 1. interpret_rule() says which way the rule goes at
+# the reader's counts and, when it keeps the rival, which condition
+# failed, because the reader's next question is which number to look at.
 
-test_that("interpret_M_star(0L) reports failure at baseline", {
-  out <- interpret_M_star(0L, threshold = 20)
-  expect_type(out, "character")
-  expect_match(out, "below threshold|already|baseline", ignore.case = TRUE)
+test_that("interpret_rule says the rule sets the rival aside when both conditions hold", {
+  out <- interpret_rule(20.67, 2.73)
+  expect_match(out, "sets the rival aside", fixed = TRUE)
+  expect_no_match(out, "keeps the rival", fixed = TRUE)
 })
 
-test_that("interpret_M_star(NA_integer_) reports robust-to-prior-sweep", {
-  out <- interpret_M_star(NA_integer_, threshold = 20)
-  expect_type(out, "character")
-  expect_match(out, "robust|stays above|did not cross", ignore.case = TRUE)
+test_that("interpret_rule names the uniform-weights condition when it fails", {
+  out <- interpret_rule(4.16, 1.2)
+  expect_match(out, "keeps the rival", fixed = TRUE)
+  expect_match(out, "uniform-weights Bayes factor is below 20", fixed = TRUE)
 })
 
-test_that("interpret_M_star(14L) reports the integer count and threshold", {
-  out <- interpret_M_star(14L, threshold = 20)
-  expect_match(out, "14", fixed = TRUE)
-  expect_match(out, "20", fixed = TRUE)
+test_that("interpret_rule names the worst-case condition when only it fails", {
+  # Possible only with more than 100 observations, as at 59 of 101.
+  out <- interpret_rule(20.78, 0.98)
+  expect_match(out, "keeps the rival", fixed = TRUE)
+  expect_match(out, "worst-case Bayes factor is 1 or below", fixed = TRUE)
+  expect_no_match(out, "below 20", fixed = TRUE)
 })
 
-test_that("interpret_M_star names the posterior odds, not the Bayes factor", {
-  # What a Beta(1, M + 1) prior drops below the threshold is the
-  # posterior odds. The Bayes factor rises with M, so prose saying the
-  # Bayes factor falls would tell the reader the opposite of the truth.
-  for (m in list(0L, NA_integer_, 14L)) {
-    out <- interpret_M_star(m, threshold = 20)
-    expect_match(out, "posterior odds", ignore.case = TRUE)
-    expect_false(grepl("Bayes factor", out, fixed = TRUE))
-  }
+test_that("interpret_rule follows the thresholds it is given", {
+  # The uniform-weights condition is met at the threshold; the
+  # worst-case condition is not.
+  expect_match(interpret_rule(25, 2, threshold_uniform = 25),
+               "sets the rival aside", fixed = TRUE)
+  expect_match(interpret_rule(25, 2, threshold_worst = 2),
+               "worst-case Bayes factor is 2 or below", fixed = TRUE)
 })
 
 
-# ---- interpret_x_star --------------------------------------------------
+# ---- interpret_bias -----------------------------------------------------
 #
-# Coding-error tipping point from sens_coding(). Same three-branch
-# pattern as interpret_omega_star()/interpret_M_star():
-#   0           -- baseline already below threshold (no re-coding needed).
-#   NA_integer_ -- no re-coding within the observed counts overturns it.
-#   positive    -- the number of pro-H_1 observations that must be
-#                  re-coded as pro-rival to drop the BF below threshold.
+# interpret_bias() turns the list sens_bias() returns into a sentence.
+# Below a bias of two it reports a percentage, because "about 1 percent
+# more likely" is how a reader thinks about a small bias; from two on it
+# reports a multiple, because "233 percent more likely" is harder to
+# read than "2.33 times as likely".
 
-test_that("interpret_x_star(0L) reports failure at baseline", {
-  out <- interpret_x_star(0L, threshold = 20)
-  expect_type(out, "character")
-  expect_match(out, "below threshold|baseline|no re-coding", ignore.case = TRUE)
+sb <- function(om_u, om_w) {
+  list(bf_uniform = 30, bf_worst = 3, omega_uniform = om_u,
+       omega_worst = om_w, omega_star = suppressWarnings(min(om_u, om_w,
+                                                            na.rm = TRUE)))
+}
+
+test_that("interpret_bias reports a small bias as a percentage and names the condition", {
+  out <- interpret_bias(sb(1.0098, 1.559))
+  expect_match(out, "about 1 percent more likely", fixed = TRUE)
+  expect_match(out, "uniform-weights Bayes factor falls to 20", fixed = TRUE)
+  expect_match(out, "1.56", fixed = TRUE)
 })
 
-test_that("interpret_x_star(NA_integer_) reports robustness to re-coding", {
-  out <- interpret_x_star(NA_integer_, threshold = 20)
-  expect_type(out, "character")
-  expect_match(out, "does not|not turn", ignore.case = TRUE)
+test_that("interpret_bias reports a large bias as a multiple", {
+  out <- interpret_bias(sb(2.334, 3.236))
+  expect_match(out, "2.33 times as likely", fixed = TRUE)
 })
 
-test_that("interpret_x_star(1L) names one re-coding (singular) and the threshold", {
-  out <- interpret_x_star(1L, threshold = 20)
-  expect_match(out, "1 pro-working-theory observation", fixed = TRUE)
-  expect_match(out, "20", fixed = TRUE)
-  # singular: must not pluralize at x = 1
-  expect_false(grepl("1 pro-working-theory observations", out, fixed = TRUE))
+test_that("interpret_bias names the worst-case condition when it fails first", {
+  out <- interpret_bias(sb(3, 2))
+  expect_match(out, "worst-case Bayes factor falls to 1", fixed = TRUE)
 })
 
-test_that("interpret_x_star(2L) pluralizes", {
-  out <- interpret_x_star(2L, threshold = 20)
-  expect_match(out, "2 pro-working-theory observations", fixed = TRUE)
+test_that("interpret_bias says there is nothing for bias to change when the rule already keeps the rival", {
+  out <- interpret_bias(sb(0, 0))
+  expect_match(out, "unbiased search", fixed = TRUE)
+  expect_match(out, "no decision for bias to change", fixed = TRUE)
+})
+
+test_that("interpret_bias handles a condition that no bias makes fail", {
+  # Steinsson's twelve of twelve: the worst-case value never falls to 1,
+  # so the uniform-weights condition decides.
+  out <- interpret_bias(sb(5.485, Inf))
+  expect_match(out, "5.49 times as likely", fixed = TRUE)
+  expect_match(out, "no bias", ignore.case = TRUE)
 })
 
 
-# ---- bf_omega_curve ----------------------------------------------------
+# ---- interpret_coding ---------------------------------------------------
 
-test_that("bf_omega_curve(9, 3) is monotone-decreasing in omega", {
-  # Granting more search bias toward the working theory can only lower
-  # the value, so the curve the app draws must fall from left to right.
-  df <- bf_omega_curve(9, 3, threshold = 20)
+sc <- function(x_u, x_w) {
+  list(bf_uniform = 30, bf_worst = 3, x_uniform = x_u, x_worst = x_w,
+       x_star = suppressWarnings(as.integer(min(x_u, x_w, na.rm = TRUE))))
+}
+
+test_that("interpret_coding names one re-coding, in the singular, and the condition", {
+  out <- interpret_coding(sc(1L, 2L))
+  expect_match(out, "1 re-coded observation ", fixed = TRUE)
+  expect_match(out, "uniform-weights Bayes factor below 20", fixed = TRUE)
+})
+
+test_that("interpret_coding pluralizes", {
+  out <- interpret_coding(sc(2L, 4L))
+  expect_match(out, "2 re-coded observations", fixed = TRUE)
+})
+
+test_that("interpret_coding says nothing needs re-coding when the rule already keeps the rival", {
+  out <- interpret_coding(sc(0L, 0L))
+  expect_match(out, "as coded", fixed = TRUE)
+})
+
+
+# ---- bf_omega_curve -----------------------------------------------------
+
+test_that("bf_omega_curve samples both Bayes factors on a log grid", {
+  df <- bf_omega_curve(9, 3)
+  expect_named(df, c("omega", "bf_uniform", "bf_worst"))
   expect_equal(nrow(df), 80)
-  expect_true(all(diff(df$omega) > 0))
-  expect_true(all(diff(df$bf) <= 1e-9))
+  expect_true(all(diff(log(df$omega)) > 0))
+  expect_equal(range(df$omega), c(0.25, 8))
 })
 
-test_that("bf_omega_curve near omega = 1 brackets the unbiased value", {
-  # At an unbiased search the curve must pass through the number the
-  # Result tab shows, 20.67 at the running example.
-  df <- bf_omega_curve(9, 3, threshold = 20)
-  idx <- which.min(abs(df$omega - 1))
-  expect_gt(df$bf[idx], 19)
-  expect_lt(df$bf[idx], 23)
+test_that("both curves fall as the bias grows", {
+  # Granting more bias toward the working theory lowers both values.
+  df <- bf_omega_curve(9, 3)
+  expect_true(all(diff(df$bf_uniform) < 0))
+  expect_true(all(diff(df$bf_worst) < 0))
 })
 
-test_that("bf_omega_curve propagates the threshold for downstream layers", {
-  df <- bf_omega_curve(9, 3, threshold = 25)
-  expect_true(all(df$threshold == 25))
-})
-
-
-# ---- post_odds_M_curve -------------------------------------------------
-#
-# A Beta(1, M + 1) prior on the whole interval from zero to one moves
-# weight between the two theories as well as within their ranges, so
-# what falls as M rises is the posterior odds, not the Bayes factor.
-# The column is named for what it holds.
-
-test_that("post_odds_M_curve(10, 0, M_max=50) falls as M rises", {
-  df <- post_odds_M_curve(10, 0, M_max = 50, threshold = 20)
-  expect_equal(nrow(df), 51)
-  expect_true(all(diff(df$post_odds) <= 1e-9))
-})
-
-test_that("post_odds_M_curve at M = 0 is the uniform-weights Bayes factor", {
-  # At M = 0 the prior is uniform, the two theories carry equal weight,
-  # the prior odds are one, and the posterior odds and the Bayes factor
-  # coincide. That is the only M at which they do.
-  df <- post_odds_M_curve(10, 0, M_max = 5, threshold = 20)
-  expect_equal(df$post_odds[1], DrWrinch::bf_uniform_weights(10, 0))
-})
-
-test_that("the Bayes factor rises where the posterior odds fall", {
-  # The fact that makes the naming matter. Tilting the prior toward the
-  # rival commits her to shares near zero, under which the counts are
-  # more surprising still, so the Bayes factor rises even as the
-  # posterior odds fall.
-  df <- post_odds_M_curve(9, 3, M_max = 4, threshold = 20)
-  bayes_factor <- vapply(0:4, function(M) {
-    lik <- function(t) stats::dbinom(9, 12, t)
-    num <- stats::integrate(
-      function(t) lik(t) * stats::dbeta(t, 1, M + 1), 0.5, 1)$value
-    den <- stats::integrate(
-      function(t) lik(t) * stats::dbeta(t, 1, M + 1), 0, 0.5)$value
-    pi_1 <- 1 - stats::pbeta(0.5, 1, M + 1)
-    (num / pi_1) / (den / (1 - pi_1))
-  }, numeric(1))
-  expect_true(all(diff(df$post_odds) < 0))
-  expect_true(all(diff(bayes_factor) > 0))
+test_that("the curves are the package's values at each bias", {
+  df <- bf_omega_curve(9, 3)
+  for (i in c(1, 30, 80)) {
+    expect_equal(df$bf_uniform[i],
+                 DrWrinch::bf_uniform_weights(9, 3, omega = df$omega[i]))
+    expect_equal(df$bf_worst[i],
+                 DrWrinch::bf_worst_case(9, 3, omega = df$omega[i]))
+  }
 })
 
 
