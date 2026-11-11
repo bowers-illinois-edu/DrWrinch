@@ -1,5 +1,5 @@
 ---
-next: Jake reviews and merges the branch claude/serene-ramanujan-ebm3vl (version 0.0.2.2, text changes to the app and documentation), then redeploys the app with source("deploy.R") after installing 0.0.2.2 from GitHub on that machine.
+next: Version 0.0.2.2 (text changes to the app and documentation) is on main. Jake redeploys the app with source("deploy.R") after installing 0.0.2.2 from GitHub on that machine.
 kind: code
 project_kind: R package
 milestone: the paper and its appendix built on DrWrinch 0.0.2.1 from GitHub
@@ -26,8 +26,8 @@ package is the accurate one: at 0 and 25 with a bias of 1.5 the package
 gives 6.9474e-11, the paper's `binom_bf_weighted()` gives 6.9869e-11, and
 a sum over two million points gives 6.9474e-11.
 
-Jake then asked for four changes on a branch,
-`claude/serene-ramanujan-ebm3vl`. They are version 0.0.2.2, and `NEWS.md`
+Jake then asked for four changes, made on the branch
+`claude/serene-ramanujan-ebm3vl` and merged into `main` at his request the same day. They are version 0.0.2.2, and `NEWS.md`
 lists them:
 
 - README, `inst/CITATION`, and the app's About tab cite the paper's
