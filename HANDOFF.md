@@ -1,5 +1,5 @@
 ---
-next: Nothing is pending in the package. On 2026-10-27, at Jake's request, Claude made the paper-repository edits listed in PLAN_decision_rule.md in ~/repos/fully_specified_bf, and committed and pushed them (see that repository's HANDOFF.md).
+next: Jake reviews and merges the branch claude/serene-ramanujan-ebm3vl (version 0.0.2.2, text changes to the app and documentation), then redeploys the app with source("deploy.R") after installing 0.0.2.2 from GitHub on that machine.
 kind: code
 project_kind: R package
 milestone: the paper and its appendix built on DrWrinch 0.0.2.1 from GitHub
@@ -14,6 +14,54 @@ Last touched: 2026-10-27. Read `PLAN_decision_rule.md` next. It records
 what changed in the paper between 2026-08-29 and 2026-10-19, the four
 choices Jake made on 2026-10-27, the tests written before the code, and
 the edits the paper repository needs once this version is on GitHub.
+
+## 2026-11-11: the app and documentation follow the paper's current wording
+
+Jake asked Claude, in a cloud session, whether the package and the app
+match the paper as it stands (arXiv v3, tag `arxiv-2026-11-06` in the
+paper repository). Claude ran the package against the paper's own code in
+`tests/*.R` and against `replications/<study>/results.csv`. Every number
+the paper reports agrees. Where the two differ, at extreme counts, the
+package is the accurate one: at 0 and 25 with a bias of 1.5 the package
+gives 6.9474e-11, the paper's `binom_bf_weighted()` gives 6.9869e-11, and
+a sum over two million points gives 6.9474e-11.
+
+Jake then asked for four changes on a branch,
+`claude/serene-ramanujan-ebm3vl`. They are version 0.0.2.2, and `NEWS.md`
+lists them:
+
+- README, `inst/CITATION`, and the app's About tab cite the paper's
+  current title.
+- README and the app use the paper's phrase "Bayes factor range." The
+  helper `describe_range()` in `inst/shiny/R/helpers.R` writes the
+  sentence on the Result tab.
+- The worst-case card prints no Kass and Raftery verdict. The helper
+  `worst_case_status()` says whether the value is above the second
+  threshold.
+- The sidebar and the About tab say that a weighted observation is
+  entered by adding its weight to the count.
+
+Checked: the tests were written first and failed; with the changes all
+148 test blocks (1154 expectations) pass under R 4.3.3, and the app's
+Result tab showed the new sentences in a headless browser. Not checked:
+`devtools::check()`, the pkgdown build, and the hosted app, which this
+session's network could not reach.
+
+Left as they were, for Jake to decide:
+
+- When the counts favor the rival, `bf_worst_case()` holds the rival at
+  one half, as the paper's closed form does. One half is then not the
+  rival's most favorable share, and the value can exceed the
+  uniform-weights value (two and five: 0.22 against 0.17). The app's
+  range sentence orders the two numbers by size for that reason.
+- `.dw_needed` in `inst/shiny/global.R` stays at 0.0.2.1, because the app
+  calls no function that 0.0.2.1 lacks.
+- `R/DrWrinch-package.R`, the help pages, and the vignette do not use
+  "Bayes factor range." roxygen2 was not available to rebuild the help
+  pages.
+- "At least provisionally" stays in the package's wording of the rule.
+  `POINT.md` in the paper repository uses it; `Paper/evalues.qmd` does
+  not.
 
 ## What DrWrinch is
 

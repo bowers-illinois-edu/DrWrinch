@@ -266,3 +266,86 @@ test_that("validate_counts rejects (0, 0) since there is no evidence", {
   expect_true(inherits(err, "condition"))
   expect_match(conditionMessage(err), "both be zero", ignore.case = TRUE)
 })
+
+
+# ---- worst_case_status --------------------------------------------------
+#
+# The paper applies the Kass and Raftery threshold of 20 to the
+# uniform-weights Bayes factor only. Of the worst-case Bayes factor it
+# asks one thing: is the value above 1, so that no weights on the rival's
+# shares make the counts more probable under the rival? The worst-case
+# card therefore reports that comparison and no Kass and Raftery bin. A
+# bin on 2.73 ("not worth more than a bare mention") reads as a verdict
+# against a decision the rule has just made.
+
+test_that("worst_case_status says 2.73 is above 1, which the rule requires", {
+  out <- worst_case_status(DrWrinch::bf_worst_case(9, 3), threshold_worst = 1)
+  expect_match(out, "above 1", fixed = TRUE)
+  expect_no_match(out, "or below", fixed = TRUE)
+})
+
+test_that("worst_case_status says 0.83 is not above 1, so the rival stays", {
+  # Pavone and Stiansen at the agreed coding: seven and four.
+  out <- worst_case_status(DrWrinch::bf_worst_case(7, 4), threshold_worst = 1)
+  expect_match(out, "1 or below", fixed = TRUE)
+  expect_match(out, "keeps the rival", fixed = TRUE)
+})
+
+test_that("worst_case_status treats a value of exactly 1 as not above 1", {
+  # The rule's second condition is strict: even counts give exactly 1
+  # under no weights at all on the rival's side, and the rule keeps the
+  # rival there.
+  expect_match(worst_case_status(1, threshold_worst = 1), "1 or below",
+               fixed = TRUE)
+})
+
+test_that("worst_case_status compares with the threshold the reader typed", {
+  expect_match(worst_case_status(2.73, threshold_worst = 3), "3 or below",
+               fixed = TRUE)
+  expect_match(worst_case_status(2.73, threshold_worst = 2), "above 2",
+               fixed = TRUE)
+})
+
+test_that("worst_case_status never names a Kass and Raftery bin", {
+  for (bf in c(0.01, 0.5, 1, 2.73, 25, 500)) {
+    out <- worst_case_status(bf)
+    for (bin in KR_LABELS) expect_no_match(out, bin, fixed = TRUE)
+  }
+})
+
+
+# ---- describe_range -----------------------------------------------------
+#
+# The paper calls the pair of Bayes factors the Bayes factor range. When
+# the counts favor the working theory, the worst-case value is the lower
+# end: its denominator is the largest probability any of the rival's
+# shares gives the counts, and an average over those shares cannot exceed
+# the largest of them. When the counts favor the rival, the paper holds
+# the rival at one half, which is then not its most favorable share, and
+# the order can reverse (two and five: 0.22 against 0.17). The sentence
+# therefore orders the two numbers by size and names each.
+
+test_that("describe_range runs from the worst-case value up to the uniform-weights value", {
+  out <- describe_range(DrWrinch::bf_uniform_weights(9, 3),
+                        DrWrinch::bf_worst_case(9, 3))
+  expect_match(out, "Bayes factor range", fixed = TRUE)
+  expect_match(out, "from 2.73 (worst case)", fixed = TRUE)
+  expect_match(out, "to 20.7 (uniform weights)", fixed = TRUE)
+})
+
+test_that("the worst-case value is the lower end whenever the counts favor the working theory", {
+  g <- expand.grid(k = 0:15, r = 0:15)
+  g <- g[g$k >= g$r & g$k > 0, ]
+  lower <- mapply(DrWrinch::bf_worst_case, g$k, g$r)
+  upper <- mapply(DrWrinch::bf_uniform_weights, g$k, g$r)
+  expect_true(all(lower <= upper * (1 + 1e-12)))
+})
+
+test_that("describe_range puts the smaller number first when the counts favor the rival", {
+  uw <- DrWrinch::bf_uniform_weights(2, 5)
+  wc <- DrWrinch::bf_worst_case(2, 5)
+  expect_gt(wc, uw)
+  out <- describe_range(uw, wc)
+  expect_match(out, "from 0.169 (uniform weights)", fixed = TRUE)
+  expect_match(out, "to 0.22 (worst case)", fixed = TRUE)
+})

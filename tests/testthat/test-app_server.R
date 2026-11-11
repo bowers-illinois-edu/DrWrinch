@@ -180,3 +180,78 @@ test_that("the app no longer offers the urn, the separation, or the prior sweep"
     }
   })
 })
+
+
+test_that("the worst-case card compares 2.73 with 1 and names no Kass and Raftery bin", {
+  # The paper takes the Kass and Raftery threshold for the uniform-weights
+  # Bayes factor only. A bin under the worst-case value, "not worth more
+  # than a bare mention" at 2.73, contradicts the rule printed above it,
+  # which that value satisfies.
+  shiny::testServer(app = app_dir, expr = {
+    set_example(session)
+    txt <- as.character(output$result_worst_case)
+    expect_match(txt, "above 1", fixed = TRUE, all = FALSE)
+    expect_no_match(txt, "Kass", fixed = TRUE, all = TRUE)
+    expect_no_match(txt, "bare mention", fixed = TRUE, all = TRUE)
+  })
+})
+
+
+test_that("the worst-case card says the rival stays when the value is 1 or below", {
+  shiny::testServer(app = app_dir, expr = {
+    set_example(session, y_W = 7, y_R = 4)
+    txt <- as.character(output$result_worst_case)
+    expect_match(txt, "0.834", fixed = TRUE, all = FALSE)
+    expect_match(txt, "1 or below", fixed = TRUE, all = FALSE)
+  })
+})
+
+
+test_that("the Result tab reports the Bayes factor range, 2.73 to 20.7", {
+  shiny::testServer(app = app_dir, expr = {
+    set_example(session)
+    txt <- as.character(output$rule_text)
+    expect_match(txt, "Bayes factor range", fixed = TRUE, all = FALSE)
+    expect_match(txt, "from 2.73", fixed = TRUE, all = FALSE)
+    expect_match(txt, "to 20.7", fixed = TRUE, all = FALSE)
+  })
+})
+
+
+test_that("a smoking gun counted as ten observations gives the paper's 2337 and 143", {
+  # The paper weights an observation by counting it as that many
+  # observations: the memo at weight 10 turns nine and three into
+  # 8 + 10 = 18 and 3. The app has no weight field, so a reader enters 18,
+  # and the cards have to show what the paper reports at that weight.
+  shiny::testServer(app = app_dir, expr = {
+    set_example(session, y_W = 8 + 10, y_R = 3)
+    expect_equal(round(bf_uw()), 2337)
+    expect_equal(round(bf_wc()), 143)
+    expect_equal(round(sens_b()$omega_star, 2), 2.33)
+  })
+})
+
+
+test_that("the About tab cites the paper's title and says how to weight an observation", {
+  shiny::testServer(app = app_dir, expr = {
+    set_example(session)
+    txt <- as.character(output$about_panel)
+    expect_match(
+      txt,
+      "A Fully Specified Bayes Factor Range for Hypothesis Testing and Sensitivity Analysis in Process Tracing",
+      fixed = TRUE, all = FALSE
+    )
+    expect_match(txt, "8 + 10 = 18", fixed = TRUE, all = FALSE)
+    expect_match(txt, "2337", fixed = TRUE, all = FALSE)
+  })
+})
+
+
+test_that("the sidebar tells a reader how to enter a weighted observation", {
+  # ui.R is one expression that builds the page. Evaluating it where
+  # shiny's functions are visible gives the page's HTML without a browser.
+  ui <- source(file.path(app_dir, "ui.R"),
+               local = new.env(parent = asNamespace("shiny")))$value
+  txt <- as.character(ui)
+  expect_match(txt, "count it as that many observations", fixed = TRUE)
+})

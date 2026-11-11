@@ -58,6 +58,12 @@ bslib::page_sidebar(
       "share above one half and the rival a share at or below it. The ",
       "paper's rule sets the rival aside when the uniform-weights Bayes ",
       "factor is at least 20 and the worst-case Bayes factor is above 1."
+    ),
+    tags$p(
+      class = "text-muted small",
+      "To give one observation more weight than the others, ",
+      "count it as that many observations: ",
+      "a memo counted as ten adds ten to its side's count, not one."
     )
   ),
 

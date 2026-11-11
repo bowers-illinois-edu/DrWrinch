@@ -2,7 +2,7 @@ citHeader("To cite DrWrinch in publications, please cite the paper it implements
 
 bibentry(
   bibtype = "Misc",
-  title   = "Fully specified Bayes factors for process tracing",
+  title   = "A Fully Specified Bayes Factor Range for Hypothesis Testing and Sensitivity Analysis in Process Tracing",
   author  = c(
     person("Matias", "Lopez"),
     person("Jake", "Bowers"),

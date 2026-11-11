@@ -117,6 +117,40 @@ interpret_rule <- function(bf_uniform, bf_worst,
 }
 
 
+# worst_case_status() is the line the worst-case card prints under its
+# value. The paper takes the Kass and Raftery threshold for the
+# uniform-weights Bayes factor only; of the worst-case value the rule
+# asks whether it is above threshold_worst (1). A Kass and Raftery bin
+# here ("not worth more than a bare mention" at 2.73) read as a verdict
+# against a decision the rule had just made, so the card reports the
+# comparison the rule makes. The comparison is strict, as in
+# interpret_rule().
+worst_case_status <- function(bf_worst, threshold_worst = 1) {
+  if (is.na(bf_worst)) return("undefined")
+  if (bf_worst > threshold_worst) {
+    return(paste0("above ", threshold_worst, ", which the rule requires"))
+  }
+  paste0(threshold_worst, " or below, so a researcher following the rule ",
+         "keeps the rival")
+}
+
+
+# describe_range() states the paper's Bayes factor range: the two Bayes
+# factors, smaller first, each named. The worst-case value is the
+# smaller one whenever the counts favor the working theory. When they
+# favor the rival the paper holds the rival at one half, which is then
+# not the rival's most favorable share, so the order can reverse; the
+# sentence orders by size and does not assume which is which.
+describe_range <- function(bf_uniform, bf_worst) {
+  vals <- c(bf_worst, bf_uniform)
+  labs <- c("worst case", "uniform weights")
+  o <- order(vals)
+  shown <- vapply(vals[o], function(v) format_bf(v)$value, character(1))
+  paste0("The Bayes factor range runs from ", shown[1], " (", labs[o][1],
+         ") to ", shown[2], " (", labs[o][2], ").")
+}
+
+
 # How much more likely a search with bias om is to find a
 # pro-working-theory observation, in words. Below a bias of two a
 # percentage reads naturally ("about 1 percent more likely"); from two

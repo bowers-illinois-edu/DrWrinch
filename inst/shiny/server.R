@@ -68,9 +68,12 @@ function(input, output, session) {
 
   output$rule_text <- renderUI({
     th <- thresholds()
-    tags$p(interpret_rule(bf_uw(), bf_wc(),
-                          threshold_uniform = th$uniform,
-                          threshold_worst = th$worst))
+    tagList(
+      tags$p(interpret_rule(bf_uw(), bf_wc(),
+                            threshold_uniform = th$uniform,
+                            threshold_worst = th$worst)),
+      tags$p(describe_range(bf_uw(), bf_wc()))
+    )
   })
 
   output$result_uniform <- renderUI({
@@ -92,9 +95,14 @@ function(input, output, session) {
 
   output$result_worst_case <- renderUI({
     fmt <- format_bf(bf_wc())
+    th <- thresholds()
     tagList(
       tags$p(tags$strong("Bayes factor:"), " ", fmt$value),
-      tags$p(tags$strong("Verdict (Kass and Raftery):"), " ", fmt$verdict),
+      # No Kass and Raftery bin on this card: the paper takes that scale
+      # for the uniform-weights value only, and asks of this one whether
+      # it is above the second threshold.
+      tags$p(tags$strong("Compared with the rule's threshold:"), " ",
+             worst_case_status(bf_wc(), threshold_worst = th$worst)),
       tags$p(tags$strong("Direction:"), " ", fmt$direction),
       tags$p(
         "This number evaluates the rival at the share in its range that ",
@@ -192,6 +200,10 @@ function(input, output, session) {
           "weights on the rival's shares can give."
         )
       ),
+      tags$p(
+        "The paper calls the pair the Bayes factor range. At the default ",
+        "counts it runs from 2.73 to 20.67."
+      ),
 
       tags$h4("The rule"),
       tags$p(
@@ -214,8 +226,26 @@ function(input, output, session) {
         "pro-working-theory evidence, would change it."
       ),
 
+      tags$h4("An observation that counts for more than one"),
+      tags$p(
+        "The paper weights an observation by counting it as that many ",
+        "observations. In its example a researcher counts one memo, a ",
+        "smoking gun for the working theory, as ten observations, so the ",
+        "counts nine and three become 8 + 10 = 18 and 3. The app has no ",
+        "separate field for a weight: enter 18 and 3. The uniform-weights ",
+        "Bayes factor is then 2337 and the worst-case Bayes factor 143, ",
+        "and the search would have to be 2.33 times as likely to find ",
+        "pro-working-theory evidence before the decision changed. Trying ",
+        "several weights shows how much the decision depends on the ",
+        "weight."
+      ),
+
       tags$h4("Verdict scale"),
-      tags$p("Verdicts use the Kass and Raftery (1995, JASA) scale:"),
+      tags$p(
+        "The uniform-weights card names a verdict on the Kass and Raftery ",
+        "(1995, JASA) scale, from which the paper takes its threshold of ",
+        "20:"
+      ),
       tags$ul(
         tags$li("above 1 up to 3: not worth more than a bare mention"),
         tags$li("above 3 up to 20: positive"),
@@ -225,12 +255,19 @@ function(input, output, session) {
       tags$p(
         "Below 1 the same bins apply to the reciprocal and the direction ",
         "flips to the rival. Exactly 1 is equipoise and reads 'neither'."
+     ,
+        " The worst-case card names no verdict on this scale, because the ",
+        "paper asks of the worst-case Bayes factor only whether it is ",
+        "above 1."
       ),
 
       tags$h4("Sources"),
       tags$p(
         "Lopez, Bowers, and Gajardo Cooper (2026), ",
-        tags$em("Fully specified Bayes factors for process tracing"),
+        tags$em(paste(
+          "A Fully Specified Bayes Factor Range for Hypothesis Testing and",
+          "Sensitivity Analysis in Process Tracing"
+        )),
         ". Source code and documentation: ",
         tags$a(
           href = "https://github.com/bowers-illinois-edu/DrWrinch",
