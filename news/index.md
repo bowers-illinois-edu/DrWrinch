@@ -1,5 +1,30 @@
 # Changelog
 
+## DrWrinch 0.0.2.2
+
+The paper is now titled “A Fully Specified Bayes Factor Range for
+Hypothesis Testing and Sensitivity Analysis in Process Tracing,” and it
+calls the pair of Bayes factors the Bayes factor range. No function
+returns a different number in this release; the changes are to the app’s
+text and to the documentation.
+
+- The app’s worst-case card no longer prints a Kass and Raftery verdict.
+  The paper takes that scale for the uniform-weights Bayes factor only
+  and asks of the worst-case Bayes factor whether it is above 1, so at
+  nine and three the card had printed “not worth more than a bare
+  mention” under a value, 2.73, that meets the rule. The card now says
+  whether the value is above the reader’s second threshold.
+- The app’s Result tab states the Bayes factor range, smaller number
+  first and each number named. The worst-case value is the smaller one
+  whenever the counts favor the working theory. When they favor the
+  rival the order can reverse (two and five: 0.22 against 0.17), because
+  the paper then holds the rival at one half.
+- The app’s sidebar and About tab say how to enter an observation that
+  counts for more than one: add its weight to the count. The paper’s
+  memo counted as ten turns nine and three into 18 and 3.
+- README, `inst/CITATION`, and the app’s About tab cite the paper’s
+  current title.
+
 ## DrWrinch 0.0.2.1
 
 Under the paper’s rule, a researcher now sets the rival aside, at least

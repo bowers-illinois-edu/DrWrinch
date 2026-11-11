@@ -3,7 +3,8 @@
 Fully specified Bayes factors for process tracing.
 
 This package implements the methods of Lopez, Bowers, and Gajardo Cooper
-(2026), “Fully specified Bayes factors for process tracing”
+(2026), “A Fully Specified Bayes Factor Range for Hypothesis Testing and
+Sensitivity Analysis in Process Tracing”
 ([arXiv:2606.16683](https://arxiv.org/abs/2606.16683)).
 
 A researcher has coded the evidence into two counts: observations
@@ -28,6 +29,9 @@ differ in the denominator.
   one half at these counts. It gives 2.73, the smallest Bayes factor any
   weights on the rival’s shares can give.
 
+The paper calls the pair the Bayes factor range: 2.73 to 20.67 at nine
+and three.
+
 Under the paper’s rule, a researcher sets the rival aside, at least
 provisionally, when the uniform-weights Bayes factor is 20 or more and
 the worst-case Bayes factor is above 1. Nine of twelve meets both
@@ -40,6 +44,10 @@ report how biased the search, or how many observations re-coded, it
 would take before a researcher following the rule would no longer set
 the rival aside: at nine of twelve, a search about one percent more
 likely to find pro-working-theory evidence, or one re-coded observation.
+An observation that carries more weight than the others is counted as
+that many observations: the paper’s memo counted as ten turns nine and
+three into 8 + 10 = 18 and 3, where the two Bayes factors are 2337 and
+143.
 [`bf_rescaled()`](https://bowers-illinois-edu.github.io/DrWrinch/reference/bf_rescaled.md)
 computes the uniform-weights Bayes factor under weights on the shares
 other than the uniform, and
@@ -83,7 +91,8 @@ Result tab shows the two Bayes factors side by side above a picture of
 the three probabilities they are built from, so a reader can see where
 each number comes from rather than take it on trust. The Sensitivity tab
 reports how biased the search, or how many observations re-coded, it
-would take to change the decision.
+would take to change the decision. The app has no separate field for a
+weight; a reader adds the weight to the count.
 
 ## Status
 
