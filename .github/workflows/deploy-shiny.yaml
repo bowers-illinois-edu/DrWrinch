@@ -86,6 +86,28 @@ jobs:
           cat("Deploying DrWrinch", installed, "at", Sys.getenv("GITHUB_SHA"), "\n")
         shell: Rscript {0}
 
+      # rsconnect lists every package the app needs by taking an renv
+      # snapshot, and renv refuses to snapshot when a package named in
+      # some installed package's LinkingTo field is absent. Such a
+      # package supplies C++ headers at compile time only, so a binary
+      # install leaves it out: the first run of this workflow stopped
+      # because cpp11, which tidyr and isoband link to, was not
+      # installed. This step installs whichever of them are missing, so
+      # it does not depend on a list of names kept by hand.
+      - name: Install compile-time dependencies that binary installs leave out
+        run: |
+          ip <- installed.packages()
+          linked <- unlist(strsplit(ip[!is.na(ip[, "LinkingTo"]), "LinkingTo"], ","))
+          # Drop version requirements such as "(>= 0.4.0)" and white space.
+          linked <- unique(trimws(sub("\\(.*\\)", "", linked)))
+          missing <- setdiff(linked[nzchar(linked)], rownames(ip))
+          cat("Missing LinkingTo packages:",
+              if (length(missing)) missing else "none", "\n")
+          if (length(missing)) install.packages(missing)
+          still <- setdiff(missing, rownames(installed.packages()))
+          if (length(still)) stop("Could not install: ", paste(still, collapse = ", "))
+        shell: Rscript {0}
+
       # A deploy replaces the public app, so the package's tests,
       # including the tests of the app's server, have to pass first.
       - name: Run the tests

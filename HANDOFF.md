@@ -53,10 +53,15 @@ when someone presses "Run workflow" on the Actions page. It installs
 DrWrinch from GitHub at the commit being deployed, runs the tests, and
 sources `deploy.R`. It needs two repository secrets, `SHINYAPPS_TOKEN`
 and `SHINYAPPS_SECRET`, from the shinyapps.io dashboard (Account, then
-Tokens). Claude checked only that the file parses as YAML. No one has
-run it, so whether shinyapps.io accepts the manifest a GitHub machine
-writes is not known. `source("deploy.R")` from a computer still works as
-before.
+Tokens). `source("deploy.R")` from a computer still works as before.
+
+Jake added the secrets and ran the workflow (run 43116816354). The
+secrets worked: rsconnect found the application. The run then stopped
+while rsconnect listed the app's packages, because renv will not
+snapshot when a package named in an installed package's LinkingTo field
+is absent, and the binary installs had left out cpp11, which tidyr and
+isoband link to. Claude added a step that installs every such missing
+package. Whether the run after that fix succeeds is not yet known.
 
 Left as they were, for Jake to decide:
 
