@@ -1,0 +1,109 @@
+# Deploy the Shiny app in inst/shiny to shinyapps.io from a GitHub
+# machine, so that a deploy does not need the maintainer's own computer.
+#
+# It runs only when someone presses "Run workflow" on the repository's
+# Actions page (or uses the GitHub mobile app). It never runs on a push.
+#
+# Before the first run, add two repository secrets under Settings ->
+# Secrets and variables -> Actions. Both come from the shinyapps.io
+# dashboard, under Account -> Tokens -> Show:
+#   SHINYAPPS_TOKEN
+#   SHINYAPPS_SECRET
+#
+# The job installs DrWrinch from GitHub at the commit being deployed and
+# then sources deploy.R, the same script used for a deploy from a
+# laptop. rsconnect copies the installed DrWrinch into the manifest that
+# shinyapps.io builds its image from. A GitHub machine starts with no R
+# packages, so the copy it records is the one at this commit; a laptop
+# with an older DrWrinch installed recorded the older one (HANDOFF.md,
+# 2026-10-27).
+
+on:
+  workflow_dispatch:
+
+name: deploy-shiny
+
+# Two deploys at once would race to replace the same application.
+concurrency:
+  group: deploy-shiny
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # Authenticated GitHub calls: the anonymous limit is 60 an hour.
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      SHINYAPPS_ACCOUNT: jakebowers
+      SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
+      SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
+    permissions:
+      contents: read
+    steps:
+      - name: Stop early if the shinyapps.io secrets are missing
+        run: |
+          if [ -z "$SHINYAPPS_TOKEN" ] || [ -z "$SHINYAPPS_SECRET" ]; then
+            echo "::error::Add the repository secrets SHINYAPPS_TOKEN and SHINYAPPS_SECRET (Settings -> Secrets and variables -> Actions) and run this workflow again."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      # The packages the app loads, plus what the deploy and the tests
+      # need. DrWrinch itself is installed in the next step, from GitHub,
+      # because rsconnect refuses a package that carries no record of
+      # where it came from.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::shiny
+            any::bslib
+            any::plotly
+            any::remotes
+            any::rsconnect
+            any::testthat
+
+      - name: Install DrWrinch from GitHub at this commit
+        run: |
+          remotes::install_github(
+            "bowers-illinois-edu/DrWrinch",
+            ref = Sys.getenv("GITHUB_SHA"),
+            upgrade = "never"
+          )
+          # The installed copy has to be the one in this checkout: the
+          # manifest records the installed copy, and the app's files come
+          # from the checkout.
+          installed <- as.character(utils::packageVersion("DrWrinch"))
+          checkout <- read.dcf("DESCRIPTION", fields = "Version")[[1]]
+          if (!identical(installed, checkout)) {
+            stop("Installed DrWrinch is ", installed,
+                 " but this checkout is ", checkout, ".")
+          }
+          cat("Deploying DrWrinch", installed, "at", Sys.getenv("GITHUB_SHA"), "\n")
+        shell: Rscript {0}
+
+      # A deploy replaces the public app, so the package's tests,
+      # including the tests of the app's server, have to pass first.
+      - name: Run the tests
+        run: |
+          testthat::test_dir(
+            "tests/testthat",
+            package = "DrWrinch",
+            load_package = "installed",
+            stop_on_failure = TRUE
+          )
+        shell: Rscript {0}
+
+      - name: Deploy to shinyapps.io
+        run: |
+          rsconnect::setAccountInfo(
+            name   = Sys.getenv("SHINYAPPS_ACCOUNT"),
+            token  = Sys.getenv("SHINYAPPS_TOKEN"),
+            secret = Sys.getenv("SHINYAPPS_SECRET")
+          )
+          source("deploy.R")
+        shell: Rscript {0}

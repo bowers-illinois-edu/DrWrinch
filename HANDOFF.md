@@ -1,5 +1,5 @@
 ---
-next: Version 0.0.2.2 (text changes to the app and documentation) is on main. Jake redeploys the app with source("deploy.R") after installing 0.0.2.2 from GitHub on that machine.
+next: Version 0.0.2.2 is on main and the hosted app still runs 0.0.2.1. Jake adds the repository secrets SHINYAPPS_TOKEN and SHINYAPPS_SECRET, then runs the deploy-shiny workflow from the Actions page. Its first run is the test of the workflow, which no one has run yet.
 kind: code
 project_kind: R package
 milestone: the paper and its appendix built on DrWrinch 0.0.2.1 from GitHub
@@ -46,6 +46,17 @@ Checked: the tests were written first and failed; with the changes all
 Result tab showed the new sentences in a headless browser. Not checked:
 `devtools::check()`, the pkgdown build, and the hosted app, which this
 session's network could not reach.
+
+The same day Jake asked for a way to deploy the app without his own
+computer. `.github/workflows/deploy-shiny.yaml` is new. It runs only
+when someone presses "Run workflow" on the Actions page. It installs
+DrWrinch from GitHub at the commit being deployed, runs the tests, and
+sources `deploy.R`. It needs two repository secrets, `SHINYAPPS_TOKEN`
+and `SHINYAPPS_SECRET`, from the shinyapps.io dashboard (Account, then
+Tokens). Claude checked only that the file parses as YAML. No one has
+run it, so whether shinyapps.io accepts the manifest a GitHub machine
+writes is not known. `source("deploy.R")` from a computer still works as
+before.
 
 Left as they were, for Jake to decide:
 
