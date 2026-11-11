@@ -37,6 +37,17 @@ Result tab showed the new sentences in a headless browser. Not checked:
 `devtools::check()`, the pkgdown build, and the hosted app, which this
 session’s network could not reach.
 
+The same day Jake asked for a way to deploy the app without his own
+computer. `.github/workflows/deploy-shiny.yaml` is new. It runs only
+when someone presses “Run workflow” on the Actions page. It installs
+DrWrinch from GitHub at the commit being deployed, runs the tests, and
+sources `deploy.R`. It needs two repository secrets, `SHINYAPPS_TOKEN`
+and `SHINYAPPS_SECRET`, from the shinyapps.io dashboard (Account, then
+Tokens). Claude checked only that the file parses as YAML. No one has
+run it, so whether shinyapps.io accepts the manifest a GitHub machine
+writes is not known. `source("deploy.R")` from a computer still works as
+before.
+
 Left as they were, for Jake to decide:
 
 - When the counts favor the rival,
