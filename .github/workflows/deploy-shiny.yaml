@@ -65,6 +65,7 @@ jobs:
             any::plotly
             any::remotes
             any::rsconnect
+            any::jsonlite
             any::testthat
 
       - name: Install DrWrinch from GitHub at this commit
@@ -120,8 +121,54 @@ jobs:
           )
         shell: Rscript {0}
 
+      # rsconnect uploads a manifest that tells shinyapps.io where to
+      # fetch each package's source. The second run of this workflow got
+      # as far as building the image there and stopped with "Unsupported
+      # url scheme: RSPM/src/contrib/remotes_2.5.0.tar.gz": for remotes
+      # the manifest held the repository's name, RSPM, where its address
+      # belongs. The binaries this job installs carry "Repository: RSPM"
+      # in their DESCRIPTION, and rsconnect turns that name into an
+      # address by looking it up in the repositories renv records.
+      # setup-r points renv at one unnamed address through
+      # RENV_CONFIG_REPOS_OVERRIDE, so the name RSPM had nothing to match.
+      # This step names the repositories itself, writes the manifest, and
+      # prints where each package comes from. It stops, before anything
+      # is uploaded, if a package from a repository has no web address.
       - name: Deploy to shinyapps.io
         run: |
+          Sys.unsetenv("RENV_CONFIG_REPOS_OVERRIDE")
+          options(repos = c(
+            RSPM = "https://packagemanager.posit.co/cran/latest",
+            CRAN = "https://cloud.r-project.org"
+          ))
+
+          app_files <- c("global.R", "ui.R", "server.R",
+                         "R/helpers.R", "R/curves.R", "R/plots.R")
+          rsconnect::writeManifest(appDir = "inst/shiny", appFiles = app_files)
+          pk <- jsonlite::read_json("inst/shiny/manifest.json")$packages
+          # deploy.R names the files it uploads, and the manifest is not
+          # one of them; rsconnect writes its own during the deploy.
+          unlink("inst/shiny/manifest.json")
+          field <- function(p, f) {
+            if (is.null(p[[f]])) NA_character_ else as.character(p[[f]])
+          }
+          tab <- data.frame(
+            package = names(pk),
+            source = vapply(pk, field, "", f = "Source"),
+            repository = vapply(pk, field, "", f = "Repository"),
+            row.names = NULL
+          )
+          print(tab, right = FALSE)
+          from_github <- !is.na(tab$source) & tab$source == "github"
+          has_address <- !is.na(tab$repository) &
+            grepl("^https?://", tab$repository)
+          bad <- tab[!from_github & !has_address, ]
+          if (nrow(bad) > 0) {
+            stop("The manifest gives no web address for: ",
+                 paste(bad$package, collapse = ", "),
+                 ". Nothing was uploaded.")
+          }
+
           rsconnect::setAccountInfo(
             name   = Sys.getenv("SHINYAPPS_ACCOUNT"),
             token  = Sys.getenv("SHINYAPPS_TOKEN"),

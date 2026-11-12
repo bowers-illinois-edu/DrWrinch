@@ -61,7 +61,19 @@ while rsconnect listed the app's packages, because renv will not
 snapshot when a package named in an installed package's LinkingTo field
 is absent, and the binary installs had left out cpp11, which tidyr and
 isoband link to. Claude added a step that installs every such missing
-package. Whether the run after that fix succeeds is not yet known.
+package.
+
+The next run (43118293863) passed that point, uploaded the bundle, and
+failed while shinyapps.io built the image: "Unsupported url scheme:
+RSPM/src/contrib/remotes_2.5.0.tar.gz". The manifest named the
+repository RSPM for remotes and gave no address for it. Claude changed
+the deploy step to name the repositories itself, to print where the
+manifest says each package comes from, and to stop before any upload if
+a package from a repository has no web address. Claude ran that check
+in a session with no route to the repositories, where it stopped as
+written. Whether the run after this fix succeeds is not yet known, and
+the hosted app is unchanged: the failed build did not replace it, as far
+as the log shows.
 
 Left as they were, for Jake to decide:
 
