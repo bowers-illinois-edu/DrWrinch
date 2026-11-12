@@ -57,16 +57,26 @@ jobs:
       # need. DrWrinch itself is installed in the next step, from GitHub,
       # because rsconnect refuses a package that carries no record of
       # where it came from.
+      #
+      # The names are bare on purpose. Written as "any::shiny", the
+      # installer records "RemoteType: any" in the installed package.
+      # renv copies that into its snapshot as the package's source, and
+      # rsconnect, which knows no source called "any", then writes the
+      # repository's name where its address belongs. The third run's
+      # manifest showed exactly that for shiny, plotly, and remotes, the
+      # three app packages that had been requested with "any::" and were
+      # not also pulled in as another package's dependency. A bare name
+      # is recorded as an ordinary repository package.
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages: |
-            any::shiny
-            any::bslib
-            any::plotly
-            any::remotes
-            any::rsconnect
-            any::jsonlite
-            any::testthat
+            shiny
+            bslib
+            plotly
+            remotes
+            rsconnect
+            jsonlite
+            testthat
 
       - name: Install DrWrinch from GitHub at this commit
         run: |
@@ -126,14 +136,12 @@ jobs:
       # as far as building the image there and stopped with "Unsupported
       # url scheme: RSPM/src/contrib/remotes_2.5.0.tar.gz": for remotes
       # the manifest held the repository's name, RSPM, where its address
-      # belongs. The binaries this job installs carry "Repository: RSPM"
-      # in their DESCRIPTION, and rsconnect turns that name into an
-      # address by looking it up in the repositories renv records.
-      # setup-r points renv at one unnamed address through
-      # RENV_CONFIG_REPOS_OVERRIDE, so the name RSPM had nothing to match.
-      # This step names the repositories itself, writes the manifest, and
-      # prints where each package comes from. It stops, before anything
-      # is uploaded, if a package from a repository has no web address.
+      # belongs (the comment on the package list above says why). This
+      # step names the repositories, so that the name RSPM, which the
+      # installed binaries carry, has an address to resolve to. It then
+      # writes the manifest and prints where each package comes from, and
+      # it stops, before anything is uploaded, if a package from a
+      # repository has no web address.
       - name: Deploy to shinyapps.io
         run: |
           Sys.unsetenv("RENV_CONFIG_REPOS_OVERRIDE")
