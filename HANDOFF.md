@@ -61,9 +61,17 @@ the deploy step to name the repositories itself, to print where the
 manifest says each package comes from, and to stop before any upload if
 a package from a repository has no web address. Claude ran that check in
 a session with no route to the repositories, where it stopped as
-written. Whether the run after this fix succeeds is not yet known, and
-the hosted app is unchanged: the failed build did not replace it, as far
-as the log shows.
+written. The hosted app is unchanged: the failed build did not replace
+it, as far as the log shows.
+
+The run after that (43143407214) stopped at the new check, before any
+upload, and its table showed the cause. Of 71 packages, 67 had the
+address <https://packagemanager.posit.co/cran/latest> and DrWrinch had
+source github. Three, shiny, plotly, and remotes, had source “any” and
+repository “RSPM”. They are the app packages the workflow had asked for
+as `any::shiny` and so on, which the installer records as “RemoteType:
+any”. Claude changed the package list to bare names. Whether the run
+after this fix succeeds is not yet known.
 
 Left as they were, for Jake to decide:
 
